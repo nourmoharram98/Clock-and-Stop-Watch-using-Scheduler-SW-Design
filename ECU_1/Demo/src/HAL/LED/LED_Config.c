@@ -13,6 +13,7 @@ const LED_strLEDConfig_t LED_arrOfStrLEDs[NUM_OF_LEDS] =
         .Pin=                  Select value from the following       ( GPIO_PIN_0 , GPIO_PIN_1 , GPIO_PIN_2 , ... , GPIO_PIN_15 ) 
         .Connection=           Select value form enum Direction      ( LED_Connection_FW , LED_Connection_RV )
         .Init_Value=           Select value from enum Active State   ( LED_SET_OFF , LED_SET_ON )
+        
     }
     */
     [LED_RED]= 
