@@ -16,7 +16,27 @@ typedef enum
     true
 }bool;
 
-#define unit_time_ms 100
+
+#define DeciSecond_hundred         0
+#define Second_unit                1
+#define Second_tens                2
+
+#define Minutes_unit               3
+#define Minutes_tens               4
+
+#define Hours_unit                 5
+#define Hours_tens                 6
+
+#define Day_unit                   7
+#define Day_tens                   8
+
+#define Month_unit                 9
+#define Month_tens                 10
+
+#define Years_thousand             11
+#define Years_hundreds             12
+#define Years_tens                 13
+#define Years_unit                 14
 
 
 #define Day_Tens_Position         7
@@ -41,36 +61,103 @@ typedef enum
 
 #define Deci_Hundred_Position     12
 
-struct  
+
+
+#include "Std_Types.h"
+#include "./APP/Clock_Date_App.h"
+
+typedef struct 
 {
-    U8 Day_Value[2];
-    U8 Month_Value[2];
-    U16 Year_Value[4];
+    u8 value;
+    u8 x_pos;
+    u8 y_pos;
+    u8 digit_state;
+}unit_Info_t;
 
-    U8 Hours_Value[2];
-    U8 Minuts_Value[2];
-    U8 Seconds_Value[2];
-    U8 Deci_Value;
-
-}Clock_Date_Data;
+unit_Info_t Digits[NUMBER_OF_DIGITS]=
+{
+    [DeciSecond_hundred]={
+        .value=0,
+        .x_pos=1,  // x hia al row
+        .y_pos=12   // y hia al col
+    },
+    [Second_unit]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=10
+    },
+    [Second_tens]={
+        .value=0,
+        .x_pos=0,
+        .y_pos=9
+    },
+    [Minutes_unit]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=7
+    },
+    [Minutes_tens]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=6
+    },
+    [Hours_unit]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=4
+    },
+    [Hours_tens]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=3
+    },
+    [Day_unit]={
+        .value=6,
+        .x_pos=0,
+        .y_pos=7
+    },
+    [Day_tens]={
+        .value=1,
+        .x_pos=0,
+        .y_pos=6
+    },
+    [Month_unit]={
+        .value=4,
+        .x_pos=0,
+        .y_pos=10
+    },
+    [Month_tens]={
+        .value=0,
+        .x_pos=0,
+        .y_pos=9
+    },
+    [Years_thousand]={
+        .value=2,
+        .x_pos=0,
+        .y_pos=12
+    },
+    [Years_hundreds]={
+        .value=0,
+        .x_pos=0,
+        .y_pos=13
+    },
+    [Years_tens]={
+        .value=0,
+        .x_pos=0,
+        .y_pos=14
+    },
+    [Years_unit]={
+        .value=0,
+        .x_pos=0,
+        .y_pos=15
+    },
+};
 
 struct
 {
     U8 Row;
     U8 Column;
 } Cursur_Position;
-
-enum
-{
-    Day,
-    Month,
-    Year,
-
-    Hours,
-    Minuts,
-    Seconds,
-    Deci
-};
 
 
 bool is_leap_year(int year) 
@@ -94,47 +181,73 @@ int days_in_month(int month, int year)
 
 void Clock_Date_Runnable(void)
 {
-    Clock_Date_Data.Deci_Value++;
+    Digits[DeciSecond_hundred].value++;
     
-    if (Clock_Date_Data.Deci_Value > 9)
+    if (Digits[DeciSecond_hundred].value > 9)
     {
-        Clock_Date_Data.Deci_Value = 0;
-        Clock_Date_Data.Seconds_Value++;
+        Digits[DeciSecond_hundred].value=0;
+        Digits[Second_unit].value++;
     }
-
-    if (Clock_Date_Data.Seconds_Value > 59)
+    if(Digits[Second_unit].value > 9)
     {
-        Clock_Date_Data.Seconds_Value = 0;
-        Clock_Date_Data.Minuts_Value++;
+        Digits[Second_unit].value=0;
+        Digits[Second_tens].value++;
     }
-    
-    if (Clock_Date_Data.Minuts_Value > 59)
+    if(Digits[Second_tens].value>6)
     {
-        Clock_Date_Data.Minuts_Value = 0;
-        Clock_Date_Data.Hours_Value++;
+        Digits[Second_tens].value=0;
+        Digits[Minutes_unit].value++;
     }
-    
-    if (Clock_Date_Data.Hours_Value > 23)
+    if(Digits[Minutes_unit].value>9)
     {
-        Clock_Date_Data.Deci_Value    = 0;
-        Clock_Date_Data.Seconds_Value = 0;
-        Clock_Date_Data.Minuts_Value  = 0;
-        Clock_Date_Data.Hours_Value   = 0;
-
-        Clock_Date_Data.Day_Value++;
-    }    
-
-    int max_days = days_in_month(Clock_Date_Data.Month_Value, Clock_Date_Data.Year_Value);
-
-    if (Clock_Date_Data.Day_Value > max_days)
-    {
-        Clock_Date_Data.Day_Value = 1;
-        Clock_Date_Data.Month_Value++;
+        Digits[Minutes_unit].value=0;
+        Digits[Minutes_tens].value++;
     }
-
-    if (Clock_Date_Data.Month_Value > 12)
+    if(Digits[Minutes_tens].value>6)
     {
-        Clock_Date_Data.Month_Value = 1;
-        Clock_Date_Data.Year_Value++;
+        Digits[Minutes_tens].value=0;
+        Digits[Hours_unit].value++;
+    }
+    if(Digits[Hours_unit].value>9)
+    {
+        Digits[Hours_unit].value=0;
+        Digits[Hours_tens].value++;
+    }
+    if((Digits[Hours_tens].value==2)&&(Digits[Hours_unit].value==4))
+    {
+        Digits[Hours_tens].value=0;
+        Digits[Hours_unit].value=0;
+        Digits[Day_unit].value++;
+    }
+    if(Digits[Day_unit].value>9)
+    {
+        Digits[Day_unit].value=1;
+        Digits[Day_tens].value++;
+    }
+    if(Digits[Day_tens].value>3)
+    {
+        Digits[Day_tens].value=0;
+        Digits[Month_unit].value++;
+    }
+    if(Digits[Month_unit].value>9)
+    {
+        Digits[Month_unit].value=1;
+        Digits[Month_tens].value=1;
+    }
+    if((Digits[Month_tens].value==1)&&(Digits[Month_unit].value==2))
+    {
+        Digits[Month_unit].value=1;
+        Digits[Month_tens].value=0;
+        Digits[Years_unit].value++;
+    }
+    if(Digits[Years_unit].value>9)
+    {
+        Digits[Years_unit].value=0;
+        Digits[Years_tens].value++;
+    }
+    if(Digits[Years_tens].value>9)
+    {
+        Digits[Years_tens].value=0;
+        Digits[Years_hundreds].value++;
     }
 }

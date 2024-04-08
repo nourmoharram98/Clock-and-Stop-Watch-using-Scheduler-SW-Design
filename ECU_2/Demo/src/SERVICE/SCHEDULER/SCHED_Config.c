@@ -37,7 +37,7 @@
 const RunnableTask_t RUN_LIST[_Runnable_no] = 
 
 {
-    [Clock_Data]=
+    [Clock_Date]=
     {
         .TaskName="Clock Data APP",
         .InitialDelayMS=200,
@@ -65,7 +65,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="LED TEST APP",
         .InitialDelayMS=40,
-        .PeriodicityMS=100,
+        .PeriodicityMS=2,
         .CallBack=LCD_Runnbale
     }
     ,
