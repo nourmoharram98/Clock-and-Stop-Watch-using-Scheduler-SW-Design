@@ -23,9 +23,15 @@
  */
 typedef enum
 {
-    Run1=0,
+    Clock_Date,
+    StopWatch,
+    Manager,
+    LCD,
     _Runnable_no
 } RunnablePriority_t;
 
 /*********************************** Runnable prototypers ******************************************/
-extern void Runnable_TrafficLight_StateMachine (void);
+extern void Clock_Date_Runnable   (void);
+extern void Stopwatch_Runnable    (void);
+extern void Application_Runnable  (void);
+extern void LCD_Runnable          (void);
