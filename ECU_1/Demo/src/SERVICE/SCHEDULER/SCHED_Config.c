@@ -11,7 +11,11 @@
 /**********************************  Includes **********************************************/
 #include "./SERVICE/SCHEDULER/SCHED.h"
 #include "./SERVICE/SCHEDULER/SCHED_Config.h"
+
 /********************************** Definitions ********************************************/
+
+
+
 /**********************************   Types ************************************************/
 
 /**
@@ -30,13 +34,46 @@
  * The example provided initializes a single task to run the TrafficLight_Runnable function,
  * which controls the traffic light state machine.
  */
-const RunnableTask_t RUN_LIST[_Runnable_no] = {
+const RunnableTask_t RUN_LIST[_Runnable_no] = 
 
-    [Run1]=
+{
+    [Clock_Data]=
+    {
+        .TaskName="Clock Data APP",
+        .InitialDelayMS=200,
+        .PeriodicityMS=100,
+        .CallBack=Clock_Data_Runnable
+    }
+    ,
+    [StopWatch]=
     {
         .TaskName="LED TEST APP",
-        .InitialDelayMS=100,
+        .InitialDelayMS=200,
         .PeriodicityMS=100,
-        .CallBack=Runnable_TrafficLight_StateMachine
+        .CallBack=Stopwatch_Runnable
+    }
+    ,
+    [Manager]=
+    {
+        .TaskName="Manager",
+        .InitialDelayMS=200,
+        .PeriodicityMS=100,
+        .CallBack=Manager_Runnable
+    }
+    ,
+    [LCD]=
+    {
+        .TaskName="LED TEST APP",
+        .InitialDelayMS=40,
+        .PeriodicityMS=100,
+        .CallBack=LCD_Runnbale
+    }
+    ,
+    [Switch]=
+    {
+        .TaskName="LED TEST APP",
+        .InitialDelayMS=200,
+        .PeriodicityMS=5,
+        .CallBack=Switch_Runnable
     }
 };
