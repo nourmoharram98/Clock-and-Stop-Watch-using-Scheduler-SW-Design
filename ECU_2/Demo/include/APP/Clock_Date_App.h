@@ -1,7 +1,7 @@
 /**
- * @file App.c
+ * @file Clock_Date_App.h
  * @author your name (you@domain.com)
- * @brief implementation of initialization functions
+ * @brief this file will carry the apis for clock_date mode
  * @version 0.1
  * @date 2024-04-07
  * 
