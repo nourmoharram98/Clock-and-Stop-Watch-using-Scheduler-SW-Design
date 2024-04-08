@@ -59,7 +59,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Manager",
         .InitialDelayMS=200,
-        .PeriodicityMS=100,
+        .PeriodicityMS=70,
         .CallBack=Application_Runnable
     }
     ,
@@ -68,6 +68,6 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
         .TaskName="LCD APP",
         .InitialDelayMS=0,
         .PeriodicityMS=2,
-        .CallBack=LCD_Runnable
+        .CallBack=LCD_Runnable_Manager
     }
 };

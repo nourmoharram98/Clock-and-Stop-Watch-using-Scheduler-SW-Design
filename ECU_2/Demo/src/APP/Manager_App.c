@@ -50,7 +50,7 @@
  */
 
  #include "Std_Types.h"
- #include "HAL/LCD/HAL_LCD.h"
+ #include "HAL/LCD/LCD.h"
  #include "APP/Manager.h"
 
  #define Manager_Periodicity 50
@@ -123,16 +123,19 @@ static void print_frame_thread() //period = 4
         //counter+=Manager_Periodicity;
         
         case print_first_line:
-            LCD_WriteStringAsync("CLOCK 16/04/",12);      // (12 x 2) x 2 = 48 ms
+            //LCD_WriteStringAsync("CLOCK 16/04/",12);      // (12 x 2) x 2 = 48 ms
+            LCD_enuWriteStringAsync("CLOCK 16/04/2000",16); // (16 x 2) x 2 = 64 ms  -> 69 ms
             print_frame_state=set_cursor_second_line;
         break;
         case set_cursor_second_line:
-            LCD_SetCursorPosAsync(1,0);                   // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms
+            //LCD_SetCursorPosAsync(1,0);                   // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms
+            LCD_SetCursorPosAsync(2, 1);
             print_frame_state = print_second_line;
         break;
 
         case print_second_line:
-            LCD_WriteStringAsync("hh:MM:SS:M",10);       // (11 x 2) x 2 = 44 ms
+            //LCD_WriteStringAsync("hh:MM:SS:M",10);       // (11 x 2) x 2 = 44 ms
+            LCD_enuWriteStringAsync("  01:11:11:100",14); 
             print_frame_state = end ;
         break;
 

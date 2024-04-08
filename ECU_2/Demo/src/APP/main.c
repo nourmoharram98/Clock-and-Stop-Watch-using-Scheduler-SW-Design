@@ -4,7 +4,7 @@
 
 #include "HAL/LED/LED.h"
 
-#include "HAL/LCD/HAL_LCD.h"
+#include "HAL/LCD/LCD.h"
 
 #include "HAL/SWITCH/HAL_SWITCH.h"
 

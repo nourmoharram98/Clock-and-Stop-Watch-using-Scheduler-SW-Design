@@ -34,4 +34,4 @@ typedef enum
 extern void Clock_Date_Runnable   (void);
 extern void Stopwatch_Runnable    (void);
 extern void Application_Runnable  (void);
-extern void LCD_Runnable          (void);
+extern void LCD_Runnable_Manager  (void);
