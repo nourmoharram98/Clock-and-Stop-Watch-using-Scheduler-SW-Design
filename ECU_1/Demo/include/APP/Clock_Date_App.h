@@ -8,3 +8,9 @@
  * @copyright Copyright (c) 2024
  * 
  */
+
+#define NUMBER_OF_DIGITS           15
+
+
+#define DIGIT_STATE_OPERATING      1
+#define DIGIT_STATE_EDITTING       2
