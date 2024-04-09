@@ -9,7 +9,7 @@
 #ifndef H_LCD_CONFIG
 #define H_LCD_CONFIG
 
-#include "Std_Types.h"
+#include"Std_Types.h"
 
 #define LCD_NUM_OF_ROWS         2   
 #define LCD_NUM_OF_COLS         16

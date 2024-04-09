@@ -12,7 +12,7 @@
 
 #include"Std_Types.h"
 #include"Error_states.h"
-#include "HAL/LCD/HAL_LCD_CONFIG.h"
+#include"HAL/LCD/HAL_LCD_CONFIG.h"
 
 #define LCD_DISPLAY_ROW1        0
 #define LCD_DISPLAY_ROW2        1
@@ -54,8 +54,6 @@ typedef struct
  * @brief functions APIs
  * f
  */
-
-void LCD_Runnable(void);
 Sys_enuErrorStates_t LCD_InitAsync(void);
 Sys_enuErrorStates_t LCD_ClearScreenAsync(void);
 Sys_enuErrorStates_t LCD_SetCursorPosAsync(u8 Copy_LCDPosx,u8 Copy_LCDPosy);

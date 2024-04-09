@@ -1,3 +1,7 @@
 {
-    "C_Cpp.errorSquiggles": "enabled"
+    "C_Cpp.errorSquiggles": "enabled",
+    "files.associations": {
+        "hal_lcd.h": "c",
+        "hal_lcd_config.h": "c"
+    }
 }
