@@ -9,47 +9,86 @@
  * 
  */
 
-struct  
-{
-    U8 Hours_Value;
-    U8 Minuts_Value;
-    U8 Seconds_Value;
-    U8 Deci_Value;
+#include "./APP/Stop_Watch_App.h"
 
-}Stopwatch_Data;
+unit_Info_t Stop_Watch_Digits[NUMBER_OF_DIGITS]=
+{
+    [DeciSecond_hundred]={
+        .value=0,
+        .x_pos=1,  // x hia al row
+        .y_pos=12   // y hia al col
+    },
+    [Second_unit]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=10
+    },
+    [Second_tens]={
+        .value=0,
+        .x_pos=0,
+        .y_pos=9
+    },
+    [Minutes_unit]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=7
+    },
+    [Minutes_tens]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=6
+    },
+    [Hours_unit]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=4
+    },
+    [Hours_tens]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=3
+    }
+};
+
+
 
 void Stopwatch_Runnable(void)
 {
-    extern LCD;
+        Stop_Watch_Digits[DeciSecond_hundred].value++;
     
-    if(LCD.Stopwatch.state=Operation)
+    if (Stop_Watch_Digits[DeciSecond_hundred].value > 9)
     {
-        Stopwatch_Data.Deci_Value++;
-        
-        if (Stopwatch_Data.Deci_Value > 9)
-        {
-            Stopwatch_Data.Deci_Value = 0;
-            Stopwatch_Data.Seconds_Value++;
-        }
-
-        if (Stopwatch_Data.Seconds_Value > 59)
-        {
-            Stopwatch_Data.Seconds_Value = 0;
-            Stopwatch_Data.Minuts_Value++;
-        }
-        
-        if (Stopwatch_Data.Minuts_Value > 59)
-        {
-            Stopwatch_Data.Minuts_Value = 0;
-            Stopwatch_Data.Hours_Value++;
-        }
-        
-        if (Stopwatch_Data.Hours_Value > 99)
-        {
-            Stopwatch_Data.Deci_Value    = 0;
-            Stopwatch_Data.Seconds_Value = 0;
-            Stopwatch_Data.Minuts_Value  = 0;
-            Stopwatch_Data.Hours_Value   = 0;
-        }
+        Stop_Watch_Digits[DeciSecond_hundred].value=0;
+        Stop_Watch_Digits[Second_unit].value++;
     }
+    if(Stop_Watch_Digits[Second_unit].value > 9)
+    {
+        Stop_Watch_Digits[Second_unit].value=0;
+        Stop_Watch_Digits[Second_tens].value++;
+    }
+    if(Stop_Watch_Digits[Second_tens].value>6)
+    {
+        Stop_Watch_Digits[Second_tens].value=0;
+        Stop_Watch_Digits[Minutes_unit].value++;
+    }
+    if(Stop_Watch_Digits[Minutes_unit].value>9)
+    {
+        Stop_Watch_Digits[Minutes_unit].value=0;
+        Stop_Watch_Digits[Minutes_tens].value++;
+    }
+    if(Stop_Watch_Digits[Minutes_tens].value>6)
+    {
+        Stop_Watch_Digits[Minutes_tens].value=0;
+        Stop_Watch_Digits[Hours_unit].value++;
+    }
+    if(Stop_Watch_Digits[Hours_unit].value>9)
+    {
+        Stop_Watch_Digits[Hours_unit].value=0;
+        Stop_Watch_Digits[Hours_tens].value++;
+    }
+    if(Stop_Watch_Digits[Hours_tens].value>9)
+    {
+        Stop_Watch_Digits[Hours_tens].value=0;
+    }
+
 }
