@@ -116,16 +116,39 @@
     }print_frame_state_t;
 /*-------------------------------------------------------------------*/
 
+/*---------------------------Static Functions------------------------*/
+    static void print_frame_thread();
+    static void operation_thread(void);
+/*-------------------------------------------------------------------*/
+
 /*----------------------------Global Variables-----------------------*/
     static uint8 counter=0;
     states_t  state             = print_frame ;
     print_frame_state_t print_frame_state = print_first_line ;
 /*-------------------------------------------------------------------*/
 
+void Application_Runnable(void)
+{
+    counter+=Manager_Periodicity;   
+
+    switch (state)
+    {
+        case print_frame:
+            print_frame_thread();
+        break;
+
+        case operation:
+            operation_thread();
+        break;
+
+        default:
+
+        break;
+    }
+}
 
 static void print_frame_thread() //period = 4
 {
-    
     switch(print_frame_state)
     {
 
@@ -172,15 +195,8 @@ static void print_frame_thread() //period = 4
             print_frame_state=print_first_line;
         break;  
     }
-
 }
 
-/********************************************************************/
-// static  uint8 stringfy (uint8 num)
-// {
-//     return (num+'0');
-// }
-/********************************************************************/
 
 static uint8 mystate=0;
 static uint8 i=0;
@@ -205,31 +221,8 @@ static void operation_thread(void)
  
         break; 
 
-
         default:
             /*Do Nothing*/
         break;
     }
 }
-/********************************************************************/
-
-void Application_Runnable(void)
-{
-    counter+=Manager_Periodicity;   
-
-    switch (state)
-    {
-        case print_frame:
-            print_frame_thread();
-        break;
-
-        case operation:
-            operation_thread();
-        break;
-
-        default:
-
-        break;
-    }
-}
-
