@@ -53,7 +53,7 @@
  #include "HAL/LCD/LCD.h"
  #include "APP/Manager.h"
 
- #define Manager_Periodicity 50
+ #define Manager_Periodicity 4
 // #include"APP/Clock_Date_App.h"
 // #include"APP/Manager.h"
 // extern unit_Info_t Digits[15];
@@ -108,79 +108,126 @@ states_t  state             = print_frame ;
 typedef enum 
 {
     print_first_line,
+    wait1,
     set_cursor_second_line,
     print_second_line,
+    wait2,
     end   
 }print_frame_state_t;
 
 print_frame_state_t print_frame_state = print_first_line ;
 
+
+static uint8 counter=0;
+
 static void print_frame_thread() //period = 4
 {
-    //static uint8 counter=0;
+    
     switch(print_frame_state)
     {
-        //counter+=Manager_Periodicity;
-        
+
         case print_first_line:
-            //LCD_WriteStringAsync("CLOCK 16/04/",12);      // (12 x 2) x 2 = 48 ms
-            LCD_enuWriteStringAsync("CLOCK 16/04/2000",16); // (16 x 2) x 2 = 64 ms  -> 69 ms
-            print_frame_state=set_cursor_second_line;
+
+            LCD_enuWriteStringAsync("CLOCK 16/04/2000",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            
+            print_frame_state=wait1;
+
         break;
+
+        case wait1:
+            if(counter>=70)
+            {
+                counter=0;
+                print_frame_state=set_cursor_second_line;
+            }
+        break;
+
         case set_cursor_second_line:
-            //LCD_SetCursorPosAsync(1,0);                   // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms
-            LCD_SetCursorPosAsync(2, 1);
+        
+            LCD_SetCursorPosAsync(2, 1);                    // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+           
             print_frame_state = print_second_line;
+            counter=0;
         break;
 
         case print_second_line:
-            //LCD_WriteStringAsync("hh:MM:SS:M",10);       // (11 x 2) x 2 = 44 ms
-            LCD_enuWriteStringAsync("  01:11:11:100",14); 
-            print_frame_state = end ;
-        break;
 
+
+                LCD_enuWriteStringAsync("  01:11:11:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+
+        print_frame_state=wait2;
+        break;
+        case wait2:
+        if(counter>=70)
+        {
+            counter=0;
+            print_frame_state=end;
+        }
+        break;
         case end:
             state = operation;
-        break;    
+            counter=0;
+            print_frame_state=print_first_line;
+        break;  
+    }
+
+}
+/********************************************************************/
+static  uint8 stringfy (uint8 num)
+{
+    return (num+'0');
+}
+/********************************************************************/
+static uint8 mystate=0;
+static uint8 i=0;
+static void operation_thread(void)
+{
+    uint8 a=stringfy(Clock_Date_Digits[i].value);
+    switch (mystate)
+    {
+    case 0:
+        LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos,Clock_Date_Digits[i].y_pos);
+        mystate=1;
+        break;
+
+    case 1:
+        LCD_enuWriteStringAsync(a,1);
+        mystate=0;
+        i++;
+        if(i>7)
+        {
+            i=0;
+        }
+        break; 
+    default:
+        break;
     }
 }
 /********************************************************************/
 
-/********************************************************************/
-static void operation_thread(void)
+void Application_Runnable(void)
 {
-    
-}
-/********************************************************************/
-
- void Application_Runnable(void)
- {
-//     Clock_Application();
-//     Stop_WatchApplication();
-//     if(Globalmode==Clock_mode)
-//         call the LCD apis to display the clock mode by retrieving the data from externed array
-//         Manager(clock digits array)
-//     else
-//         call the LCD apis to display the stop watch mode by retrieiving the data from externed array
-//         Manager(stop watch digits array)
+    counter+=Manager_Periodicity;    
 switch (state)
 {
-case print_frame:
-    print_frame_thread();
-break;
+    case print_frame:
+        print_frame_thread();
+    break;
 
-case operation:
-    operation_thread();
-break;
+    case operation:
+        operation_thread();
+    break;
 
-default:
+    default:
 
-break;
+    break;
+    
+
 }
 
 
 
- }
+}
 
 // u8 Clock_Application(void)
 // {

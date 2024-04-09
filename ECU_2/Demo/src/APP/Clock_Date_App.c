@@ -21,7 +21,7 @@ unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
     {
         .value=0,
         .x_pos=1,  // x hia al row
-        .y_pos=12   // y hia al col
+        .y_pos=12  // y hia al col
     },
     [Second_unit]={
         .value=0,
@@ -120,7 +120,7 @@ int days_in_month(int month, int year)
 
 */
 
-void Clock_Date_Runnable(void)
+void Clock_Date_Runnable(void) //every 100 ms
 {
     Clock_Date_Digits[DeciSecond_hundred].value++;
     
@@ -134,7 +134,7 @@ void Clock_Date_Runnable(void)
         Clock_Date_Digits[Second_unit].value=0;
         Clock_Date_Digits[Second_tens].value++;
     }
-    if(Clock_Date_Digits[Second_tens].value>6)
+    if(Clock_Date_Digits[Second_tens].value>5)
     {
         Clock_Date_Digits[Second_tens].value=0;
         Clock_Date_Digits[Minutes_unit].value++;
@@ -144,7 +144,7 @@ void Clock_Date_Runnable(void)
         Clock_Date_Digits[Minutes_unit].value=0;
         Clock_Date_Digits[Minutes_tens].value++;
     }
-    if(Clock_Date_Digits[Minutes_tens].value>6)
+    if(Clock_Date_Digits[Minutes_tens].value>5)
     {
         Clock_Date_Digits[Minutes_tens].value=0;
         Clock_Date_Digits[Hours_unit].value++;
