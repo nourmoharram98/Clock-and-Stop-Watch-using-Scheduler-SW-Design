@@ -167,15 +167,15 @@
 //     }
 //     if(Clock_Date_Digits[Day_tens].value == 3 && Clock_Date_Digits[Day_unit].value > 1 )
 //     {
-//         Clock_Date_Digits[Day_tens].value=0;
-//         Clock_Date_Digits[Day_unit].value=1;
-//         Clock_Date_Digits[Month_unit].value++;
+        // Clock_Date_Digits[Day_tens].value=0;
+        // Clock_Date_Digits[Day_unit].value=1;
+        // Clock_Date_Digits[Month_unit].value++;
 //     }
-//     if(Clock_Date_Digits[Month_unit].value>9)
-//     {
-//         Clock_Date_Digits[Month_unit].value=0;
-//         Clock_Date_Digits[Month_tens].value=1;
-//     }
+    // if(Clock_Date_Digits[Month_unit].value>9)
+    // {
+    //     Clock_Date_Digits[Month_unit].value=0;
+    //     Clock_Date_Digits[Month_tens].value=1;
+    // }
 //     if((Clock_Date_Digits[Month_tens].value==1)&&(Clock_Date_Digits[Month_unit].value>2))
 //     {
 //         Clock_Date_Digits[Month_unit].value=1;
@@ -259,22 +259,22 @@ unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
         .y_pos=10
     },
     [Years_thousand]={
-        .value=2,
+        .value=1,
         .x_pos=1,
         .y_pos=13
     },
     [Years_hundreds]={
-        .value=0,
+        .value=9,
         .x_pos=1,
         .y_pos=14
     },
     [Years_tens]={
-        .value=0,
+        .value=9,
         .x_pos=1,
         .y_pos=15
     },
     [Years_unit]={
-        .value=0,
+        .value=9,
         .x_pos=1,
         .y_pos=16
     }
@@ -336,14 +336,13 @@ void Clock_Date_Runnable(void)
                         {
                             Clock_Date_Digits[Hours_unit].value = 0;
                             Clock_Date_Digits[Hours_tens].value++;
-
-                            if ((Clock_Date_Digits[Hours_tens].value >= 2) && (Clock_Date_Digits[Hours_unit].value > 3)) 
-                            {
-                                // Reset hours to 0 if it exceeds 23
-                                Clock_Date_Digits[Hours_tens].value = 0;
-                                Clock_Date_Digits[Hours_unit].value = 0;
-                                Clock_Date_Digits[Day_unit].value++;
-                            }
+                        }
+                        if ((Clock_Date_Digits[Hours_tens].value >= 2) && (Clock_Date_Digits[Hours_unit].value >= 3)) 
+                        {
+                            // Reset hours to 0 if it exceeds 23
+                            Clock_Date_Digits[Hours_tens].value = 0;
+                            Clock_Date_Digits[Hours_unit].value = 0;
+                            Clock_Date_Digits[Day_unit].value++;
                         }
                     }
                 }
@@ -359,57 +358,59 @@ void Clock_Date_Runnable(void)
 
     int days_in_current_month = days_in_month(month - 1, year);
 
-    if (Clock_Date_Digits[Day_unit].value > 9) 
+    if ( Clock_Date_Digits[Day_unit].value > 9 )
     {
-        Clock_Date_Digits[Day_unit].value = 0;
+        Clock_Date_Digits[Day_unit].value=1;
         Clock_Date_Digits[Day_tens].value++;
+    } 
+
+    if ( Clock_Date_Digits[Day_tens].value * 10 + Clock_Date_Digits[Day_unit].value > days_in_current_month )
+    {
+        Clock_Date_Digits[Day_tens].value=0;
+        Clock_Date_Digits[Day_unit].value=1;
+        Clock_Date_Digits[Month_unit].value++;
     }
 
-    if (Clock_Date_Digits[Day_tens].value * 10 + Clock_Date_Digits[Day_unit].value > days_in_current_month) 
+    if(Clock_Date_Digits[Month_unit].value>9)
     {
-        Clock_Date_Digits[Day_tens].value = 0;
-        Clock_Date_Digits[Day_unit].value = 1; // Reset day to 1 if it exceeds days in month
-        Clock_Date_Digits[Month_unit].value++;
+        Clock_Date_Digits[Month_unit].value=0;
+        Clock_Date_Digits[Month_tens].value=1;
+    }
 
-        if (Clock_Date_Digits[Month_unit].value > 9) 
+    if (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value > 2) 
+    { 
+        Clock_Date_Digits[Month_tens].value = 0;
+        Clock_Date_Digits[Month_unit].value = 1; //reset to month one
+        Clock_Date_Digits[Years_unit].value++;
+    }    
+
+    if (Clock_Date_Digits[Years_unit].value > 9) 
+    {
+        Clock_Date_Digits[Years_unit].value = 0;
+        Clock_Date_Digits[Years_tens].value++;
+
+        if (Clock_Date_Digits[Years_tens].value > 9) 
         {
-            Clock_Date_Digits[Month_unit].value = 0;
-            Clock_Date_Digits[Month_tens].value = 1;
+            Clock_Date_Digits[Years_tens].value = 0;
+            Clock_Date_Digits[Years_hundreds].value++;
 
-            if (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value > 2) 
-            { // Increment year if month exceeds 12 
-                Clock_Date_Digits[Month_tens].value = 0;
-                Clock_Date_Digits[Month_unit].value = 1; //reset to month one
-                Clock_Date_Digits[Years_unit].value++;
+            if (Clock_Date_Digits[Years_hundreds].value > 9) 
+            {
+                Clock_Date_Digits[Years_hundreds].value = 0;
+                Clock_Date_Digits[Years_thousand].value++;
 
-                if (Clock_Date_Digits[Years_unit].value > 9) 
+                if (Clock_Date_Digits[Years_thousand].value > 9) 
                 {
-                    Clock_Date_Digits[Years_unit].value = 0;
-                    Clock_Date_Digits[Years_tens].value++;
-
-                    if (Clock_Date_Digits[Years_tens].value > 9) 
-                    {
-                        Clock_Date_Digits[Years_tens].value = 0;
-                        Clock_Date_Digits[Years_hundreds].value++;
-
-                        if (Clock_Date_Digits[Years_hundreds].value > 9) 
-                        {
-                            Clock_Date_Digits[Years_hundreds].value = 0;
-                            Clock_Date_Digits[Years_thousand].value++;
-
-                            if (Clock_Date_Digits[Years_thousand].value > 9) 
-                            {
-                                Clock_Date_Digits[Years_thousand].value = 0;
-                                Clock_Date_Digits[Years_hundreds].value = 0;
-                                Clock_Date_Digits[Years_tens].value     = 0;
-                                Clock_Date_Digits[Years_unit].value     = 0;
-                            }
-                        }
-                    }
-
+                    Clock_Date_Digits[Years_thousand].value = 0;
+                    Clock_Date_Digits[Years_hundreds].value = 0;
+                    Clock_Date_Digits[Years_tens].value     = 0;
+                    Clock_Date_Digits[Years_unit].value     = 0;
                 }
             }
         }
+
     }
 }
+
+
 

@@ -131,7 +131,7 @@ static void print_frame_thread() //period = 4
 
         case print_first_line:
 
-            LCD_enuWriteStringAsync("CLOCK 31/12/2000",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            LCD_enuWriteStringAsync("CLOCK 31/12/1999",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
             
             print_frame_state=wait1;
 
@@ -147,7 +147,7 @@ static void print_frame_thread() //period = 4
 
         case set_cursor_second_line:
         
-            LCD_SetCursorPosAsync(2, 1);                    // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+            LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
            
             print_frame_state = print_second_line;
             counter=0;
