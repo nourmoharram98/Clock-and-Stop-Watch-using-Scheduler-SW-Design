@@ -241,6 +241,7 @@ void Manager_Runnable(void)
         {
             LCD_SetCursorPosAsync(Clock_Date_Digits[index].x_pos,Clock_Date_Digits[index].y_pos);
             LCD_WriteStringAsync(Clock_Date_Digits[index].value+'0',1);
+            Clock_Date_Digits[index].digit_state=DIGIT_STATE_NOT_PRINT;
         }
     }
 }
