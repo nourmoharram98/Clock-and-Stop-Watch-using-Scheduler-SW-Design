@@ -45,21 +45,23 @@
 
 /*------------------------------------static functions------------------------------------*/
 
-    static LCD_enuErrorStatus_t LCD_enuWriteCommand(U8 Copy_u8Command);
+    static LCD_enuErrorStatus_t LCD_enuWriteCommand  (U8 Copy_u8Command);
 
-    static LCD_enuErrorStatus_t LCD_enuWriteData(U8 Copy_u8Data);
+    static LCD_enuErrorStatus_t LCD_enuWriteData     (U8 Copy_u8Data);
 
-        static void LCD_Init_Manager (void);
+        static void LCD_Init_Manager                 (void);
 
             static GPIO_Error_t LCD_IMH_PowerOn(void);
 
-        static void LCD_Write_Proc(void);
+        static void LCD_WriteString_Proc             (void);
+        
+        static void LCD_WriteNumber_Proc             (void);
 
-        static void LCD_Clear_Proc(void); 
+        static void LCD_Clear_Proc                   (void); 
 
-        static void LCD_SetPostion_Proc(void);
+        static void LCD_SetPostion_Proc              (void);
 
-        static void LCD_CtrlEnablePin(U8 Copy_LCDEnablePinState);     
+        static void LCD_CtrlEnablePin                (U8 Copy_LCDEnablePinState);     
 
 /*--------------------------------------------------------------------------------------*/
 
@@ -106,7 +108,7 @@
                     /*------------*/
 
                     /*UserReQ Operation*/
-                        UserREQ.Operation_Type = Write;
+                        UserREQ.Operation_Type = Write_String;
                     /*----------------*/
                 
                     /*Setting data to be printed*/
@@ -119,7 +121,42 @@
                     Local_Error = LCD_enumNotReady;  
                 }
             /*--------------------*/
+
             return Local_Error;        
+        }
+    /*--------------------------------------------------------------------------------------*/
+
+    /*-----------------------------------Write Number Function------------------------------*/
+        LCD_enuErrorStatus_t LCD_enuWriteNumber(U8 Copy_u8Number)
+        {
+            LCD_enuErrorStatus_t Local_Error = LCD_enumNOK;
+
+            /*Actual Implementation*/
+                if ( (UserREQ.LCD_STAGE == Operation_Stage) && (UserREQ.State == readyForNewRequest) ) 
+                {
+                    /*Local Error flag*/
+                        Local_Error = LCD_enumOK;  
+                    /*----------------*/
+
+                    /*UserReQ state*/                
+                        UserREQ.State=REQ_Pending;
+                    /*------------*/
+
+                    /*UserReQ Operation*/
+                        UserREQ.Operation_Type = Write_Number;
+                    /*----------------*/
+                
+                    /*Setting data to be printed*/
+                        UserREQ.Number = Copy_u8Number;
+                    /*------------------------*/
+                }
+                else
+                {
+                    Local_Error = LCD_enumNotReady;  
+                }
+            /*--------------------*/
+
+            return Local_Error;   
         }
     /*--------------------------------------------------------------------------------------*/
 
@@ -260,8 +297,8 @@
             {
                 switch (UserREQ.Operation_Type)
                 {
-                    case Write:
-                        LCD_Write_Proc();                  
+                    case Write_String:
+                        LCD_WriteString_Proc();                  
                     break;
 
                     case Clear:
@@ -271,6 +308,10 @@
                     case SetPosition:
                         LCD_SetPostion_Proc();             
                     break;    
+
+                    case Write_Number:
+                        LCD_WriteNumber_Proc();
+                    break;
 
                     default:
                                     
@@ -364,7 +405,7 @@
     /*-----------------------------------------------------------------------------*/
 
     /*-----------------------------------Write Process-----------------------------*/
-        static void LCD_Write_Proc(void)
+        static void LCD_WriteString_Proc(void)
         {
             switch (G_WriteState)
             {
@@ -396,6 +437,40 @@
                 break;
 
             }
+        }
+    /*-----------------------------------------------------------------------------*/
+
+    /*--------------------------------Write Number Process-------------------------*/
+        static void LCD_WriteNumber_Proc(void) // 2ms
+        {
+            // U8 LOC_u8Reversed = 1 ;
+
+            switch (G_WriteState)
+            {
+                case WriteInit_State: 
+                    G_WriteState = Writing_State;
+                break;
+
+                case Writing_State:
+                    LCD_enuWriteData( UserREQ.Number+48 );//4
+
+                    if( G_LCD_EnablePinState == LCD_EnablePin_OFF )
+                    {
+                        G_WriteState = Writing_Done;
+                    }
+                    else 
+                    {
+                        /*Wait till write command finish*/
+                    }
+
+                break;
+                case Writing_Done:
+                    UserREQ.State = readyForNewRequest;
+                    UserREQ.Operation_Type  = None;
+                    G_WriteState = WriteInit_State;
+                break;
+
+            }  
         }
     /*-----------------------------------------------------------------------------*/
 

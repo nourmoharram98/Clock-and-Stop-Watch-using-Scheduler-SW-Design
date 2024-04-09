@@ -47,7 +47,8 @@
         typedef enum
         {
             None,
-            Write,
+            Write_String,
+            Write_Number,
             Clear,
             SetPosition,
             ShiftDisplay
@@ -58,6 +59,7 @@
         struct 
         {
             const char *String;
+            U8 Number;
             U8 Length;
             State_t State;  
             LCD_STAGE_t LCD_STAGE;
@@ -94,9 +96,13 @@
         LCD_enuErrorStatus_t LCD_enuWriteStringAsync(char* Copy_pchPattern , U8 Length);
     /*--------------------------------------------------------------------------------------*/
 
+    /*-----------------------------------Write Number Function------------------------------*/
+		 LCD_enuErrorStatus_t LCD_enuWriteNumber(U8 Copy_u8Number);
+    /*--------------------------------------------------------------------------------------*/
+
     /*-----------------------------Get Operations State Function----------------------------*/
         LCD_enuErrorStatus_t Get_OperationState (U8 *Op_State);
-    /*---------------------------------------------------------------------------------------*/
+    /*--------------------------------------------------------------------------------------*/
 /*****/
 
 // /*Extra*/	
@@ -112,6 +118,4 @@
 
 
 
-
 #endif
-

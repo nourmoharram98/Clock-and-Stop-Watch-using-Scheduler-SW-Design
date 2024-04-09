@@ -97,28 +97,31 @@
 // } 
 
 /********************************************************************/
-typedef enum
-{
-    print_frame,
-    operation
-}states_t;
 
-states_t  state             = print_frame ;
+/*--------------------------------Types Defs-------------------------*/
+    typedef enum
+    {
+        print_frame,
+        operation
+    }states_t;
 
-typedef enum 
-{
-    print_first_line,
-    wait1,
-    set_cursor_second_line,
-    print_second_line,
-    wait2,
-    end   
-}print_frame_state_t;
+    typedef enum 
+    {
+        print_first_line,
+        wait1,
+        set_cursor_second_line,
+        print_second_line,
+        wait2,
+        end   
+    }print_frame_state_t;
+/*-------------------------------------------------------------------*/
 
-print_frame_state_t print_frame_state = print_first_line ;
+/*----------------------------Global Variables-----------------------*/
+    static uint8 counter=0;
+    states_t  state             = print_frame ;
+    print_frame_state_t print_frame_state = print_first_line ;
+/*-------------------------------------------------------------------*/
 
-
-static uint8 counter=0;
 
 static void print_frame_thread() //period = 4
 {
@@ -128,7 +131,7 @@ static void print_frame_thread() //period = 4
 
         case print_first_line:
 
-            LCD_enuWriteStringAsync("CLOCK 16/04/2000",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            LCD_enuWriteStringAsync("CLOCK 31/12/2000",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
             
             print_frame_state=wait1;
 
@@ -151,19 +154,18 @@ static void print_frame_thread() //period = 4
         break;
 
         case print_second_line:
-
-
-                LCD_enuWriteStringAsync("  01:11:11:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
-
-        print_frame_state=wait2;
+            LCD_enuWriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+            print_frame_state=wait2;
         break;
+
         case wait2:
-        if(counter>=70)
-        {
-            counter=0;
-            print_frame_state=end;
-        }
+            if(counter>=70)
+            {
+                counter=0;
+                print_frame_state=end;
+            }
         break;
+
         case end:
             state = operation;
             counter=0;
@@ -172,34 +174,40 @@ static void print_frame_thread() //period = 4
     }
 
 }
+
 /********************************************************************/
-static  uint8 stringfy (uint8 num)
-{
-    return (num+'0');
-}
+// static  uint8 stringfy (uint8 num)
+// {
+//     return (num+'0');
+// }
 /********************************************************************/
+
 static uint8 mystate=0;
 static uint8 i=0;
+
 static void operation_thread(void)
 {
-    uint8 a=stringfy(Clock_Date_Digits[i].value);
     switch (mystate)
     {
-    case 0:
-        LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos,Clock_Date_Digits[i].y_pos);
-        mystate=1;
+        case 0:
+            LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos , Clock_Date_Digits[i].y_pos);
+            mystate=1;
         break;
 
-    case 1:
-        LCD_enuWriteStringAsync(a,1);
-        mystate=0;
-        i++;
-        if(i>7)
-        {
-            i=0;
-        }
+        case 1:
+            LCD_enuWriteNumber(Clock_Date_Digits[i].value);
+            mystate=0;
+            i++;
+            if(i>14)
+            {
+                i=0;
+            }
+ 
         break; 
-    default:
+
+
+        default:
+            /*Do Nothing*/
         break;
     }
 }
@@ -207,46 +215,21 @@ static void operation_thread(void)
 
 void Application_Runnable(void)
 {
-    counter+=Manager_Periodicity;    
-switch (state)
-{
-    case print_frame:
-        print_frame_thread();
-    break;
+    counter+=Manager_Periodicity;   
 
-    case operation:
-        operation_thread();
-    break;
+    switch (state)
+    {
+        case print_frame:
+            print_frame_thread();
+        break;
 
-    default:
+        case operation:
+            operation_thread();
+        break;
 
-    break;
-    
+        default:
 
+        break;
+    }
 }
 
-
-
-}
-
-// u8 Clock_Application(void)
-// {
-//  //not implemented in this file
-// }
-
-// u8 Stop_WatchApplication(void)
-// {
-//  //not implemented in this file
-// }
-
-// u8 Check_for_switch_runnable(void)
-// {
-
-// }
-
-// //up/down/right/left functions
-
-// /**
-// Ok button function:
-// change edit mode from (digit to global) or (global to operation)
-// */
