@@ -114,6 +114,12 @@
         wait2,
         end   
     }print_frame_state_t;
+
+    typedef enum
+    {
+        SetCursor,
+        WriteNumber
+    }Operation_State_t;
 /*-------------------------------------------------------------------*/
 
 /*---------------------------Static Functions------------------------*/
@@ -122,9 +128,11 @@
 /*-------------------------------------------------------------------*/
 
 /*----------------------------Global Variables-----------------------*/
-    static uint8 counter=0;
-    states_t  state             = print_frame ;
-    print_frame_state_t print_frame_state = print_first_line ;
+    static uint8 counter                          = 0;
+    static Operation_State_t Operation_State      = SetCursor;
+
+    states_t state                               = print_frame ;
+    print_frame_state_t print_frame_state        = print_first_line ;
 /*-------------------------------------------------------------------*/
 
 void Application_Runnable(void)
@@ -198,27 +206,31 @@ static void print_frame_thread() //period = 4
 }
 
 
-static uint8 mystate=0;
+
 static uint8 i=0;
 
 static void operation_thread(void)
 {
-    switch (mystate)
+    switch (Operation_State)
     {
-        case 0:
+        case SetCursor:
+
             LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos , Clock_Date_Digits[i].y_pos);
-            mystate=1;
+
+            Operation_State = WriteNumber;
         break;
 
-        case 1:
+        case WriteNumber:
             LCD_enuWriteNumber(Clock_Date_Digits[i].value);
-            mystate=0;
+
+            Operation_State=SetCursor;
+
             i++;
             if(i>14)
             {
                 i=0;
             }
- 
+
         break; 
 
         default:
