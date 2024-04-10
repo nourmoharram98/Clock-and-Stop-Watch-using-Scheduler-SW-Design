@@ -323,13 +323,24 @@ int main ()
     RCC_AHB_PREscaler			( AHB_PRE_1 );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIA );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIB );
-    // SysTick inits
+    
+    /**
+     * @warning Mandatory to be called before starting the scheduler 
+    */
+    
     SysTick_SetClockSource(SysTick_CLOCK_SOURCE_AHB_8);
     SysTick_SetCurrentVal(0);
     SysTick_EnableInterrupt();
-    // HAL_SWITCH_Init();
+    
+    /**
+     * @brief HAl Components Initialisation
+    */
+    
     LCD_InitAsync();  
-
+   /**
+    * @brief System Initialisation
+    * @warning Should be called at the end of each init function 
+   */
     SCHED_Init                  ();
     SCHED_Start                 ();
 }
