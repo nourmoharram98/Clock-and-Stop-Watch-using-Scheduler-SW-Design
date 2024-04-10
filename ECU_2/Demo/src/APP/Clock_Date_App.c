@@ -239,12 +239,12 @@ unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
         .y_pos=3
     },
     [Day_unit]={
-        .value=1,
+        .value=8,
         .x_pos=1,
         .y_pos=8
     },
     [Day_tens]={
-        .value=3,
+        .value=2,
         .x_pos=1,
         .y_pos=7
     },
@@ -254,27 +254,27 @@ unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
         .y_pos=11
     },
     [Month_tens]={
-        .value=1,
+        .value=0,
         .x_pos=1,
         .y_pos=10
     },
     [Years_thousand]={
-        .value=1,
+        .value=2,
         .x_pos=1,
         .y_pos=13
     },
     [Years_hundreds]={
-        .value=9,
+        .value=0,
         .x_pos=1,
         .y_pos=14
     },
     [Years_tens]={
-        .value=9,
+        .value=0,
         .x_pos=1,
         .y_pos=15
     },
     [Years_unit]={
-        .value=9,
+        .value=0,
         .x_pos=1,
         .y_pos=16
     }

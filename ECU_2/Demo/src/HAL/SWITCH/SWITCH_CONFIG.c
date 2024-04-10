@@ -12,12 +12,42 @@
 
 /*array for switches configurations*/
 const SWITCH_CONFIGURATIONS arrOfSwitches[Number_Of_Switches]={
-		[SWITCH_NUMONE]={
+		[EDIT_SWITCH]={
                             .port=GPIO_PORT_C,
                             .Switch_Pin=GPIO_PIN_13,
                             .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
                             .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
                         },
+        [OK_SWITCH]={
+                            .port=GPIO_PORT_C,
+                            .Switch_Pin=GPIO_PIN_13,
+                            .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
+                            .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
+        },
+        [UP_SWITCH]={
+                            .port=GPIO_PORT_C,
+                            .Switch_Pin=GPIO_PIN_13,
+                            .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
+                            .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
+        },
+        [DOWN_SWITCH]={
+                            .port=GPIO_PORT_C,
+                            .Switch_Pin=GPIO_PIN_13,
+                            .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
+                            .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
+        },
+        [RIGHT_SWITCH]={
+                            .port=GPIO_PORT_C,
+                            .Switch_Pin=GPIO_PIN_13,
+                            .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
+                            .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
+        },
+        [LEFT_SWITCH]={
+                            .port=GPIO_PORT_C,
+                            .Switch_Pin=GPIO_PIN_13,
+                            .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
+                            .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
+        },
 		// [SWITCH_NUMTWO]={
         //                     .port=GPIOC_BASE_ADDRESS,
         //                     .Switch_Pin=GPIO_PIN_14,
