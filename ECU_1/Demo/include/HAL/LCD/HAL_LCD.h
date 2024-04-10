@@ -63,6 +63,7 @@ Sys_enuErrorStates_t LCD_GetStatus(u32* PtrToLCDstatus);
 Sys_enuErrorStates_t LCD_WriteSetCB(LCD_CBFUNC_t PtrTofunc);
 Sys_enuErrorStates_t LCD_ClearSetCB(LCD_CBFUNC_t PtrTofunc);
 Sys_enuErrorStates_t LCD_SetCursorSetCB(LCD_CBFUNC_t PtrTofunc);
+Sys_enuErrorStates_t LCD_enuWriteNumber(u32 number);
 
 
 

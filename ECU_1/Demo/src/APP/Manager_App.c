@@ -131,7 +131,7 @@ static void print_frame_thread() //period = 4
 
         case print_first_line:
 
-            LCD_enuWriteStringAsync("CLOCK 31/12/2000",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            LCD_WriteStringAsync("CLOCK 31/12/9999",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
             
             print_frame_state=wait1;
 
@@ -147,14 +147,14 @@ static void print_frame_thread() //period = 4
 
         case set_cursor_second_line:
         
-            LCD_SetCursorPosAsync(1, 1);                    // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+            LCD_SetCursorPosAsync(1, 0);                    // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
            
             print_frame_state = print_second_line;
             counter=0;
         break;
 
         case print_second_line:
-            LCD_enuWriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+            LCD_WriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
             print_frame_state=wait2;
         break;
 
@@ -182,35 +182,35 @@ static void print_frame_thread() //period = 4
 // }
 /********************************************************************/
 
-static uint8 mystate=0;
-static uint8 i=0;
+//static uint8 mystate=0;
+// static uint8 i=0;
 
-static void operation_thread(void)
-{
-    switch (mystate)
-    {
-        case 0:
-            LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos , Clock_Date_Digits[i].y_pos);
-            mystate=1;
-        break;
+// static void operation_thread(void)
+// {
+//     switch (mystate)
+//     {
+//         case 0:
+//             LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos , Clock_Date_Digits[i].y_pos);
+//             mystate=1;
+//         break;
 
-        case 1:
-            LCD_enuWriteNumber(Clock_Date_Digits[i].value);
-            mystate=0;
-            i++;
-            if(i>14)
-            {
-                i=0;
-            }
+//         case 1:
+//             LCD_enuWriteNumber(Clock_Date_Digits[i].value);
+//             mystate=0;
+//             i++;
+//             if(i>14)
+//             {
+//                 i=0;
+//             }
  
-        break; 
+//         break; 
 
 
-        default:
-            /*Do Nothing*/
-        break;
-    }
-}
+//         default:
+//             /*Do Nothing*/
+//         break;
+//     }
+// }
 /********************************************************************/
 
 void Application_Runnable(void)
@@ -224,13 +224,18 @@ void Application_Runnable(void)
         break;
 
         case operation:
-            operation_thread();
+            //operation_thread();
+            Manager_Runnable();
         break;
 
         default:
 
         break;
     }
+}
+void numbertochar(int number)
+{
+
 }
 
 void Manager_Runnable(void)
@@ -240,7 +245,7 @@ void Manager_Runnable(void)
         if(Clock_Date_Digits[index].digit_state==DIGIT_STATE_PRINT)
         {
             LCD_SetCursorPosAsync(Clock_Date_Digits[index].x_pos,Clock_Date_Digits[index].y_pos);
-            LCD_WriteStringAsync(Clock_Date_Digits[index].value+'0',1);
+            LCD_enuWriteNumber(Clock_Date_Digits[index].value);
             Clock_Date_Digits[index].digit_state=DIGIT_STATE_NOT_PRINT;
         }
     }

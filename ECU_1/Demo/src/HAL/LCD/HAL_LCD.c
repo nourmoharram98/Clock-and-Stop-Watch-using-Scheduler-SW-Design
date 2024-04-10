@@ -1,8 +1,7 @@
-#include"typedefs.h"
+#include"Std_Types.h"
 #include"Error_states.h"
 #include"HAL/LCD/HAL_LCD.h"
-#include"MCAL/GPIO/STM32F401cc_MCAL_GPIO.h"
-#include"APPLICATION/APP1.h"
+#include"MCAL/GPIO/GPIO.h"
 
 
 /* Macros for CLCD Commands */
@@ -30,7 +29,7 @@
 #define INDEX_FOR_LINE_4 0X50
 #define WRITE_ON_DDRAM_INDEX 0X80
 
-#define BUFFER_SIZE         20
+#define BUFFER_SIZE         35
 
 typedef enum
 {
@@ -44,6 +43,7 @@ typedef enum
     LCD_ReqWrite,
     LCD_ReqClear,
     LCD_ReqSetPos,
+    LCD_ReqWriteNumber,
 }LCD_UserRequestType;
 
 
@@ -84,6 +84,7 @@ typedef struct
     LCD_UserRequestState State;
     LCD_UserRequestType Type;
     LCD_PosCord CurrentPos;
+    u8 number;
 } LCD_UserRequest;
 
 struct{
@@ -116,6 +117,8 @@ static Sys_enuErrorStates_t LCD_SetPosition_Process(void);
 static Sys_enuErrorStates_t LCD_Helper_SetPosition(u8 *PTR_PostionDDRAM);
 static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand);
 static Sys_enuErrorStates_t LCD_WriteData(char Copy_LCDData);
+static void LCD_WriteNumber_Proc(void);// 2ms
+
 //static Sys_enuErrorStates_t LCD_Helper_Clear(void);
 //static Sys_enuErrorStates_t LCD_OverFlowHandler(void);
 
@@ -147,6 +150,9 @@ void LCD_Runnable(void)
                         break;
                     case LCD_ReqSetPos:
                         LCD_SetPosition_Process();
+                        break;
+                    case LCD_ReqWriteNumber:
+                        LCD_WriteNumber_Proc();
                         break;
                     default:
                         break;
@@ -218,14 +224,14 @@ static Sys_enuErrorStates_t LCD_Init_Process(void)
 static Sys_enuErrorStates_t LCD_PowerOnProcess(void)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-    GPIO_PinConfigs_t Local_PinConfiguration={0};
-    Local_PinConfiguration.Pin_Mode=GPIO_PIN_OUTPUT_PUSHPULL_NP;
-    Local_PinConfiguration.Pin_Speed=GPIO_PIN_MEDSPEED;
+    GPIO_Pin_t Local_PinConfiguration={0};
+    Local_PinConfiguration.Pin_Mode=GPIO_MODE_OP_PP;
+    Local_PinConfiguration.Pin_Speed=GPIO_SPEED_MED;
     for(u8 index_p=0;index_p<LCD_Configurations[LCD_One].config.LCD_PIN_NUM_MODE;index_p++)
     {
         Local_PinConfiguration.Pin_num=LCD_Configurations[LCD_One].pins[index_p].Pin;
         Local_PinConfiguration.Port=LCD_Configurations[LCD_One].pins[index_p].Port;
-        GPIO_Init_Pin(&Local_PinConfiguration);    
+        GPIO_Init(&Local_PinConfiguration);    
     }
     return Error_Status;
 }
@@ -350,8 +356,8 @@ static Sys_enuErrorStates_t LCD_Helper_SetPosition(u8 *PTR_PostionDDRAM)
 static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand)
 {
    Sys_enuErrorStates_t Error_Status=NOT_OK;
-   GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RS_8BIT].Port,LCD_Configurations[LCD_One].pins[RS_8BIT].Pin,GPIO_PIN_STATUS_LOW);
-   GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RW_8BIT].Port,LCD_Configurations[LCD_One].pins[RW_8BIT].Pin,GPIO_PIN_STATUS_LOW);
+   GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RS_8BIT].Port,LCD_Configurations[LCD_One].pins[RS_8BIT].Pin,GPIO_STATE_RESET);
+   GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RW_8BIT].Port,LCD_Configurations[LCD_One].pins[RW_8BIT].Pin,GPIO_STATE_RESET);
    if(Global_EnablePinState==LCD_ENABLE_LOW)
    {
         GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[D0].Port,LCD_Configurations[LCD_One].pins[D0].Pin,(Copy_LCDCommand>>D0&1));
@@ -363,13 +369,13 @@ static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand)
         GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[D6].Port,LCD_Configurations[LCD_One].pins[D6].Pin,(Copy_LCDCommand>>D6&1));
         GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[D7].Port,LCD_Configurations[LCD_One].pins[D7].Pin,(Copy_LCDCommand>>D7&1));
 
-        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_PIN_STATUS_HIGH);
+        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_STATE_SET);
         Global_EnablePinState=LCD_ENABLE_HIGH;
         Error_Status=OK;
    }
    else if(Global_EnablePinState==LCD_ENABLE_HIGH)
    {
-        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_PIN_STATUS_LOW);
+        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_STATE_RESET);
         Global_EnablePinState=LCD_ENABLE_LOW;
         Error_Status=OK;
    }
@@ -381,11 +387,11 @@ static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand)
 static Sys_enuErrorStates_t LCD_WriteData(char Copy_LCDData)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RS_8BIT].Port,LCD_Configurations[LCD_One].pins[RS_8BIT].Pin,GPIO_PIN_STATUS_HIGH);
-        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RW_8BIT].Port,LCD_Configurations[LCD_One].pins[RW_8BIT].Pin,GPIO_PIN_STATUS_LOW);
+        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RS_8BIT].Port,LCD_Configurations[LCD_One].pins[RS_8BIT].Pin,GPIO_STATE_SET);
+        GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[RW_8BIT].Port,LCD_Configurations[LCD_One].pins[RW_8BIT].Pin,GPIO_STATE_RESET);
         if(Global_EnablePinState==LCD_ENABLE_LOW)
         {
-            GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_PIN_STATUS_LOW);
+            GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_STATE_RESET);
 
             GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[D0].Port,LCD_Configurations[LCD_One].pins[D0].Pin,(Copy_LCDData>>D0&1));
             GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[D1].Port,LCD_Configurations[LCD_One].pins[D1].Pin,(Copy_LCDData>>D1&1));
@@ -396,7 +402,7 @@ static Sys_enuErrorStates_t LCD_WriteData(char Copy_LCDData)
             GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[D6].Port,LCD_Configurations[LCD_One].pins[D6].Pin,(Copy_LCDData>>D6&1));
             GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[D7].Port,LCD_Configurations[LCD_One].pins[D7].Pin,(Copy_LCDData>>D7&1));
 
-            GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_PIN_STATUS_HIGH);
+            GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_STATE_SET);
             Global_EnablePinState=LCD_ENABLE_HIGH;
 
             Error_Status=OK;
@@ -404,7 +410,7 @@ static Sys_enuErrorStates_t LCD_WriteData(char Copy_LCDData)
         else if(Global_EnablePinState==LCD_ENABLE_HIGH)
         {
             Cursor_Location++;
-            GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_PIN_STATUS_LOW);
+            GPIO_Set_PinValue(LCD_Configurations[LCD_One].pins[EN_8BIT].Port,LCD_Configurations[LCD_One].pins[EN_8BIT].Pin,GPIO_STATE_RESET);
             Global_EnablePinState=LCD_ENABLE_LOW;
             Error_Status=OK;
         }
@@ -475,6 +481,31 @@ Sys_enuErrorStates_t LCD_WriteStringAsync(const char *ptrToString,u8 String_size
     return Error_Status;
 }
 
+Sys_enuErrorStates_t LCD_enuWriteNumber(u32 number)
+{
+    Sys_enuErrorStates_t Error_Status=NOT_OK;
+    if(number<0)
+    {
+        Error_Status=NOT_OK;
+    }
+    else if(CircularBuffer.count==BUFFER_SIZE)
+    {
+        Error_Status=LCD_BUFFER_REQUESTS_FULL;
+    }
+    else
+    {
+        CircularBuffer.buffer[CircularBuffer.head].Type=LCD_ReqWriteNumber;
+        CircularBuffer.buffer[CircularBuffer.head].number=number;
+        CircularBuffer.head++;
+        CircularBuffer.count++;
+        if(CircularBuffer.head==BUFFER_SIZE&&CircularBuffer.count<BUFFER_SIZE)
+        {
+            CircularBuffer.head=0;
+        }
+    }
+}
+
+
 Sys_enuErrorStates_t LCD_GetStatus(u32* PtrToLCDstatus)
 {
     Sys_enuErrorStates_t Error_Status=OK;
@@ -488,21 +519,59 @@ Sys_enuErrorStates_t LCD_GetStatus(u32* PtrToLCDstatus)
     }
     return Error_Status;
 }
-Sys_enuErrorStates_t LCD_WriteSetCB(LCD_CBFUNC_t PtrTofunc)
-{
-    Sys_enuErrorStates_t Error_Status=OK;
+// Sys_enuErrorStates_t LCD_WriteSetCB(LCD_CBFUNC_t PtrTofunc)
+// {
+//     Sys_enuErrorStates_t Error_Status=OK;
     
-    return Error_Status;
-}
-Sys_enuErrorStates_t LCD_ClearSetCB(LCD_CBFUNC_t PtrTofunc)
-{
-    Sys_enuErrorStates_t Error_Status=OK;
+//     return Error_Status;
+// }
+// Sys_enuErrorStates_t LCD_ClearSetCB(LCD_CBFUNC_t PtrTofunc)
+// {
+//     Sys_enuErrorStates_t Error_Status=OK;
     
-    return Error_Status;
-}
-Sys_enuErrorStates_t LCD_SetCursorSetCB(LCD_CBFUNC_t PtrTofunc)
-{
-    Sys_enuErrorStates_t Error_Status=OK;
+//     return Error_Status;
+// }
+// Sys_enuErrorStates_t LCD_SetCursorSetCB(LCD_CBFUNC_t PtrTofunc)
+// {
+//     Sys_enuErrorStates_t Error_Status=OK;
     
-    return Error_Status;
+//     return Error_Status;
+// }
+static void LCD_WriteNumber_Proc(void) // 2ms
+{
+    // U8 LOC_u8Reversed = 1 ;
+
+    switch (Global_WriteState)
+    {
+        case LCD_WriteStart: 
+            Global_WriteState = LCD_WriteCharacter;
+        break;
+
+        case LCD_WriteCharacter:
+            LCD_WriteData(CircularBuffer.buffer[CircularBuffer.tail].number+48 );//4
+
+            if( Global_EnablePinState == LCD_ENABLE_LOW )
+            {
+                Global_WriteState = LCD_WriteDone;
+            }
+            else 
+            {
+                /*Wait till write command finish*/
+            }
+
+        break;
+        case LCD_WriteDone:
+            CircularBuffer.buffer[CircularBuffer.tail].Type=LCD_NoReq;
+            CircularBuffer.buffer[CircularBuffer.tail].State=LCD_ReqReady;
+            CircularBuffer.buffer[CircularBuffer.tail].number=0;
+            CircularBuffer.tail++;
+            CircularBuffer.count--;
+            if(CircularBuffer.tail==BUFFER_SIZE)
+            {
+                CircularBuffer.tail=0;
+            }
+            Global_WriteState=LCD_WriteStart;
+        break;
+
+    }  
 }

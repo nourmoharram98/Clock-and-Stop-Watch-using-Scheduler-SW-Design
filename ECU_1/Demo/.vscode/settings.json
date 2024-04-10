@@ -2,6 +2,8 @@
     "C_Cpp.errorSquiggles": "enabled",
     "files.associations": {
         "hal_lcd.h": "c",
-        "hal_lcd_config.h": "c"
+        "hal_lcd_config.h": "c",
+        "sched_config.h": "c",
+        "manager.h": "c"
     }
 }

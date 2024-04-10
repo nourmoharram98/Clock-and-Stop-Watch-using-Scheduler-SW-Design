@@ -3,3 +3,6 @@
 
 
 extern unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS];
+
+
+void Manager_Runnable(void);
