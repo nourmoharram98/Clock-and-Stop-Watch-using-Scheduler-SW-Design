@@ -382,45 +382,18 @@ void Manager_Runnable(void)
 
 void ControlSwitches_Runnable(void)
 {
-    // static u32 Local_counter=0;
-    // Local_counter+=100;
-
-    // if(Local_counter==10000)
-    // {
-    //     LCD_ClearScreenAsync();
-    //     Mode^=1;
-    //     Operation_type=Init_Operation;
-    //     Local_counter=0;
-    // }
-     u32 Switch_Status=0; //released
-    //static u32 Previous_Switch_Status=0;
+    
+     u32 Switch_Status=0;
     HAL_SWITCH_enuGetSwitchState(SWITCH_NUMONE,&Switch_Status);
     
-    if ( Switch_Status == 0 )
+    if ( Switch_Status == 1 )
+    {
+        LED_SetStatus( Nour_LED , LED_SET_ON );
+    }
+    else if ( Switch_Status == 0 )
     {
         LED_SetStatus( Nour_LED , LED_SET_OFF );
     }
-    else if ( Switch_Status == 1 )
-    {
-        LED_SetStatus( Nour_LED , LED_SET_ON );
-        Switch_Status=0;
-    }
 
-    // if(Switch_Status==0)
-    // {
-    //     Previous_Switch_Status=Switch_Status;
-    // }
-    // else if(Previous_Switch_Status==0 && Switch_Status==1)
-    // {
-    //     if(Mode==Clock_Mode)
-    //     {
-    //         //Mode=StopWatch_Mode;
-    //     }
-    //     else
-    //     {
-    //         //Mode=Clock_Mode;
-    //     }
-    //     Previous_Switch_Status=0;
-    //     LED_SetStatus( Nour_LED , LED_SET_ON );
-    // }
+   
 }
