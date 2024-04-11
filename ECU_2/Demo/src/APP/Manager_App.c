@@ -87,24 +87,25 @@ typedef enum
         uint8 OPTION; //running operating or editing
     }strMODE_t;
 
-/*-------------------------------------------------------------------*/
-
-/*---------------------------- CLOCK Mode -------------------------*/ 
     typedef enum 
     {
+        SET_CURSOR_FIRST_LINE,
         PRINT_FIRST_LINE,
         WAIT_1,
-        SET_CUTSOR_SECOND_LINE,
+        SET_CURSOR_SECOND_LINE,
         PRINT_SECOND_LINE,
         WAIT_2,
         END   
-    }CLOCK_OPERATING_INIT_STATES_t;
-
+    }INIT_STATES_t;
+    
     typedef enum
     {
         SET_CURSOR,
         WRITE_NUMBER
-    }CLOCK_OPERATING_RUN_STATES_t;
+    }OPERATING_RUN_STATES_t;
+/*-------------------------------------------------------------------*/
+
+/*---------------------------- CLOCK Mode -------------------------*/ 
 
     typedef enum 
     {
@@ -120,9 +121,18 @@ typedef enum
 
 /*-------------------------------------------------------------------*/
 
+
 /*-------------------------- STOP/WATCH Mode ------------------------*/ 
+typedef enum 
+{
+    STOP_WATCH_OPTION_OPERATING
+}STOP_WATCH_OPTION_t;
 
-
+typedef enum 
+{
+    STOP_WATCH_INIT,
+    STOP_WATCH_RUN
+}STOP_WATCH_OPERATING_STATES_t;
 
 
 /*-------------------------------------------------------------------*/
@@ -134,9 +144,11 @@ typedef enum
 /*---------------------------Static Functions------------------------*/
     static void CLOCK_OPERATING_INIT_THREAD(void);
     static void CLOCK_OPERATING_RUN_THREAD(void);
-
     static void CLOCK_THREAD(void);
-    static void STOPWATCH_THREAD(void);
+
+    static void STOP_WATCH_THREAD(void);
+    static void STOP_WATCH_INIT_THREAD(void);
+    static void STOP_WATCH_RUN_THREAD(void);
 /*-------------------------------------------------------------------*/
 
 
@@ -148,7 +160,7 @@ typedef enum
 
 /*----------------------------General Modes -------------------------*/
 
-MODE_t    MODE                                = MODE_CLOCK;
+MODE_t    MODE                                = MODE_STOPWATCH;
 COMMAND_t COMMAND                             = COMMAND_IDLE;
 /*-------------------------------------------------------------------*/
 
@@ -156,14 +168,24 @@ COMMAND_t COMMAND                             = COMMAND_IDLE;
 
 static strMODE_t CLOCK={.COUNTER=0,.OPTION=CLOCK_OPTION_OPERATING};
 
-static uint8 DIGIT_ITERATOR=0;
+static uint8 CLOCK_DIGIT_ITERATOR=0;
 
 static CLOCK_OPERATING_STATES_t      CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
-static CLOCK_OPERATING_INIT_STATES_t CLOCK_OPERATING_INIT_STATE = PRINT_FIRST_LINE;
-static CLOCK_OPERATING_RUN_STATES_t  CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;
+static INIT_STATES_t CLOCK_OPERATING_INIT_STATE = PRINT_FIRST_LINE;
+static OPERATING_RUN_STATES_t  CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;
 
-static uint8 CLOCK_EDITING_STATE;
     
+/*-------------------------------------------------------------------*/
+
+/*-------------------------- STOP WATCH MODE ------------------------*/
+static strMODE_t STOP_WATCH={.COUNTER=0,.OPTION=STOP_WATCH_OPTION_OPERATING};
+
+static uint8 STOP_WATCH_DIGIT_ITERATOR=0;
+
+static STOP_WATCH_OPERATING_STATES_t STOP_WATCH_OPERATING_STATE=STOP_WATCH_INIT;
+static INIT_STATES_t STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
+static OPERATING_RUN_STATES_t STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+
 /*-------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------*/
@@ -179,7 +201,7 @@ void Application_Runnable(void)
         break;
 
         case MODE_STOPWATCH:
-            STOPWATCH_THREAD();
+            STOP_WATCH_THREAD();
         break;    
 
     }
@@ -229,11 +251,11 @@ void Application_Runnable(void)
                     if(CLOCK.COUNTER>=70)
                     {
                         CLOCK.COUNTER=0;
-                    CLOCK_OPERATING_INIT_STATE=SET_CUTSOR_SECOND_LINE;
+                    CLOCK_OPERATING_INIT_STATE=SET_CURSOR_SECOND_LINE;
                     }
                 break;
 
-                case SET_CUTSOR_SECOND_LINE:
+                case SET_CURSOR_SECOND_LINE:
                 
                     LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
                 
@@ -270,36 +292,36 @@ void Application_Runnable(void)
 
         static void CLOCK_OPERATING_RUN_THREAD(void)
         {
-            if(Clock_Date_Digits[DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+            if(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
             {
                 switch (CLOCK_OPERATING_RUN_STATE)
                 {
                     case SET_CURSOR:
-                        LCD_SetCursorPosAsync(Clock_Date_Digits[DIGIT_ITERATOR].x_pos, Clock_Date_Digits[DIGIT_ITERATOR].y_pos);
+                        LCD_SetCursorPosAsync(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].x_pos, Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].y_pos);
                         CLOCK_OPERATING_RUN_STATE = WRITE_NUMBER;
                     break;
 
                     case WRITE_NUMBER:
-                        LCD_enuWriteNumber(Clock_Date_Digits[DIGIT_ITERATOR].value);
+                        LCD_enuWriteNumber(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].value);
 
                         CLOCK_OPERATING_RUN_STATE=SET_CURSOR;
 
-                        Clock_Date_Digits[DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                        Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
                         
-                        DIGIT_ITERATOR++;
-                        if(DIGIT_ITERATOR > 14)
+                        CLOCK_DIGIT_ITERATOR++;
+                        if(CLOCK_DIGIT_ITERATOR > 14)
                         {
-                            DIGIT_ITERATOR= 0;
+                            CLOCK_DIGIT_ITERATOR= 0;
                         }
                     break; 
                 }   
             }
             else // DIGIT_STATE_NOT_PRINT
             {
-                DIGIT_ITERATOR++;
-                if(DIGIT_ITERATOR > 14)
+                CLOCK_DIGIT_ITERATOR++;
+                if(CLOCK_DIGIT_ITERATOR > 14)
                 {
-                    DIGIT_ITERATOR = 0;
+                    CLOCK_DIGIT_ITERATOR = 0;
                     CLOCK_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
                 }
             }
@@ -308,9 +330,113 @@ void Application_Runnable(void)
     /*-------------------------------------------------------------------------*/
     
 /*-------------------------------------------------------------------------------*/
-static void STOPWATCH_THREAD()
+static void STOP_WATCH_THREAD()
 {
+    switch (STOP_WATCH_OPERATING_STATE)
+    {
+        case STOP_WATCH_INIT:
+            STOP_WATCH_INIT_THREAD();
+            break;
 
+        case STOP_WATCH_RUN:
+            STOP_WATCH_RUN_THREAD();
+            break;
+
+        default:
+            break;
+    }   
+}
+
+
+static void STOP_WATCH_INIT_THREAD(void)
+{
+             STOP_WATCH.COUNTER+=Manager_Periodicity; 
+            switch(STOP_WATCH_INIT_STATE)
+            {
+                case SET_CURSOR_FIRST_LINE:
+                    LCD_SetCursorPosAsync(1, 1);
+                    STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
+                break;
+                case PRINT_FIRST_LINE:
+
+                    LCD_enuWriteStringAsync("STOP-WATCH",10); // (16 x 2) x 2 = 64 ms  -> 70 ms
+                    
+                    STOP_WATCH_INIT_STATE=WAIT_1;
+
+                break;
+
+                case WAIT_1:
+                    if(STOP_WATCH.COUNTER>=70)
+                    {
+                        STOP_WATCH.COUNTER=0;
+                    STOP_WATCH_INIT_STATE=SET_CURSOR_SECOND_LINE;
+                    }
+                break;
+
+                case SET_CURSOR_SECOND_LINE:
+                
+                    LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+                
+                    STOP_WATCH_INIT_STATE = PRINT_SECOND_LINE;
+                    STOP_WATCH.COUNTER=0;
+                break;
+
+                case PRINT_SECOND_LINE:
+                    LCD_enuWriteStringAsync("  00:00:00:000",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+                    STOP_WATCH_INIT_STATE=WAIT_2;
+                break;
+
+                case WAIT_2:
+                    if(STOP_WATCH.COUNTER>=70)
+                    {
+                        STOP_WATCH.COUNTER=0;
+                        STOP_WATCH_INIT_STATE=END;
+                    }
+                break;
+
+                case END:
+                    STOP_WATCH_OPERATING_STATE = STOP_WATCH_RUN;
+                    STOP_WATCH.COUNTER=0;
+                    STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
+                    STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+                break;  
+            }
+}
+static void STOP_WATCH_RUN_THREAD(void)
+{
+             if(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+            {
+                switch (STOP_WATCH_OPERATING_RUN_STATE)
+                {
+                    case SET_CURSOR:
+                        LCD_SetCursorPosAsync(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].x_pos, Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].y_pos);
+                        STOP_WATCH_OPERATING_RUN_STATE = WRITE_NUMBER;
+                    break;
+
+                    case WRITE_NUMBER:
+                        LCD_enuWriteNumber(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].value);
+
+                        STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+
+                        Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                        
+                        STOP_WATCH_DIGIT_ITERATOR++;
+                        if(STOP_WATCH_DIGIT_ITERATOR > 6)
+                        {
+                            STOP_WATCH_DIGIT_ITERATOR= 0;
+                        }
+                    break; 
+                }   
+            }
+            else // DIGIT_STATE_NOT_PRINT
+            {
+                STOP_WATCH_DIGIT_ITERATOR++;
+                if(STOP_WATCH_DIGIT_ITERATOR > 6)
+                {
+                    STOP_WATCH_DIGIT_ITERATOR = 0;
+                    STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
+                }
+            }
 }
 
 
