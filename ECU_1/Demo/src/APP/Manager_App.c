@@ -53,6 +53,7 @@
  #include "HAL/LCD/HAL_LCD.h"
  #include "HAL/SWITCH/HAL_SWITCH.h"
  #include "APP/Manager.h"
+ #include  "HAL/LED/LED.h"
 
  #define Manager_Periodicity 10
 
@@ -124,7 +125,8 @@ static void Print_ClockFrame()
 
         case print_first_line:
 
-            LCD_WriteStringAsync("CLOCK 11/04/2024",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            // LCD_WriteStringAsync("CLOCK 11/04/2024",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            LCD_WriteStringAsync("CLOCK   /  /    ",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
 
             print_frame_state=wait1;
 
@@ -281,7 +283,7 @@ static void print_frame_thread(Modes_t Copy_Mode) //period = 4
 // {
 //     //read the requests of up/down buttons
 //     //read the ok button to save the changes and return to idle operation
-// }
+//}
 static void DisplayOnLCD(Modes_t Copy_Mode)
 {
     switch(Copy_Mode)
@@ -315,7 +317,6 @@ static void DisplayOnLCD(Modes_t Copy_Mode)
 
 
 
-
 void Manager_Runnable(void)
 {
     counter+=Manager_Periodicity;   
@@ -323,6 +324,13 @@ void Manager_Runnable(void)
     switch(Operation_type)
     {
         case Init_Operation:
+
+        //Clear display before printing 
+        //LCD_ClearScreenAsync();
+
+        //prinit all digits and frame
+
+
             print_frame_thread(Mode);
             if(state==operation)
             {
@@ -374,33 +382,45 @@ void Manager_Runnable(void)
 
 void ControlSwitches_Runnable(void)
 {
-    static u32 Local_counter=0;
-    Local_counter+=100;
+    // static u32 Local_counter=0;
+    // Local_counter+=100;
 
-    if(Local_counter==10000)
+    // if(Local_counter==10000)
+    // {
+    //     LCD_ClearScreenAsync();
+    //     Mode^=1;
+    //     Operation_type=Init_Operation;
+    //     Local_counter=0;
+    // }
+     u32 Switch_Status=0; //released
+    //static u32 Previous_Switch_Status=0;
+    HAL_SWITCH_enuGetSwitchState(SWITCH_NUMONE,&Switch_Status);
+    
+    if ( Switch_Status == 0 )
     {
-        LCD_ClearScreenAsync();
-        Mode^=1;
-        Operation_type=Init_Operation;
-        Local_counter=0;
+        LED_SetStatus( Nour_LED , LED_SET_OFF );
     }
-    // static u32 Switch_Status=0; //released
-    // static u32 Previous_Switch_Status=0;
-    // HAL_SWITCH_enuGetSwitchState(SWITCH_NUMONE,&Switch_Status);
-    // if(Switch_Status==1)
+    else if ( Switch_Status == 1 )
+    {
+        LED_SetStatus( Nour_LED , LED_SET_ON );
+        Switch_Status=0;
+    }
+
+    // if(Switch_Status==0)
     // {
     //     Previous_Switch_Status=Switch_Status;
     // }
-    // else if(Previous_Switch_Status==1 && Switch_Status==0)
+    // else if(Previous_Switch_Status==0 && Switch_Status==1)
     // {
     //     if(Mode==Clock_Mode)
     //     {
-    //         Mode=StopWatch_Mode;
+    //         //Mode=StopWatch_Mode;
     //     }
     //     else
     //     {
-    //         Mode=Clock_Mode;
+    //         //Mode=Clock_Mode;
     //     }
     //     Previous_Switch_Status=0;
+    //     LED_SetStatus( Nour_LED , LED_SET_ON );
     // }
 }

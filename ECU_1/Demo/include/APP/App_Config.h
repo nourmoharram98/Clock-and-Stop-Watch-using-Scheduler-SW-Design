@@ -26,7 +26,7 @@ typedef struct
 
 typedef struct 
 {
-       const u8 Pattern;
+       const u8 Pattern; 
        const u8 x_pos;
        const u8 y_pos;
 }FrameConstants_t;

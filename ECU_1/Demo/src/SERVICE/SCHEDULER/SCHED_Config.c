@@ -66,7 +66,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Manager",
         .InitialDelayMS=200,
-        .PeriodicityMS=100,
+        .PeriodicityMS=50,
         .CallBack=ControlSwitches_Runnable
     }
     ,

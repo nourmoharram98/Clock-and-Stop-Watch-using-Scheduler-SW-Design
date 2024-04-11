@@ -13,7 +13,7 @@
 #include"APP/App_Config.h"
 #include "./APP/Clock_Date_App.h"
 
-FrameConstants_t Clock_Date_Frame[];
+//FrameConstants_t Clock_Date_Frame[]; 
 
 
 unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS_CLK_MODE]=

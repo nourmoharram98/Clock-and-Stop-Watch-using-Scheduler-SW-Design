@@ -14,7 +14,7 @@
 const SWITCH_CONFIGURATIONS arrOfSwitches[Number_Of_Switches]={
 		[SWITCH_NUMONE]={
                             .port=GPIO_PORT_C,
-                            .Switch_Pin=GPIO_PIN_14,
+                            .Switch_Pin=GPIO_PIN_13,
                             .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
                             .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
                         },

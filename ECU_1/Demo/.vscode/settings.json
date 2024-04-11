@@ -9,6 +9,9 @@
         "std_types.h": "c",
         "clock_date_app.h": "c",
         "hal_switch.h": "c",
-        "app_config.h": "c"
+        "app_config.h": "c",
+        "led.h": "c",
+        "led_config.h": "c",
+        "nvic.h": "c"
     }
 }
