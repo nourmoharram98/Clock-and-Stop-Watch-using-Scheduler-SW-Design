@@ -31,7 +31,9 @@ typedef enum
 } RunnablePriority_t;
 
 /*********************************** Runnable prototypers ******************************************/
-extern void Clock_Date_Runnable   (void);
-extern void Stopwatch_Runnable    (void);
-extern void Application_Runnable  (void);
-extern void LCD_Runnable_Manager  (void);
+extern void Clock_Date_Runnable        (void);
+extern void Stopwatch_Runnable         (void);
+extern void Application_Runnable       (void);
+extern void LCD_Runnable_Manager       (void);
+extern void ControlSwitches_Runnable   (void);
+extern void Switch_Debouncing_Runnable (void); 

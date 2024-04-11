@@ -54,47 +54,7 @@
  #include "APP/Manager.h"
 
  #define Manager_Periodicity 6
-// #include"APP/Clock_Date_App.h"
-// #include"APP/Manager.h"
-// extern unit_Info_t Digits[15];
 
-// u8 Global_Mode = // Clock mode - Stop watch mode
-// u8 Edit_mode  = //General - Digit - Idle
-// //to keep track of cursor position in LCD
-// u8 Global_X_pos=0;
-// u8 Global_Y_Pos=0;
-// /**
-// enum lel switches IDs hanstkhdmha 3lshan ne enable el readings menhom aw la 3la hasb mhtagen wla la
-// */
-// enum{
-//     Up,
-//     Down,
-//     Left,
-//     Right,
-//     Edit,
-//     Mode,
-//     Ok
-// }Switches;
-// /**
-// array lel switch states
-// */
-// u8 Switches_mode[7]=
-// {
-//     [Up] =0,
-//     [Down]=0,
-//     [Left]=0,
-//     [Right]=0,
-//     [Edit]=1,
-//     [Mode]=1,
-//     [Ok]=0,
-// }
-
-// u8 Manager(u8 flag_for_array_to_be_retreived)
-// {
-//     u8 Error_Status=0;you 
-//     //read the mode switch button if previous reading != current reading toggle the global mode state
-//     return Error_Status;
-// } 
 
 /********************************************************************/
 
@@ -188,7 +148,7 @@ typedef enum
 
 /*----------------------------General Modes -------------------------*/
 
-MODE_t    MODE                                = MODE_STOPWATCH;
+MODE_t    MODE                                = MODE_CLOCK;
 COMMAND_t COMMAND                             = COMMAND_IDLE;
 /*-------------------------------------------------------------------*/
 
