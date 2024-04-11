@@ -99,21 +99,28 @@
 /********************************************************************/
 
 /*--------------------------------Types Defs-------------------------*/
+/*-------------------------------- COMMANDS -------------------------*/
+typedef enum 
+{
+    COMMAND_EDIT,
+    COMMAND_OK  ,
+    COMMAND_MODE,
+    COMMAND_UP,
+    COMMAND_DOWN,
+    COMMAND_LEFT,
+    COMMAND_RIGHT,
+    COMMAND_IDLE
+}COMMAND_t;
+/*-------------------------------------------------------------------*/
 
 /*----------------------------General Modes -------------------------*/
 
     typedef enum
     {
-        Clock,
-        StopWatch
-    }Mode_t;
+        MODE_CLOCK,
+        MODE_STOPWATCH
+    }MODE_t;
     
-    typedef enum
-    {
-        INIT,
-        RUN
-    }states_t;
-
     typedef struct 
     {
         uint8 COUNTER;
@@ -181,8 +188,8 @@
 
 /*----------------------------General Modes -------------------------*/
 
-Mode_t   Mode                                = Clock;
-    
+MODE_t    MODE                                = MODE_STOPWATCH;
+COMMAND_t COMMAND                             = COMMAND_IDLE;
 /*-------------------------------------------------------------------*/
 
 /*---------------------------- CLOCK Mode -------------------------*/
@@ -199,19 +206,19 @@ static uint8 CLOCK_EDITING_STATE;
     
 /*-------------------------------------------------------------------*/
 
-
 /*-------------------------------------------------------------------*/
 
+/*********************************************************************/
 void Application_Runnable(void)
 {
 
-    switch (Mode)
+    switch (MODE)
     {
-        case Clock:
+        case MODE_CLOCK:
             CLOCK_THREAD();
         break;
 
-        case StopWatch:
+        case MODE_STOPWATCH:
             STOPWATCH_THREAD();
         break;    
 
@@ -224,7 +231,7 @@ void Application_Runnable(void)
     /*--------------------------CLOCK_THREAD_Manager---------------------------*/
         static void CLOCK_THREAD(void)
         {
-            CLOCK.COUNTER+=Manager_Periodicity;   
+  
 
             switch (CLOCK_OPERATING_STATE)
             {
@@ -246,7 +253,7 @@ void Application_Runnable(void)
     /*--------------------------CLK_print_frame_thread-------------------------*/
         static void CLOCK_OPERATING_INIT_THREAD() //period = 4
         {
-            
+             CLOCK.COUNTER+=Manager_Periodicity; 
             switch(CLOCK_OPERATING_INIT_STATE)
             {
 
