@@ -12,7 +12,7 @@
 
 #include "Std_Types.h"
 
-#define NUMBER_OF_DIGITS           15
+#define NUMBER_OF_DIGITS_CLK_MODE  15
 
 
 #define DIGIT_STATE_OPERATING      1
@@ -63,14 +63,7 @@
 #define Deci_Hundred_Position     12
 
 
-#define DIGIT_STATE_PRINT          0
-#define DIGIT_STATE_NOT_PRINT      1
 
-typedef struct 
-{
-          u8    value;
-   const  u8    max_value;      
-   const  u8    x_pos;
-   const  u8    y_pos;
-          u8    digit_state;  //digit_state -> ( print , not print ) 
-}unit_Info_t;
+
+
+void Clock_Date_Runnable(void);

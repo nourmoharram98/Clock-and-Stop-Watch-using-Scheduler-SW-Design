@@ -51,87 +51,131 @@
 
  #include "Std_Types.h"
  #include "HAL/LCD/HAL_LCD.h"
+ #include "HAL/SWITCH/HAL_SWITCH.h"
  #include "APP/Manager.h"
 
- #define Manager_Periodicity 4
-// #include"APP/Clock_Date_App.h"
-// #include"APP/Manager.h"
-// extern unit_Info_t Digits[15];
+ #define Manager_Periodicity 10
 
-// u8 Global_Mode = // Clock mode - Stop watch mode
-// u8 Edit_mode  = //General - Digit - Idle
-// //to keep track of cursor position in LCD
-// u8 Global_X_pos=0;
-// u8 Global_Y_Pos=0;
-// /**
-// enum lel switches IDs hanstkhdmha 3lshan ne enable el readings menhom aw la 3la hasb mhtagen wla la
-// */
-// enum{
-//     Up,
-//     Down,
-//     Left,
-//     Right,
-//     Edit,
-//     Mode,
-//     Ok
-// }Switches;
-// /**
-// array lel switch states
-// */
-// u8 Switches_mode[7]=
-// {
-//     [Up] =0,
-//     [Down]=0,
-//     [Left]=0,
-//     [Right]=0,
-//     [Edit]=1,
-//     [Mode]=1,
-//     [Ok]=0,
-// }
-
-// u8 Manager(u8 flag_for_array_to_be_retreived)
-// {
-//     u8 Error_Status=0;you 
-//     //read the mode switch button if previous reading != current reading toggle the global mode state
-//     return Error_Status;
-// } 
-
-/********************************************************************/
-
-/*--------------------------------Types Defs-------------------------*/
-    typedef enum
-    {
-        print_frame,
-        operation
-    }states_t;
-
-    typedef enum 
-    {
-        print_first_line,
-        wait1,
-        set_cursor_second_line,
-        print_second_line,
-        wait2,
-        end   
-    }print_frame_state_t;
-/*-------------------------------------------------------------------*/
+u32 Mode=Clock_Mode;
+Operation_Types_t Operation_type=Init_Operation;
 
 /*----------------------------Global Variables-----------------------*/
-    static uint8 counter=0;
-    states_t  state             = print_frame ;
-    print_frame_state_t print_frame_state = print_first_line ;
-/*-------------------------------------------------------------------*/
-extern unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS];
+static uint8 counter= 0;
+states_t  state  = print_frame ;
+print_frame_state_t print_frame_state = print_first_line ;
 
-static void print_frame_thread() //period = 4
-{
+
+// static void print_frame_thread() //period = 4
+// {
     
+//     switch(print_frame_state)
+//     {
+
+//         case print_first_line:
+
+//             LCD_WriteStringAsync("CLOCK 31/12/9999",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            
+//             print_frame_state=wait1;
+
+//         break;
+
+//         case wait1:
+//             if(counter>=70)
+//             {
+//                 counter=0;
+//                 print_frame_state=set_cursor_second_line;
+//             }
+//         break;
+
+//         case set_cursor_second_line:
+        
+//             LCD_SetCursorPosAsync(1, 0);                    // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+           
+//             print_frame_state = print_second_line;
+//             counter=0;
+//         break;
+
+//         case print_second_line:
+//             LCD_WriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+//             print_frame_state=wait2;
+//         break;
+
+//         case wait2:
+//             if(counter>=70)
+//             {
+//                 counter=0;
+//                 print_frame_state=end;
+//             }
+//         break;
+
+//         case end:
+//             state = operation;
+//             counter=0;
+//             print_frame_state=print_first_line;
+//         break;  
+//     }
+
+// }
+
+static void Print_ClockFrame()
+{
     switch(print_frame_state)
     {
 
         case print_first_line:
 
-            LCD_WriteStringAsync("CLOCK 31/12/9999",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            LCD_WriteStringAsync("CLOCK 11/04/2024",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+
+            print_frame_state=wait1;
+
+        break;
+
+        case wait1:
+            if(counter>=70)
+            {
+                counter=0;
+                print_frame_state=set_cursor_second_line;
+            }
+        break;
+
+        case set_cursor_second_line:
+        
+            LCD_SetCursorPosAsync(1, 0);                    // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+           
+            print_frame_state = print_second_line;
+            counter=0;
+        break;
+
+        case print_second_line:
+            LCD_WriteStringAsync("  09:15:32:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+
+            print_frame_state=wait2;
+        break;
+
+        case wait2:
+            if(counter>=70)
+            {
+                counter=0;
+                print_frame_state=end;
+            }
+        break;
+
+        case end:
+            state = operation;
+            counter=0;
+            print_frame_state=print_first_line;
+        break;  
+    }
+}
+
+static void Print_StopWatchFrame()
+{
+    switch(print_frame_state)
+    {
+
+        case print_first_line:
+
+            LCD_WriteStringAsync("STOPWATCH START",15); // (16 x 2) x 2 = 64 ms  -> 70 ms
             
             print_frame_state=wait1;
 
@@ -154,7 +198,8 @@ static void print_frame_thread() //period = 4
         break;
 
         case print_second_line:
-            LCD_WriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+            LCD_WriteStringAsync("  00:00:00:000",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+
             print_frame_state=wait2;
         break;
 
@@ -172,81 +217,190 @@ static void print_frame_thread() //period = 4
             print_frame_state=print_first_line;
         break;  
     }
+}
+
+static void print_frame_thread(Modes_t Copy_Mode) //period = 4
+{
+    switch(Copy_Mode)
+    {
+        case Clock_Mode:
+            Print_ClockFrame();
+            break;
+        case StopWatch_Mode:
+            Print_StopWatchFrame();
+            break;
+        default:
+            break;
+    }
+   
 
 }
 
-/********************************************************************/
-// static  uint8 stringfy (uint8 num)
+// static void Clock_Manager(void)
 // {
-//     return (num+'0');
-// }
-/********************************************************************/
-
-//static uint8 mystate=0;
-// static uint8 i=0;
-
-// static void operation_thread(void)
-// {
-//     switch (mystate)
+//     switch(ModeOfOperation)
 //     {
-//         case 0:
-//             LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos , Clock_Date_Digits[i].y_pos);
-//             mystate=1;
-//         break;
-
-//         case 1:
-//             LCD_enuWriteNumber(Clock_Date_Digits[i].value);
-//             mystate=0;
-//             i++;
-//             if(i>14)
-//             {
-//                 i=0;
-//             }
- 
-//         break; 
-
-
+//         case Clk_Idle_Mode:
+//             Display_OnLCD(Mode);
+//             break;
+//         case Clk_GeneralEdit_Mode:
+//             break;
+//         case Clk_DigitEdit_Mode:
+//             break;
 //         default:
-//             /*Do Nothing*/
-//         break;
+//             break;
+//     }
+  
+// }
+
+
+
+// static void StopWatch_Manager(void)
+// {
+//     switch(ModeOfOperation)
+//     {
+//         case Clk_Idle_Mode:
+//             Display_OnLCD(Mode);
+//             break;
+//         case Clk_GeneralEdit_Mode:
+//             break;
+//         case Clk_DigitEdit_Mode:
+//             break;
+//         default:
+//             break;
 //     }
 // }
-/********************************************************************/
 
-void Application_Runnable(void)
+// static void GeneralEditMode(Modes_t Copy_Mode)
+// {
+//     //read the requests of up/down/right/left buttons
+//     //read the request from edit button to move to digitedit operation 
+//     //read the ok button to return to idle operation
+// }
+// static void DigitEditMode(Modes_t Copy_Mode)
+// {
+//     //read the requests of up/down buttons
+//     //read the ok button to save the changes and return to idle operation
+// }
+static void DisplayOnLCD(Modes_t Copy_Mode)
 {
-    counter+=Manager_Periodicity;   
-
-    switch (state)
+    switch(Copy_Mode)
     {
-        case print_frame:
-            print_frame_thread();
-        break;
-
-        case operation:
-            //operation_thread();
-            Manager_Runnable();
-        break;
-
+        case Clock_Mode:
+            for(u8 index=0;index<NUMBER_OF_DIGITS_CLK_MODE;index++)
+            {
+                if(Clock_Date_Digits[index].digit_state==DIGIT_STATE_PRINT)
+                {
+                    LCD_SetCursorPosAsync(Clock_Date_Digits[index].x_pos,Clock_Date_Digits[index].y_pos);
+                    LCD_enuWriteNumber(Clock_Date_Digits[index].value);
+                    Clock_Date_Digits[index].digit_state=DIGIT_STATE_NOT_PRINT;
+                }
+            }
+            break;
+        case StopWatch_Mode:
+            for(u8 index=0;index<NUMBER_OF_DIGITS_STOPW_MODE;index++)
+            {
+                if(Stop_Watch_Digits[index].digit_state==DIGIT_STATE_PRINT)
+               {
+                    LCD_SetCursorPosAsync(Stop_Watch_Digits[index].x_pos,Stop_Watch_Digits[index].y_pos);
+                    LCD_enuWriteNumber(Stop_Watch_Digits[index].value);
+                    Stop_Watch_Digits[index].digit_state=DIGIT_STATE_NOT_PRINT;
+               }
+            }
+            break;
         default:
-
-        break;
+            break;
     }
 }
-void numbertochar(int number)
-{
 
-}
+
+
 
 void Manager_Runnable(void)
 {
-    for(u8 index=0;index<NUMBER_OF_DIGITS;index++)
+    counter+=Manager_Periodicity;   
+
+    switch(Operation_type)
     {
-        if(Clock_Date_Digits[index].digit_state==DIGIT_STATE_PRINT)
-        {
-            LCD_SetCursorPosAsync(Clock_Date_Digits[index].x_pos,Clock_Date_Digits[index].y_pos);
-            LCD_enuWriteNumber(Clock_Date_Digits[index].value);
-            Clock_Date_Digits[index].digit_state=DIGIT_STATE_NOT_PRINT;
-        }
+        case Init_Operation:
+            print_frame_thread(Mode);
+            if(state==operation)
+            {
+                Operation_type=Idle_Operation;
+            }
+            break;
+        case Idle_Operation:
+            DisplayOnLCD(Mode);
+            break;
+        case GeneralEdit_Operation:
+            //GeneralEditMode(Mode);
+            break;
+        case DigitEdit_Operation:
+           // DigitEditMode(Mode);
+            break;
+        default:
+            break;
     }
+  
+}
+
+
+
+// void Application_Runnable(void)
+// {
+//     counter+=Manager_Periodicity;   
+
+//     switch (state)
+//     {
+//         case print_frame:
+//             print_frame_thread();
+//         break;
+
+//         case operation:
+//             Manager_Runnable();
+//         break;
+
+//         default:
+
+//         break;
+//     }
+// // }
+// void Application_Runnable(void)
+// {
+//     counter+=Manager_Periodicity;   
+
+//     Manager();
+// }
+
+void ControlSwitches_Runnable(void)
+{
+    static u32 Local_counter=0;
+    Local_counter+=100;
+
+    if(Local_counter==10000)
+    {
+        LCD_ClearScreenAsync();
+        Mode^=1;
+        Operation_type=Init_Operation;
+        Local_counter=0;
+    }
+    // static u32 Switch_Status=0; //released
+    // static u32 Previous_Switch_Status=0;
+    // HAL_SWITCH_enuGetSwitchState(SWITCH_NUMONE,&Switch_Status);
+    // if(Switch_Status==1)
+    // {
+    //     Previous_Switch_Status=Switch_Status;
+    // }
+    // else if(Previous_Switch_Status==1 && Switch_Status==0)
+    // {
+    //     if(Mode==Clock_Mode)
+    //     {
+    //         Mode=StopWatch_Mode;
+    //     }
+    //     else
+    //     {
+    //         Mode=Clock_Mode;
+    //     }
+    //     Previous_Switch_Status=0;
+    // }
 }

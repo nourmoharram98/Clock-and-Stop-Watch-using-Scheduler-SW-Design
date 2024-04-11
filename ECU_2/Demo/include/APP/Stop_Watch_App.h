@@ -8,3 +8,48 @@
  * @copyright Copyright (c) 2024
  * 
  */
+
+#pragma once
+
+#include "Std_Types.h"
+
+
+
+#define NUMBER_OF_DIGITS           7
+
+
+#define DIGIT_STATE_OPERATING      1
+#define DIGIT_STATE_EDITTING       2
+
+#define DeciSecond_hundred         0
+#define Second_unit                1
+#define Second_tens                2
+
+#define Minutes_unit               3
+#define Minutes_tens               4
+
+#define Hours_unit                 5
+#define Hours_tens                 6
+
+
+#define Hours_Tens_Position       3
+#define Hours_Units_Position      4
+
+#define Minuts_Tens_Position      6
+#define Minuts_Units_Position     7 
+
+#define Seconds_Tens_Position     9
+#define Seconds_Units_Position    10
+
+#define Deci_Hundred_Position     12
+
+
+
+
+typedef struct 
+{
+    u8 value;
+    u8 x_pos;
+    u8 y_pos;
+    u8 digit_state;
+}unit_Info_t;

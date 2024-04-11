@@ -327,9 +327,9 @@ int main ()
     SysTick_SetClockSource(SysTick_CLOCK_SOURCE_AHB_8);
     SysTick_SetCurrentVal(0);
     SysTick_EnableInterrupt();
-    // HAL_SWITCH_Init();
+    HAL_SWITCH_Init();
     LCD_InitAsync();  
-
+    
     SCHED_Init                  ();
     SCHED_Start                 ();
 }

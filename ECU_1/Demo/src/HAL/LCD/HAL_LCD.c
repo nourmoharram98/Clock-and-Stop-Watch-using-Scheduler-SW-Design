@@ -118,6 +118,7 @@ static Sys_enuErrorStates_t LCD_Helper_SetPosition(u8 *PTR_PostionDDRAM);
 static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand);
 static Sys_enuErrorStates_t LCD_WriteData(char Copy_LCDData);
 static void LCD_WriteNumber_Proc(void);// 2ms
+static Sys_enuErrorStates_t LCD_ClearDisplayProcess(void);
 
 //static Sys_enuErrorStates_t LCD_Helper_Clear(void);
 //static Sys_enuErrorStates_t LCD_OverFlowHandler(void);
@@ -146,7 +147,7 @@ void LCD_Runnable(void)
                         LCD_Write_Process();
                         break;
                     case LCD_ReqClear:
-                        //LCD_Helper_Clear();
+                        LCD_ClearDisplayProcess();
                         break;
                     case LCD_ReqSetPos:
                         LCD_SetPosition_Process();
@@ -353,6 +354,27 @@ static Sys_enuErrorStates_t LCD_Helper_SetPosition(u8 *PTR_PostionDDRAM)
    return Error_Status;
 }
 
+
+static Sys_enuErrorStates_t LCD_ClearDisplayProcess(void)
+{
+    Sys_enuErrorStates_t Error_Status=NOT_OK;
+    Error_Status=LCD_WriteCommand(CLCD_CLEAR_DISPLAY);
+    if(Global_EnablePinState==LCD_ENABLE_LOW)
+    {
+        CircularBuffer.buffer[CircularBuffer.tail].State=LCD_ReqReady; //normal setposition call
+        CircularBuffer.buffer[CircularBuffer.tail].Type=LCD_NoReq;
+        CircularBuffer.tail++;
+        CircularBuffer.count--;
+        if(CircularBuffer.tail==BUFFER_SIZE)
+        {
+            CircularBuffer.tail=0;
+        }
+    }
+
+   return Error_Status;
+}
+
+
 static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand)
 {
    Sys_enuErrorStates_t Error_Status=NOT_OK;
@@ -503,9 +525,28 @@ Sys_enuErrorStates_t LCD_enuWriteNumber(u32 number)
             CircularBuffer.head=0;
         }
     }
+    return Error_Status;
 }
 
-
+Sys_enuErrorStates_t LCD_ClearScreenAsync(void)
+{
+    Sys_enuErrorStates_t Error_Status=NOT_OK;
+    if(CircularBuffer.count==BUFFER_SIZE)
+    {
+        Error_Status=LCD_BUFFER_REQUESTS_FULL;
+    }
+    else
+    {
+        CircularBuffer.buffer[CircularBuffer.head].Type=LCD_ReqClear;
+        CircularBuffer.head++;
+        CircularBuffer.count++;
+        if(CircularBuffer.head==BUFFER_SIZE&&CircularBuffer.count<BUFFER_SIZE)
+        {
+            CircularBuffer.head=0;
+        }
+    }
+    return Error_Status;
+}
 Sys_enuErrorStates_t LCD_GetStatus(u32* PtrToLCDstatus)
 {
     Sys_enuErrorStates_t Error_Status=OK;

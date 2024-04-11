@@ -4,6 +4,11 @@
         "hal_lcd.h": "c",
         "hal_lcd_config.h": "c",
         "sched_config.h": "c",
-        "manager.h": "c"
+        "manager.h": "c",
+        "stop_watch_app.h": "c",
+        "std_types.h": "c",
+        "clock_date_app.h": "c",
+        "hal_switch.h": "c",
+        "app_config.h": "c"
     }
 }

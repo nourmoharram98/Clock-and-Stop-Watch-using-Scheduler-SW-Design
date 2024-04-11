@@ -4,7 +4,7 @@
 
 #include "HAL/LED/LED.h"
 
-#include "HAL/LCD/HAL_LCD.h"
+#include "HAL/LCD/LCD.h"
 
 #include "HAL/SWITCH/HAL_SWITCH.h"
 
@@ -323,8 +323,11 @@ int main ()
     RCC_AHB_PREscaler			( AHB_PRE_1 );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIA );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIB );
-
-    HAL_SWITCH_Init();
+    // SysTick inits
+    SysTick_SetClockSource(SysTick_CLOCK_SOURCE_AHB_8);
+    SysTick_SetCurrentVal(0);
+    SysTick_EnableInterrupt();
+    // HAL_SWITCH_Init();
     LCD_InitAsync();  
 
     SCHED_Init                  ();
