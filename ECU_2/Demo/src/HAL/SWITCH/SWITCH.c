@@ -72,7 +72,7 @@ Sys_enuErrorStates_t HAL_SWITCH_enuGetSwitchState(u8 SWITCH,u32 *Switch_Status)
 	{
 		Error_Status=NULL_POINTER_ERROR;
 	}
-    else if (SWITCH < SWITCH_NUMONE || SWITCH >= Number_Of_Switches)
+    else if ( SWITCH >= Number_Of_Switches)
     {
         Error_Status = INVALID_INPUT_VALUE;
     }

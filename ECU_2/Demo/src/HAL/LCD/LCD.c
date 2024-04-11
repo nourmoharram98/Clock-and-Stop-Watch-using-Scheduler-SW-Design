@@ -17,6 +17,14 @@
     }G_WriteState_t;
 /*-----------------------------------------------------------------------------------------*/
 
+/*--------------------------------------Enum for G_WriteState------------------------------*/
+    typedef enum
+    {
+        NumberWriting_State,
+        NumberWriting_Done
+    }G_WriteNumberState_t;
+/*-----------------------------------------------------------------------------------------*/
+
 /*-------------------------------------Enum for Enable Pin state --------------------------*/
     typedef enum
     {
@@ -38,6 +46,8 @@
 /*-------------------------------------Global Variables-----------------------------------*/
     G_LCD_EnablePinState_t G_LCD_EnablePinState = LCD_EnablePin_OFF ;
     G_WriteState_t G_WriteState;
+    G_WriteNumberState_t   G_WriteNumberState;
+
     U8 G_CurserPositionRstring;        /* Curser Position Related to String being written */
     U8 G_LCD_Curser_Data;
 
@@ -445,18 +455,14 @@
         {
             // U8 LOC_u8Reversed = 1 ;
 
-            switch (G_WriteState)
+            switch (G_WriteNumberState)
             {
-                case WriteInit_State: 
-                    G_WriteState = Writing_State;
-                break;
-
-                case Writing_State:
+                case NumberWriting_State:
                     LCD_enuWriteData( UserREQ.Number+48 );//4
 
                     if( G_LCD_EnablePinState == LCD_EnablePin_OFF )
                     {
-                        G_WriteState = Writing_Done;
+                        G_WriteNumberState = NumberWriting_Done;
                     }
                     else 
                     {
@@ -464,10 +470,11 @@
                     }
 
                 break;
-                case Writing_Done:
+
+                case NumberWriting_Done:
                     UserREQ.State = readyForNewRequest;
                     UserREQ.Operation_Type  = None;
-                    G_WriteState = WriteInit_State;
+                    G_WriteNumberState = NumberWriting_State;
                 break;
 
             }  
