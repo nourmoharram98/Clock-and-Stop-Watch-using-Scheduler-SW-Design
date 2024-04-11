@@ -53,7 +53,7 @@
  #include "HAL/LCD/LCD.h"
  #include "APP/Manager.h"
 
- #define Manager_Periodicity 4
+ #define Manager_Periodicity 6
 // #include"APP/Clock_Date_App.h"
 // #include"APP/Manager.h"
 // extern unit_Info_t Digits[15];
@@ -99,142 +99,251 @@
 /********************************************************************/
 
 /*--------------------------------Types Defs-------------------------*/
+
+/*----------------------------General Modes -------------------------*/
+
     typedef enum
     {
-        print_frame,
-        operation
+        Clock,
+        StopWatch
+    }Mode_t;
+    
+    typedef enum
+    {
+        INIT,
+        RUN
     }states_t;
+
+    typedef struct 
+    {
+        uint8 COUNTER;
+        uint8 OPTION; //running operating or editing
+    }strMODE_t;
+
+/*-------------------------------------------------------------------*/
+
+/*---------------------------- CLOCK Mode -------------------------*/ 
+    typedef enum 
+    {
+        PRINT_FIRST_LINE,
+        WAIT_1,
+        SET_CUTSOR_SECOND_LINE,
+        PRINT_SECOND_LINE,
+        WAIT_2,
+        END   
+    }CLOCK_OPERATING_INIT_STATES_t;
+
+    typedef enum
+    {
+        SET_CURSOR,
+        WRITE_NUMBER
+    }CLOCK_OPERATING_RUN_STATES_t;
 
     typedef enum 
     {
-        print_first_line,
-        wait1,
-        set_cursor_second_line,
-        print_second_line,
-        wait2,
-        end   
-    }print_frame_state_t;
+        CLOCK_OPTION_OPERATING,
+        CLOCK_OPTION_EDITING
+    }CLOCK_OPTION_t;
 
-    typedef enum
+    typedef enum 
     {
-        SetCursor,
-        WriteNumber
-    }Operation_State_t;
+        CLOCK_OPERATING_INIT,
+        CLOCK_OPERATING_RUN
+    }CLOCK_OPERATING_STATES_t;
+
 /*-------------------------------------------------------------------*/
+
+/*-------------------------- STOP/WATCH Mode ------------------------*/ 
+
+
+
+
+/*-------------------------------------------------------------------*/
+
+
+
+
 
 /*---------------------------Static Functions------------------------*/
-    static void print_frame_thread();
-    static void operation_thread(void);
+    static void CLOCK_OPERATING_INIT_THREAD(void);
+    static void CLOCK_OPERATING_RUN_THREAD(void);
+
+    static void CLOCK_THREAD(void);
+    static void STOPWATCH_THREAD(void);
 /*-------------------------------------------------------------------*/
 
-/*----------------------------Global Variables-----------------------*/
-    static uint8 counter                          = 0;
-    static Operation_State_t Operation_State      = SetCursor;
 
-    states_t state                               = print_frame ;
-    print_frame_state_t print_frame_state        = print_first_line ;
+
+
+
+
+/*----------------------------Global Variables-----------------------*/
+
+/*----------------------------General Modes -------------------------*/
+
+Mode_t   Mode                                = Clock;
+    
+/*-------------------------------------------------------------------*/
+
+/*---------------------------- CLOCK Mode -------------------------*/
+
+static strMODE_t CLOCK={.COUNTER=0,.OPTION=CLOCK_OPTION_OPERATING};
+
+static uint8 DIGIT_ITERATOR=0;
+
+static CLOCK_OPERATING_STATES_t      CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
+static CLOCK_OPERATING_INIT_STATES_t CLOCK_OPERATING_INIT_STATE = PRINT_FIRST_LINE;
+static CLOCK_OPERATING_RUN_STATES_t  CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;
+
+static uint8 CLOCK_EDITING_STATE;
+    
+/*-------------------------------------------------------------------*/
+
+
 /*-------------------------------------------------------------------*/
 
 void Application_Runnable(void)
 {
-    counter+=Manager_Periodicity;   
 
-    switch (state)
+    switch (Mode)
     {
-        case print_frame:
-            print_frame_thread();
+        case Clock:
+            CLOCK_THREAD();
         break;
 
-        case operation:
-            operation_thread();
-        break;
+        case StopWatch:
+            STOPWATCH_THREAD();
+        break;    
 
-        default:
-
-        break;
     }
+
 }
 
-static void print_frame_thread() //period = 4
-{
-    switch(print_frame_state)
-    {
+/*----------------------------------CLOCK_THREAD---------------------------------*/
 
-        case print_first_line:
+    /*--------------------------CLOCK_THREAD_Manager---------------------------*/
+        static void CLOCK_THREAD(void)
+        {
+            CLOCK.COUNTER+=Manager_Periodicity;   
 
-            LCD_enuWriteStringAsync("CLOCK 31/12/1999",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+            switch (CLOCK_OPERATING_STATE)
+            {
+                case CLOCK_OPERATING_INIT:
+                    CLOCK_OPERATING_INIT_THREAD();
+                break;
+
+                case CLOCK_OPERATING_RUN:
+                    CLOCK_OPERATING_RUN_THREAD();
+                break;
+
+                default:
+
+                break;
+            }     
+        }
+    /*-------------------------------------------------------------------------*/
+
+    /*--------------------------CLK_print_frame_thread-------------------------*/
+        static void CLOCK_OPERATING_INIT_THREAD() //period = 4
+        {
             
-            print_frame_state=wait1;
-
-        break;
-
-        case wait1:
-            if(counter>=70)
+            switch(CLOCK_OPERATING_INIT_STATE)
             {
-                counter=0;
-                print_frame_state=set_cursor_second_line;
+
+                case PRINT_FIRST_LINE:
+
+                    LCD_enuWriteStringAsync("CLOCK 31/12/2000",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+                    
+                    CLOCK_OPERATING_INIT_STATE=WAIT_1;
+
+                break;
+
+                case WAIT_1:
+                    if(CLOCK.COUNTER>=70)
+                    {
+                        CLOCK.COUNTER=0;
+                    CLOCK_OPERATING_INIT_STATE=SET_CUTSOR_SECOND_LINE;
+                    }
+                break;
+
+                case SET_CUTSOR_SECOND_LINE:
+                
+                    LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+                
+                    CLOCK_OPERATING_INIT_STATE = PRINT_SECOND_LINE;
+                    CLOCK.COUNTER=0;
+                break;
+
+                case PRINT_SECOND_LINE:
+                    LCD_enuWriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+                    CLOCK_OPERATING_INIT_STATE=WAIT_2;
+                break;
+
+                case WAIT_2:
+                    if(CLOCK.COUNTER>=70)
+                    {
+                        CLOCK.COUNTER=0;
+                        CLOCK_OPERATING_INIT_STATE=END;
+                    }
+                break;
+
+                case END:
+                    CLOCK_OPERATING_STATE = CLOCK_OPERATING_RUN;
+                    CLOCK.COUNTER=0;
+                    CLOCK_OPERATING_INIT_STATE=PRINT_FIRST_LINE;
+                break;  
             }
-        break;
 
-        case set_cursor_second_line:
-        
-            LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
-           
-            print_frame_state = print_second_line;
-            counter=0;
-        break;
+        }   
+    
+    /*-------------------------------------------------------------------------*/
 
-        case print_second_line:
-            LCD_enuWriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
-            print_frame_state=wait2;
-        break;
+    /*------------------------------CLK_RUN_THREAD-----------------------------*/
 
-        case wait2:
-            if(counter>=70)
+
+        static void CLOCK_OPERATING_RUN_THREAD(void)
+        {
+            if(Clock_Date_Digits[DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
             {
-                counter=0;
-                print_frame_state=end;
+                switch (CLOCK_OPERATING_RUN_STATE)
+                {
+                    case SET_CURSOR:
+                        LCD_SetCursorPosAsync(Clock_Date_Digits[DIGIT_ITERATOR].x_pos, Clock_Date_Digits[DIGIT_ITERATOR].y_pos);
+                        CLOCK_OPERATING_RUN_STATE = WRITE_NUMBER;
+                    break;
+
+                    case WRITE_NUMBER:
+                        LCD_enuWriteNumber(Clock_Date_Digits[DIGIT_ITERATOR].value);
+
+                        CLOCK_OPERATING_RUN_STATE=SET_CURSOR;
+
+                        Clock_Date_Digits[DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                        
+                        DIGIT_ITERATOR++;
+                        if(DIGIT_ITERATOR > 14)
+                        {
+                            DIGIT_ITERATOR= 0;
+                        }
+                    break; 
+                }   
             }
-        break;
+            else // DIGIT_STATE_NOT_PRINT
+            {
+                DIGIT_ITERATOR++;
+                if(DIGIT_ITERATOR > 14)
+                {
+                    DIGIT_ITERATOR = 0;
+                    CLOCK_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
+                }
+            }
+        }
 
-        case end:
-            state = operation;
-            counter=0;
-            print_frame_state=print_first_line;
-        break;  
-    }
-}
-
-
-
-static uint8 i=0;
-
-static void operation_thread(void)
+    /*-------------------------------------------------------------------------*/
+    
+/*-------------------------------------------------------------------------------*/
+static void STOPWATCH_THREAD()
 {
-    switch (Operation_State)
-    {
-        case SetCursor:
 
-            LCD_SetCursorPosAsync(Clock_Date_Digits[i].x_pos , Clock_Date_Digits[i].y_pos);
-
-            Operation_State = WriteNumber;
-        break;
-
-        case WriteNumber:
-            LCD_enuWriteNumber(Clock_Date_Digits[i].value);
-
-            Operation_State=SetCursor;
-
-            i++;
-            if(i>14)
-            {
-                i=0;
-            }
-
-        break; 
-
-        default:
-            /*Do Nothing*/
-        break;
-    }
 }
+
+
