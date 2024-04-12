@@ -34,15 +34,17 @@
  * The example provided initializes a single task to run the TrafficLight_Runnable function,
  * which controls the traffic light state machine.
  */
-const RunnableTask_t RUN_LIST[_Runnable_no] = 
 
+
+
+const RunnableTask_t RUN_LIST[_Runnable_no] = 
 {
-    [Clock_Data]=
+    [Clock_Date]=
     {
         .TaskName="Clock Data APP",
         .InitialDelayMS=200,
         .PeriodicityMS=100,
-        .CallBack=Clock_Data_Runnable
+        .CallBack=Clock_Date_Runnable 
     }
     ,
     [StopWatch]=
@@ -57,23 +59,15 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Manager",
         .InitialDelayMS=200,
-        .PeriodicityMS=100,
-        .CallBack=Manager_Runnable
+        .PeriodicityMS=6,
+        .CallBack=Application_Runnable
     }
     ,
     [LCD]=
     {
-        .TaskName="LED TEST APP",
-        .InitialDelayMS=40,
-        .PeriodicityMS=100,
-        .CallBack=LCD_Runnbale
-    }
-    ,
-    [Switch]=
-    {
-        .TaskName="LED TEST APP",
-        .InitialDelayMS=200,
-        .PeriodicityMS=5,
-        .CallBack=Switch_Runnable
+        .TaskName="LCD APP",
+        .InitialDelayMS=0,
+        .PeriodicityMS=2,
+        .CallBack=LCD_Runnable_Manager
     }
 };
