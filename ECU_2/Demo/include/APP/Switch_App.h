@@ -8,3 +8,14 @@
  * @copyright Copyright (c) 2024
  * 
  */
+#pragma once
+
+#define CMD_SET     1
+#define CMD_RESET   0
+
+#define NUM_SWITCHES 3
+
+// Define switch indices for easier access
+#define MODE_SWITCH_INDEX  0
+#define OK_SWITCH_INDEX    1
+#define EDIT_SWITCH_INDEX  2

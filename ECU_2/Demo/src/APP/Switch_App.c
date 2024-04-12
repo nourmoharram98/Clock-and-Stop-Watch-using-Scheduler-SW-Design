@@ -2,17 +2,36 @@
 #include "APP/Switch_App.h"
 #include "HAL/SWITCH/HAL_SWITCH.h"
 
-#define PRESSED     1
-#define NOT_PRESSED 0
 
-uint32 MODE_CMD=NOT_PRESSED;
-uint32 EDIT_CMD=NOT_PRESSED;
-uint32 OK_CMD  =NOT_PRESSED;
+
+uint32 switch_states[NUM_SWITCHES] = {SWITCH_RELEASED}; // Array to store switch states
+uint32 previous_switch_states[NUM_SWITCHES] = {SWITCH_RELEASED}; // Array to store previous switch states
+
+
+uint32 CMD[NUM_SWITCHES]={CMD_RESET};
 
 void ControlSwitches_Runnable(void)
 {
-    HAL_SWITCH_enuGetSwitchState(SWITCH_MODE,&MODE_CMD);
-    HAL_SWITCH_enuGetSwitchState(SWITCH_OK,&OK_CMD);
+    // Get the current state of each switch
+    HAL_SWITCH_enuGetSwitchState (SWITCH_MODE , &switch_states[MODE_SWITCH_INDEX]);
+    HAL_SWITCH_enuGetSwitchState (SWITCH_OK   , &switch_states[OK_SWITCH_INDEX]  );
+    HAL_SWITCH_enuGetSwitchState (SWITCH_EDIT , &switch_states[EDIT_SWITCH_INDEX]);
 
-
+    for(int i=0;i<NUM_SWITCHES;i++)
+    {
+        if(switch_states[i]==SWITCH_PRESSED)
+        {
+            previous_switch_states[i]=switch_states[i];
+        }
+        else if(previous_switch_states[i]==SWITCH_PRESSED && switch_states[i]==SWITCH_RELEASED)
+        {
+            CMD[i]=CMD_SET;
+            previous_switch_states[i]=SWITCH_RELEASED;
+        }
+        else if (previous_switch_states[i]==SWITCH_RELEASED && switch_states[i]==SWITCH_RELEASED)
+        {
+            CMD[i]=CMD_RESET;
+        }
+    }
 }
+

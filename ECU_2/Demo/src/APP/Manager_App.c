@@ -53,6 +53,7 @@
  #include "HAL/LCD/LCD.h"
  #include "APP/Manager.h"
 
+
  #define Manager_Periodicity 4
 
 
@@ -160,7 +161,7 @@ typedef enum
 
 /*----------------------------General Modes -------------------------*/
 
-MODE_t    MODE                                = MODE_STOPWATCH;
+MODE_t    MODE                                = MODE_CLOCK;
 COMMAND_t COMMAND                             = COMMAND_IDLE;
 /*-------------------------------------------------------------------*/
 
@@ -333,7 +334,7 @@ void Application_Runnable(void)
                     CLOCK_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
                 }
             }
-            if(MODE_CMD==1)
+            if(CMD[MODE_SWITCH_INDEX]==1)
             {
                 MODE=MODE_STOPWATCH;
                 STOP_WATCH_OPERATING_STATE      = STOP_WATCH_INIT;
@@ -378,7 +379,7 @@ static void STOP_WATCH_INIT_THREAD(void)
                 break;
                 case PRINT_FIRST_LINE:
 
-                    LCD_enuWriteStringAsync("STOP-WATCH",10); // (16 x 2) x 2 = 64 ms  -> 70 ms
+                    LCD_enuWriteStringAsync("STOPWATCH",9); // (16 x 2) x 2 = 64 ms  -> 70 ms
                     
                     STOP_WATCH_INIT_STATE=WAIT_1;
 
@@ -456,16 +457,24 @@ static void STOP_WATCH_RUN_THREAD(void)
                     STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
                 }
             }
-            if(MODE_CMD==1)
+            if(CMD[MODE_SWITCH_INDEX]==1)
             {
                 MODE=MODE_CLOCK;
                 CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
                 CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
 
             } 
-            if(OK_CMD==1)
+            if(CMD[OK_SWITCH_INDEX]==1)
             {
                 STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
+            }
+            if(CMD[EDIT_SWITCH_INDEX]==1)
+            {
+            for(int i=0;i<7;i++)
+             {
+                Stop_Watch_Digits[i].value=0;
+                Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+             }   
             }
 }
 

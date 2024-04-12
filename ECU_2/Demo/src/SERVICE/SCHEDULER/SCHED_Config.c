@@ -81,7 +81,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Switch Debouncing Runnable",
         .InitialDelayMS=0,
-        .PeriodicityMS=6,
+        .PeriodicityMS=10,
         .CallBack=Switch_Debouncing_Runnable
     }
 };
