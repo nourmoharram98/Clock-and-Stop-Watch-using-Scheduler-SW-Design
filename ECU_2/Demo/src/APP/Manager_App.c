@@ -175,7 +175,7 @@
             static CLOCK_OPERATING_INIT_STATES_t CLOCK_OPERATING_INIT_STATE = PRINT_FIRST_LINE;
             static CLOCK_OPERATING_RUN_STATES_t  CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;
             static CLOCK_OPTION_t                CLOCK_OPTION               = CLOCK_OPTION_OPERATING;
-            static U8                            COUNTER                    = 0;
+            static U8                            CLK_COUNTER                    = 0;
         
             static uint8 CLOCK_EDITING_STATE;
             
@@ -262,7 +262,7 @@
     /*------------CLOCK_THREAD_Manager------------*/
         static void CLOCK_THREAD(void)
         {
-            CLOCK.COUNTER+=Manager_Periodicity;   
+            CLK_COUNTER+=Manager_Periodicity;   
 
             switch (CLOCK_OPERATING_STATE)
             {
@@ -296,9 +296,9 @@
                 break;
 
                 case WAIT_1:
-                    if(CLOCK.COUNTER>=70)
+                    if(CLK_COUNTER>=70)
                     {
-                        CLOCK.COUNTER=0;
+                        CLK_COUNTER=0;
                     CLOCK_OPERATING_INIT_STATE=SET_CUTSOR_SECOND_LINE;
                     }
                 break;
@@ -308,7 +308,7 @@
                     LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
                 
                     CLOCK_OPERATING_INIT_STATE = PRINT_SECOND_LINE;
-                    CLOCK.COUNTER=0;
+                    CLK_COUNTER=0;
                 break;
 
                 case PRINT_SECOND_LINE:
@@ -317,16 +317,16 @@
                 break;
 
                 case WAIT_2:
-                    if(CLOCK.COUNTER>=70)
+                    if(CLK_COUNTER>=70)
                     {
-                        CLOCK.COUNTER=0;
+                        CLK_COUNTER=0;
                         CLOCK_OPERATING_INIT_STATE=END;
                     }
                 break;
 
                 case END:
                     CLOCK_OPERATING_STATE = CLOCK_OPERATING_RUN;
-                    CLOCK.COUNTER=0;
+                    CLK_COUNTER=0;
                     CLOCK_OPERATING_INIT_STATE=PRINT_FIRST_LINE;
                 break;  
             }
