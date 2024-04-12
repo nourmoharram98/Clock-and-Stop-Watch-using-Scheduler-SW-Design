@@ -49,7 +49,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     ,
     [StopWatch]=
     {
-        .TaskName="LED TEST APP",
+        .TaskName="Stop Watch APP",
         .InitialDelayMS=200,
         .PeriodicityMS=100,
         .CallBack=Stopwatch_Runnable
@@ -59,8 +59,15 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Manager",
         .InitialDelayMS=200,
-        .PeriodicityMS=5,
-        .CallBack=Application_Runnable
+        .PeriodicityMS=100,
+        .CallBack=Manager_Runnable
+    },
+     [Control_Switch]=
+    {
+        .TaskName="Manager",
+        .InitialDelayMS=0,
+        .PeriodicityMS=100,
+        .CallBack=ControlSwitches_Runnable
     }
     ,
     [LCD]=
@@ -68,6 +75,13 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
         .TaskName="LCD APP",
         .InitialDelayMS=0,
         .PeriodicityMS=2,
-        .CallBack=LCD_Runnable_Manager
+        .CallBack=LCD_Runnable
+    },
+    [Switch_Debouncing]=
+    {
+        .TaskName="Switch Debouncing Runnable",
+        .InitialDelayMS=0,
+        .PeriodicityMS=6,
+        .CallBack=Switch_Debouncing_Runnable
     }
 };

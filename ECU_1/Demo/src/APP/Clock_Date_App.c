@@ -10,300 +10,116 @@
  */
 
 
-
+#include"APP/App_Config.h"
 #include "./APP/Clock_Date_App.h"
 
+//FrameConstants_t Clock_Date_Frame[]; 
 
 
-// unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
-// {
-//     [DeciSecond_hundred]=
-//     {
-//         .value=0,
-//         .x_pos=2,  // x hia al row
-//         .y_pos=12  // y hia al col
-//     },
-//     [Second_unit]={
-//         .value=0,
-//         .x_pos=2,
-//         .y_pos=10
-//     },
-//     [Second_tens]={
-//         .value=3,
-//         .x_pos=2,
-//         .y_pos=9
-//     },
-//     [Minutes_unit]={
-//         .value=9,
-//         .x_pos=2,
-//         .y_pos=7
-//     },
-//     [Minutes_tens]={
-//         .value=5,
-//         .x_pos=2,
-//         .y_pos=6
-//     },
-//     [Hours_unit]={
-//         .value=3,
-//         .x_pos=2,
-//         .y_pos=4
-//     },
-//     [Hours_tens]={
-//         .value=2,
-//         .x_pos=2,
-//         .y_pos=3
-//     },
-//     [Day_unit]={
-//         .value=1,
-//         .x_pos=1,
-//         .y_pos=8
-//     },
-//     [Day_tens]={
-//         .value=3,
-//         .x_pos=1,
-//         .y_pos=7
-//     },
-//     [Month_unit]={
-//         .value=2,
-//         .x_pos=1,
-//         .y_pos=11
-//     },
-//     [Month_tens]={
-//         .value=1,
-//         .x_pos=1,
-//         .y_pos=10
-//     },
-//     [Years_thousand]={
-//         .value=2,
-//         .x_pos=1,
-//         .y_pos=13
-//     },
-//     [Years_hundreds]={
-//         .value=0,
-//         .x_pos=1,
-//         .y_pos=14
-//     },
-//     [Years_tens]={
-//         .value=0,
-//         .x_pos=1,
-//         .y_pos=15
-//     },
-//     [Years_unit]={
-//         .value=0,
-//         .x_pos=1,
-//         .y_pos=16
-//     }
-// };
-
-
-
-
-// /*
-// bool is_leap_year(int year) 
-// {
-//     if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) 
-//     {
-//         return true;
-//     }
-//     return false;
-// }
-
-// int days_in_month(int month, int year) 
-// {
-//     const int days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-//     if (month == 1 && is_leap_year(year)) 
-//     {
-//         return 29;
-//     }
-//     return days[month];
-// }
-
-// */
-
-// void Clock_Date_Runnable(void) //every 100 ms
-// {
-//     Clock_Date_Digits[DeciSecond_hundred].value++;
-    
-//     if (Clock_Date_Digits[DeciSecond_hundred].value > 9)
-//     {
-//         Clock_Date_Digits[DeciSecond_hundred].value=0;
-//         Clock_Date_Digits[Second_unit].value++;
-//     }
-//     if(Clock_Date_Digits[Second_unit].value > 9)
-//     {
-//         Clock_Date_Digits[Second_unit].value=0;
-//         Clock_Date_Digits[Second_tens].value++;
-//     }
-//     if(Clock_Date_Digits[Second_tens].value>5)
-//     {
-//         Clock_Date_Digits[Second_tens].value=0;
-//         Clock_Date_Digits[Minutes_unit].value++;
-//     }
-//     if(Clock_Date_Digits[Minutes_unit].value>9)
-//     {
-//         Clock_Date_Digits[Minutes_unit].value=0;
-//         Clock_Date_Digits[Minutes_tens].value++;
-//     }
-//     if(Clock_Date_Digits[Minutes_tens].value>5)
-//     {
-//         Clock_Date_Digits[Minutes_tens].value=0;
-//         Clock_Date_Digits[Hours_unit].value++;
-//     }
-//     if(Clock_Date_Digits[Hours_unit].value>9)
-//     {
-//         Clock_Date_Digits[Hours_unit].value=0;
-//         Clock_Date_Digits[Hours_tens].value++;
-//     }
-//     if((Clock_Date_Digits[Hours_tens].value==2)&&(Clock_Date_Digits[Hours_unit].value==4))
-//     {
-//         Clock_Date_Digits[Hours_tens].value=0;
-//         Clock_Date_Digits[Hours_unit].value=0;
-//         Clock_Date_Digits[Day_unit].value++;
-//     }
-//     if(Clock_Date_Digits[Day_unit].value>9)
-//     {
-//         Clock_Date_Digits[Day_unit].value=1;
-//         Clock_Date_Digits[Day_tens].value++;
-//     }
-//     if(Clock_Date_Digits[Day_tens].value == 3 && Clock_Date_Digits[Day_unit].value > 1 )
-//     {
-//         Clock_Date_Digits[Day_tens].value=0;
-//         Clock_Date_Digits[Day_unit].value=1;
-//         Clock_Date_Digits[Month_unit].value++;
-//     }
-//     if(Clock_Date_Digits[Month_unit].value>9)
-//     {
-//         Clock_Date_Digits[Month_unit].value=0;
-//         Clock_Date_Digits[Month_tens].value=1;
-//     }
-//     if((Clock_Date_Digits[Month_tens].value==1)&&(Clock_Date_Digits[Month_unit].value>2))
-//     {
-//         Clock_Date_Digits[Month_unit].value=1;
-//         Clock_Date_Digits[Month_tens].value=0;
-//         Clock_Date_Digits[Years_unit].value++;
-//     }
-//     if(Clock_Date_Digits[Years_unit].value>9)
-//     {
-//         Clock_Date_Digits[Years_unit].value=0;
-//         Clock_Date_Digits[Years_tens].value++;
-//     }
-//     if(Clock_Date_Digits[Years_tens].value>9)
-//     {
-//         Clock_Date_Digits[Years_tens].value=0;
-//         Clock_Date_Digits[Years_hundreds].value++;
-//     }
-// }
-
-
-
-
-//leap year and months days number solution
-
-
-unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
+unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS_CLK_MODE]=
 {
     [DeciSecond_hundred]=
     {
         .value=0,
-        .x_pos=2,  // x -> Row
-        .y_pos=12,  // y -> col
+        .x_pos=1,  // x -> Row
+        .y_pos=11,  // y -> col
         .digit_state=DIGIT_STATE_NOT_PRINT
     },
     [Second_unit]={
-        .value=5,
-        .x_pos=2,
-        .y_pos=10,
-        .digit_state=DIGIT_STATE_NOT_PRINT
-
-    },
-    [Second_tens]={
-        .value=5,
-        .x_pos=2,
+        .value=2,
+        .x_pos=1,
         .y_pos=9,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
-    [Minutes_unit]={
-        .value=9,
-        .x_pos=2,
-        .y_pos=7,
-        .digit_state=DIGIT_STATE_NOT_PRINT
-
-    },
-    [Minutes_tens]={
-        .value=5,
-        .x_pos=2,
-        .y_pos=6,
-        .digit_state=DIGIT_STATE_NOT_PRINT
-
-    },
-    [Hours_unit]={
+    [Second_tens]={
         .value=3,
-        .x_pos=2,
-        .y_pos=4,
-        .digit_state=DIGIT_STATE_NOT_PRINT
-
-    },
-    [Hours_tens]={
-        .value=2,
-        .x_pos=2,
-        .y_pos=3,
-        .digit_state=DIGIT_STATE_NOT_PRINT
-
-    },
-    [Day_unit]={
-        .value=1,
         .x_pos=1,
         .y_pos=8,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
-    [Day_tens]={
-        .value=3,
+    [Minutes_unit]={
+        .value=5,
         .x_pos=1,
+        .y_pos=6,
+        .digit_state=DIGIT_STATE_NOT_PRINT
+
+    },
+    [Minutes_tens]={
+        .value=1,
+        .x_pos=1,
+        .y_pos=5,
+        .digit_state=DIGIT_STATE_NOT_PRINT
+
+    },
+    [Hours_unit]={
+        .value=9,
+        .x_pos=1,
+        .y_pos=3,
+        .digit_state=DIGIT_STATE_NOT_PRINT
+
+    },
+    [Hours_tens]={
+        .value=0,
+        .x_pos=1,
+        .y_pos=2,
+        .digit_state=DIGIT_STATE_NOT_PRINT
+
+    },
+    [Day_unit]={
+        .value=1,
+        .x_pos=0,
         .y_pos=7,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
+    [Day_tens]={
+        .value=1,
+        .x_pos=0,
+        .y_pos=6,
+        .digit_state=DIGIT_STATE_NOT_PRINT
+
+    },
     [Month_unit]={
-        .value=2,
-        .x_pos=1,
-        .y_pos=11,
+        .value=4,
+        .x_pos=0,
+        .y_pos=10,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
     [Month_tens]={
-        .value=1,
-        .x_pos=1,
-        .y_pos=10,
+        .value=0,
+        .x_pos=0,
+        .y_pos=9,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
     [Years_thousand]={
         .value=2,
-        .x_pos=1,
-        .y_pos=13,
+        .x_pos=0,
+        .y_pos=12,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
     [Years_hundreds]={
         .value=0,
-        .x_pos=1,
-        .y_pos=14,
+        .x_pos=0,
+        .y_pos=13,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
     [Years_tens]={
-        .value=0,
-        .x_pos=1,
-        .y_pos=15,
+        .value=2,
+        .x_pos=0,
+        .y_pos=14,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     },
     [Years_unit]={
-        .value=0,
-        .x_pos=1,
-        .y_pos=16,
+        .value=4,
+        .x_pos=0,
+        .y_pos=15,
         .digit_state=DIGIT_STATE_NOT_PRINT
 
     }
@@ -334,17 +150,17 @@ void Clock_Date_Runnable(void)
     // Update Deci, Sec , Min , Hours
 
     Clock_Date_Digits[DeciSecond_hundred].value++;
-    Clock_Date_Digits[Deci_Hundred_Position].digit_state=DIGIT_STATE_PRINT;
+    Clock_Date_Digits[DeciSecond_hundred].digit_state=DIGIT_STATE_PRINT;
     if (Clock_Date_Digits[DeciSecond_hundred].value > 9) 
     {
         Clock_Date_Digits[DeciSecond_hundred].value = 0;
-        Clock_Date_Digits[Deci_Hundred_Position].digit_state=DIGIT_STATE_PRINT;
+        Clock_Date_Digits[DeciSecond_hundred].digit_state=DIGIT_STATE_PRINT;
         Clock_Date_Digits[Second_unit].value++;
         Clock_Date_Digits[Second_unit].digit_state=DIGIT_STATE_PRINT;
         if (Clock_Date_Digits[Second_unit].value > 9) 
         {
             Clock_Date_Digits[Second_unit].value = 0;
-                    Clock_Date_Digits[Second_unit].digit_state=DIGIT_STATE_PRINT;
+            Clock_Date_Digits[Second_unit].digit_state=DIGIT_STATE_PRINT;
 
             Clock_Date_Digits[Second_tens].value++;
             Clock_Date_Digits[Second_tens].digit_state=DIGIT_STATE_PRINT;
@@ -385,8 +201,6 @@ void Clock_Date_Runnable(void)
                             Clock_Date_Digits[Hours_tens].value = 0;
                             Clock_Date_Digits[Hours_tens].digit_state=DIGIT_STATE_PRINT;
 
-                            
-
                             Clock_Date_Digits[Hours_unit].value = 0;
                             Clock_Date_Digits[Hours_unit].digit_state=DIGIT_STATE_PRINT;
 
@@ -415,7 +229,6 @@ void Clock_Date_Runnable(void)
 
         Clock_Date_Digits[Day_tens].value++;
         Clock_Date_Digits[Day_tens].digit_state=DIGIT_STATE_PRINT;
-
     }
 
     if (Clock_Date_Digits[Day_tens].value * 10 + Clock_Date_Digits[Day_unit].value > days_in_current_month) 
@@ -428,75 +241,70 @@ void Clock_Date_Runnable(void)
 
         Clock_Date_Digits[Month_unit].value++;
         Clock_Date_Digits[Month_unit].digit_state=DIGIT_STATE_PRINT;
-
-        if (Clock_Date_Digits[Month_unit].value > 9) 
+        
+        if(Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value > 2)
         {
-            Clock_Date_Digits[Month_unit].value = 0;
-                    Clock_Date_Digits[Month_unit].digit_state=DIGIT_STATE_PRINT;
+         // Increment year if month exceeds 12 
+            Clock_Date_Digits[Month_tens].value = 0;
+            Clock_Date_Digits[Month_tens].digit_state=DIGIT_STATE_PRINT;
 
-            Clock_Date_Digits[Month_tens].value = 1;
+            Clock_Date_Digits[Month_unit].value = 1; //reset to month one
+            Clock_Date_Digits[Month_unit].digit_state=DIGIT_STATE_PRINT;
+
+            Clock_Date_Digits[Years_unit].value++;
+            Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
+        }
+    }
+    if (Clock_Date_Digits[Month_unit].value > 9) 
+    {
+        Clock_Date_Digits[Month_unit].value = 0;
+        Clock_Date_Digits[Month_unit].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Month_tens].value = 1;
         Clock_Date_Digits[Month_tens].digit_state=DIGIT_STATE_PRINT;
+    }
+    if (Clock_Date_Digits[Years_unit].value > 9) 
+    {
+        Clock_Date_Digits[Years_unit].value = 0;
+        Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
 
-            if (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value > 2) 
-            { // Increment year if month exceeds 12 
-                Clock_Date_Digits[Month_tens].value = 0;
-                        Clock_Date_Digits[Month_tens].digit_state=DIGIT_STATE_PRINT;
+        Clock_Date_Digits[Years_tens].value++;
+        Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
+    }
+        if (Clock_Date_Digits[Years_tens].value > 9) 
+        {
+            Clock_Date_Digits[Years_tens].value = 0;
+                                    Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
 
-                Clock_Date_Digits[Month_unit].value = 1; //reset to month one
-                        Clock_Date_Digits[Month_unit].digit_state=DIGIT_STATE_PRINT;
+            Clock_Date_Digits[Years_hundreds].value++;
+                                    Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
+        
 
-                Clock_Date_Digits[Years_unit].value++;
-                        Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
+            if (Clock_Date_Digits[Years_hundreds].value > 9) 
+            {
+                Clock_Date_Digits[Years_hundreds].value = 0;
+                                        Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
+
+                Clock_Date_Digits[Years_thousand].value++;
+                                        Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
 
 
-                if (Clock_Date_Digits[Years_unit].value > 9) 
+                if (Clock_Date_Digits[Years_thousand].value > 9) 
                 {
-                    Clock_Date_Digits[Years_unit].value = 0;
+                    Clock_Date_Digits[Years_thousand].value = 0;
+                                            Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
+
+                    Clock_Date_Digits[Years_hundreds].value = 0;
+                                            Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
+
+                    Clock_Date_Digits[Years_tens].value     = 0;
+                                            Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
+
+                    Clock_Date_Digits[Years_unit].value     = 0;
                                             Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
-
-                    Clock_Date_Digits[Years_tens].value++;
-                                            Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
-
-
-                    if (Clock_Date_Digits[Years_tens].value > 9) 
-                    {
-                        Clock_Date_Digits[Years_tens].value = 0;
-                                                Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
-
-                        Clock_Date_Digits[Years_hundreds].value++;
-                                                Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
-
-
-                        if (Clock_Date_Digits[Years_hundreds].value > 9) 
-                        {
-                            Clock_Date_Digits[Years_hundreds].value = 0;
-                                                    Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
-
-                            Clock_Date_Digits[Years_thousand].value++;
-                                                    Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
-
-
-                            if (Clock_Date_Digits[Years_thousand].value > 9) 
-                            {
-                                Clock_Date_Digits[Years_thousand].value = 0;
-                                                        Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
-
-                                Clock_Date_Digits[Years_hundreds].value = 0;
-                                                        Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
-
-                                Clock_Date_Digits[Years_tens].value     = 0;
-                                                        Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
-
-                                Clock_Date_Digits[Years_unit].value     = 0;
-                                                        Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
-
-                            }
-                        }
-                    }
 
                 }
             }
         }
-    }
-}
 
+}

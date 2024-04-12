@@ -1,8 +1,8 @@
-#include"typedefs.h"
-#include"Masks.h"
-#include"cfg/HAL_LCD_CONFIG.h"
+#include"Std_Types.h"
+#include"Bit_Mask.h"
+#include"HAL/LCD/HAL_LCD_CONFIG.h"
 #include"HAL/LCD/HAL_LCD.h"
-#include"MCAL/GPIO/STM32F401cc_MCAL_GPIO.h"
+#include"MCAL/GPIO/GPIO.h"
 
 
 #define LCD_PORTA  	(void *)(0x40020000)

@@ -17,6 +17,7 @@ typedef enum
 {
     USART_One,
     USART_Two,
+    USART_Six,
     Number_Of_USARTS,
 }USART_Active_t;
 

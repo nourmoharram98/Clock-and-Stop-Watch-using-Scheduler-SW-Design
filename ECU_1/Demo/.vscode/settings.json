@@ -2,6 +2,16 @@
     "C_Cpp.errorSquiggles": "enabled",
     "files.associations": {
         "hal_lcd.h": "c",
-        "hal_lcd_config.h": "c"
+        "hal_lcd_config.h": "c",
+        "sched_config.h": "c",
+        "manager.h": "c",
+        "stop_watch_app.h": "c",
+        "std_types.h": "c",
+        "clock_date_app.h": "c",
+        "hal_switch.h": "c",
+        "app_config.h": "c",
+        "led.h": "c",
+        "led_config.h": "c",
+        "nvic.h": "c"
     }
 }
