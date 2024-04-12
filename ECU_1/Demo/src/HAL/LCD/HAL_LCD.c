@@ -29,7 +29,7 @@
 #define INDEX_FOR_LINE_4 0X50
 #define WRITE_ON_DDRAM_INDEX 0X80
 
-#define BUFFER_SIZE         35
+#define BUFFER_SIZE         50
 
 typedef enum
 {

@@ -3,14 +3,13 @@
 #include "APP/Clock_Date_App.h"
 #include "APP/Stop_Watch_App.h"
 
+
+
 extern unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS_CLK_MODE];
 extern unit_Info_t Stop_Watch_Digits[NUMBER_OF_DIGITS_STOPW_MODE];
 
-typedef enum
-{
-    Clock_Mode,
-    StopWatch_Mode,
-}Modes_t;
+
+
 
 typedef enum
 {
@@ -22,6 +21,7 @@ typedef enum
 
     DigitEdit_Operation,
 }Operation_Types_t;
+
 
 /*--------------------------------Types Defs-------------------------*/
 typedef enum

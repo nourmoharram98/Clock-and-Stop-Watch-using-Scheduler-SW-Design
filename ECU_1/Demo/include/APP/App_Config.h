@@ -14,6 +14,12 @@
 #define DIGIT_STATE_PRINT          0
 #define DIGIT_STATE_NOT_PRINT      1
 
+typedef enum
+{
+    Clock_Mode,
+    StopWatch_Mode,
+}Modes_t;
+
 
 typedef struct 
 {
