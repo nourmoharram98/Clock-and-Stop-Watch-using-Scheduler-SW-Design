@@ -336,7 +336,8 @@ int main ()
      * @brief HAl Components Initialisation
     */
     
-    LCD_InitAsync();  
+    LCD_InitAsync();
+    HAL_SWITCH_Init();
    /**
     * @brief System Initialisation
     * @warning Should be called at the end of each init function 
