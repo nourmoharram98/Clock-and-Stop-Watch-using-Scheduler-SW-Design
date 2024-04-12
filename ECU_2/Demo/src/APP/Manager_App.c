@@ -53,7 +53,7 @@
  #include "HAL/LCD/LCD.h"
  #include "APP/Manager.h"
 
- #define Manager_Periodicity 6
+ #define Manager_Periodicity 4
 
 
 /********************************************************************/
@@ -171,7 +171,7 @@ static strMODE_t CLOCK={.COUNTER=0,.OPTION=CLOCK_OPTION_OPERATING};
 static uint8 CLOCK_DIGIT_ITERATOR=0;
 
 static CLOCK_OPERATING_STATES_t      CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
-static INIT_STATES_t CLOCK_OPERATING_INIT_STATE = PRINT_FIRST_LINE;
+static INIT_STATES_t CLOCK_OPERATING_INIT_STATE = SET_CURSOR_FIRST_LINE;
 static OPERATING_RUN_STATES_t  CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;
 
     
@@ -235,13 +235,21 @@ void Application_Runnable(void)
     /*--------------------------CLK_print_frame_thread-------------------------*/
         static void CLOCK_OPERATING_INIT_THREAD() //period = 4
         {
-             CLOCK.COUNTER+=Manager_Periodicity; 
+             CLOCK.COUNTER+=Manager_Periodicity;
+             for(int i=0;i<15;i++)
+             {
+                Clock_Date_Digits[i].digit_state=DIGIT_STATE_PRINT;
+             }
             switch(CLOCK_OPERATING_INIT_STATE)
             {
+                case SET_CURSOR_FIRST_LINE:
+                 LCD_ClearScreenAsync();
+                    CLOCK_OPERATING_INIT_STATE=PRINT_FIRST_LINE;
+                break;
 
                 case PRINT_FIRST_LINE:
 
-                    LCD_enuWriteStringAsync("CLOCK 31/12/2000",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
+                    LCD_enuWriteStringAsync("CLOCK   /  /    ",16); // (16 x 2) x 2 = 64 ms  -> 70 ms
                     
                     CLOCK_OPERATING_INIT_STATE=WAIT_1;
 
@@ -264,7 +272,7 @@ void Application_Runnable(void)
                 break;
 
                 case PRINT_SECOND_LINE:
-                    LCD_enuWriteStringAsync("  23:59:55:100",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+                    LCD_enuWriteStringAsync("    :  :  :   ",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
                     CLOCK_OPERATING_INIT_STATE=WAIT_2;
                 break;
 
@@ -279,7 +287,7 @@ void Application_Runnable(void)
                 case END:
                     CLOCK_OPERATING_STATE = CLOCK_OPERATING_RUN;
                     CLOCK.COUNTER=0;
-                    CLOCK_OPERATING_INIT_STATE=PRINT_FIRST_LINE;
+                    CLOCK_OPERATING_INIT_STATE=SET_CURSOR_FIRST_LINE;
                 break;  
             }
 
@@ -325,6 +333,13 @@ void Application_Runnable(void)
                     CLOCK_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
                 }
             }
+            if(MODE_CMD==1)
+            {
+                MODE=MODE_STOPWATCH;
+                STOP_WATCH_OPERATING_STATE      = STOP_WATCH_INIT;
+                STOP_WATCH_OPERATING_RUN_STATE  = SET_CURSOR;                
+
+            }            
         }
 
     /*-------------------------------------------------------------------------*/
@@ -350,11 +365,15 @@ static void STOP_WATCH_THREAD()
 
 static void STOP_WATCH_INIT_THREAD(void)
 {
-             STOP_WATCH.COUNTER+=Manager_Periodicity; 
+             STOP_WATCH.COUNTER+=Manager_Periodicity;
+             for(int i=0;i<7;i++)
+             {
+                Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+             }             
             switch(STOP_WATCH_INIT_STATE)
             {
                 case SET_CURSOR_FIRST_LINE:
-                    LCD_SetCursorPosAsync(1, 1);
+                   LCD_ClearScreenAsync();
                     STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
                 break;
                 case PRINT_FIRST_LINE:
@@ -382,7 +401,7 @@ static void STOP_WATCH_INIT_THREAD(void)
                 break;
 
                 case PRINT_SECOND_LINE:
-                    LCD_enuWriteStringAsync("  00:00:00:000",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+                    LCD_enuWriteStringAsync("    :  :  : 00",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
                     STOP_WATCH_INIT_STATE=WAIT_2;
                 break;
 
@@ -436,6 +455,17 @@ static void STOP_WATCH_RUN_THREAD(void)
                     STOP_WATCH_DIGIT_ITERATOR = 0;
                     STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
                 }
+            }
+            if(MODE_CMD==1)
+            {
+                MODE=MODE_CLOCK;
+                CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
+                CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
+
+            } 
+            if(OK_CMD==1)
+            {
+                STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
             }
 }
 

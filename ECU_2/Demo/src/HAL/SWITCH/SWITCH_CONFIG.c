@@ -12,11 +12,24 @@
 
 /*array for switches configurations*/
 const SWITCH_CONFIGURATIONS arrOfSwitches[Number_Of_Switches]={
-		[MODE_SWITCH]={
+		[SWITCH_MODE]={
                             .port=GPIO_PORT_A,
                             .Switch_Pin=GPIO_PIN_11,
                             .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
                             .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
-                        }
+                        },
+		[SWITCH_OK]={
+                            .port=GPIO_PORT_B,
+                            .Switch_Pin=GPIO_PIN_8,
+                            .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
+                            .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
+        },
+		// [SWITCH_NUMTHREE]={
+        //                     .port=GPIO_PORT_C,
+        //                     .Switch_Pin=GPIO_PIN_15,
+        //                     .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
+        //                     .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
+
+        // }
 };
 

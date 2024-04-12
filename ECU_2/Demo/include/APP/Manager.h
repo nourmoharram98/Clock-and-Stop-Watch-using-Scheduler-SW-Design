@@ -4,3 +4,9 @@
 
 extern unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS];
 extern unit_Info_t Stop_Watch_Digits[7];
+
+extern uint8 STOP_WATCH_OPTION;
+
+extern volatile  uint32 MODE_CMD;
+extern volatile  uint32 EDIT_CMD;
+extern volatile  uint32 OK_CMD  ;
