@@ -51,11 +51,7 @@
     * 
     */
 
-    #include "Std_Types.h"
-    #include "HAL/LCD/LCD.h"
-    #include "APP/Manager.h"
 
-    #define Manager_Periodicity 6
 
     // #include"APP/Clock_Date_App.h"
     // #include"APP/Manager.h"
@@ -100,6 +96,16 @@
     // } 
 
 /*--------*/
+
+/*-----------------Includes----------------*/
+    #include "Std_Types.h"
+    #include "HAL/LCD/HAL_LCD.h"
+    #include "APP/Manager.h"
+/*-----------------------------------------*/
+
+/*-----------------Hashes------------------*/
+    #define Manager_Periodicity 6
+/*-----------------------------------------*/
 
 /*-------------------------Types Defs-------------------------*/
 

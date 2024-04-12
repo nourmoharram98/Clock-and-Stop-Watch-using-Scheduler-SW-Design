@@ -15,8 +15,8 @@
 #define NUMBER_OF_DIGITS           15
 
 
-#define DIGIT_STATE_PRINT          1
-#define DIGIT_STATE_NOT_PRINT      2
+#define DIGIT_STATE_OPERATING      1
+#define DIGIT_STATE_EDITTING       2
 
 #define DeciSecond_hundred         0
 #define Second_unit                1
@@ -61,6 +61,10 @@
 #define Seconds_Units_Position    10
 
 #define Deci_Hundred_Position     12
+
+
+#define DIGIT_STATE_PRINT          0
+#define DIGIT_STATE_NOT_PRINT      1
 
 typedef struct 
 {
