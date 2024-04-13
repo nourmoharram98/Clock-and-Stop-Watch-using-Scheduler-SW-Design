@@ -341,9 +341,15 @@ int main ()
     USART_Request_t Requestone={
         .length=1,
         .PtrtoBuffer=&x,
-        .USART_ID=USART1
+        .USART_ID=USART1,
+        .CallBack=NULL_POINTER
     };
     USART_SendByte(Requestone);
+   
+    while(1)
+    {
+
+    }
     // SCHED_Init                  ();
     // SCHED_Start                 ();
 }

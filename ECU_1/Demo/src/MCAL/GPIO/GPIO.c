@@ -291,7 +291,7 @@ typedef struct
                     else
                     {
                         /*Reciece the value of MODE in Local variable*/
-                            LOC_AFR_Value = (((GPIOx_Peri_t *)GPIO_Port_x)->GPIOx_AFRH);
+                            LOC_AFR_Value = (((GPIOx_Peri_t *)GPIO_Port_x)->GPIOx_AFRL);
                         /*-------------------------------------------*/
 
                         /*Clear the bits needed in the registers*/
@@ -303,7 +303,7 @@ typedef struct
                         /*-------------------------------------------*/
 
                         /*Send the configuration to the register*/
-                            (((GPIOx_Peri_t *)GPIO_Port_x)->GPIOx_AFRH) = LOC_AFR_Value;
+                            (((GPIOx_Peri_t *)GPIO_Port_x)->GPIOx_AFRL) = LOC_AFR_Value;
                         /*-------------------------------------------*/
                     }
                 }

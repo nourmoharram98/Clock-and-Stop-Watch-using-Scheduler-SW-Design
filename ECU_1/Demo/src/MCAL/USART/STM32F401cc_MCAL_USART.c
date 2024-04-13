@@ -144,7 +144,7 @@ Sys_enuErrorStates_t USART_Pins_Init(void)
 Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-    u16 TIME_OUT=5000;
+    u16 TIME_OUT=10000;
     if(USART_Request.USART_ID>=Number_Of_USARTS)
     {
         Error_Status=INVALID_INPUT_VALUE;
