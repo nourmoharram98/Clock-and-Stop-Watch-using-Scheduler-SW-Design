@@ -58,7 +58,14 @@
     #include "MCAL/USART/STM32F401cc_MCAL_USART.h"
     #include "SERVICE/COMM/UART_COMM.h"
 /*--------------------------------------------------------------------*/
-
+/*-----------------------Buttons Macros Data--------------------------*/
+#define MODE_BUTTON                         1
+#define OK_BUTTON                           2 
+#define EDIT_BUTTON                         3
+#define UP_BUTTON                           4
+#define DOWN_BUTTON                         5
+#define RIGHT_BUTTON                        6
+#define LEFT_BUTTON                         7
 /*----------------------------Global Variables-----------------------*/
     u32 Mode=Clock_Mode;
     Operation_Types_t Operation_type=Init_Operation;
@@ -72,8 +79,8 @@
     static void DisplayOnLCD                   (Modes_t Copy_Mode);
     static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
 
-    static void USART_MOCK_SendByteAsynchZC    (USART_MOCK_Request_t USART_Request);
-    static void USART_MOCK_ReceiveByteAsynchZC (USART_MOCK_Request_t USART_Request);
+    // static void USART_MOCK_SendByteAsynchZC    (USART_MOCK_Request_t USART_Request);
+    // static void USART_MOCK_ReceiveByteAsynchZC (USART_MOCK_Request_t USART_Request);
 /*--------------------------------------------------------------------*/
 
 void Manager_Runnable(void)
@@ -101,7 +108,7 @@ void Manager_Runnable(void)
            // DigitEditMode();
            //search 3la el element el 3yzeno 
            //tkhleh not print
-           DisplayOnLCD(Mode);
+           //DisplayOnLCD(Mode);
         break;
         
         default:
@@ -209,7 +216,7 @@ void ControlSwitches_Runnable(void)
 { 
 
     /*Setting Switch Data To be sent*/
-        static Ctrl_Switches_Data_t Ctrl_Switches_Data [7] = 
+        static Ctrl_Switches_Data_t Ctrl_Switches_Data [2] = 
         {
             [SWITCH_MODE]=
             {
@@ -225,40 +232,40 @@ void ControlSwitches_Runnable(void)
                 .Switch_PrevStatus = Switch_Released
             }
             ,
-            [SWITCH_EDIT] 
-            {
-                .DATA = 3 ,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
-            ,
-            [SWITCH_UP] 
-            {
-                .DATA = 4,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
-            ,
-            [SWITCH_DOWN] 
-            {
-                .DATA = 5,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
-            , 
-            [SWITCH_LEFT] 
-            {
-                .DATA = 6,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
-            ,
-            [SWITCH_RIGHT] 
-            {
-                .DATA = 7,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
+            // [SWITCH_EDIT] 
+            // {
+            //     .DATA = 3 ,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // ,
+            // [SWITCH_UP] 
+            // {
+            //     .DATA = 4,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // ,
+            // [SWITCH_DOWN] 
+            // {
+            //     .DATA = 5,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // , 
+            // [SWITCH_LEFT] 
+            // {
+            //     .DATA = 6,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // ,
+            // [SWITCH_RIGHT] 
+            // {
+            //     .DATA = 7,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
         };
     /*------------------------------*/
 
@@ -268,7 +275,7 @@ void ControlSwitches_Runnable(void)
         for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
         {
             /*Read Switch State*/
-                HAL_SWITCH_enuGetSwitchState( Switches_Iter , &Ctrl_Switches_Data[Switches_Iter].Switch_Status );
+                HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
             /*---------------------*/ 
 
             /*Single Realise Press signal handling and sending data via uart*/
@@ -290,7 +297,36 @@ void ControlSwitches_Runnable(void)
 
 }
 
+void Command_Handler(u8 command)
+{
+   // static u8 Edit_counter=0;
+    switch(command)
+    {
+        case MODE_BUTTON:
+            Toggle_Mode();
+            break;
+        case EDIT_BUTTON:
+            break;
+        case OK_BUTTON:
+            break;
+        case UP_BUTTON:
+            break;
+        case DOWN_BUTTON:
+            break;
+        case RIGHT_BUTTON:  
+            break;
+        case LEFT_BUTTON:
+            break;
+        default:
+            break;
+    }
+}
 
+void Toggle_Mode(void)
+{
+    Mode ^=1;
+    Operation_type=Init_Operation;
+}
 void Sender_Manager_Runnable(void)
 {
     Communication_Sender();

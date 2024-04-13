@@ -337,15 +337,15 @@ int main ()
     USART_Pins_Init();
     NVIC_EnableIRQ(USART1_IRQn);
     USART_Init();
-    char x='N';
+    u8 x='N';
     USART_Request_t Requestone={
         .length=1,
         .PtrtoBuffer=&x,
         .USART_ID=USART1
     };
     USART_SendByte(Requestone);
-    SCHED_Init                  ();
-    SCHED_Start                 ();
+    // SCHED_Init                  ();
+    // SCHED_Start                 ();
 }
 
 #endif

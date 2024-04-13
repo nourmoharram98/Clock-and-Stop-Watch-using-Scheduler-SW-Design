@@ -30,9 +30,3 @@ typedef struct
           u8    digit_state;  //digit_state -> ( print , not print ) 
 }unit_Info_t;
 
-typedef struct 
-{
-       const u8 Pattern; 
-       const u8 x_pos;
-       const u8 y_pos;
-}FrameConstants_t;

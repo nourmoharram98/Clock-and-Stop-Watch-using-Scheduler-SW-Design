@@ -59,7 +59,7 @@ U8 calculate_crc(U8 data)
 void process_received_data(U8 received_data) 
 {
     //counter for tracking the buffer of received requests
-    static u8 Receiver_Counter=0;
+    //static u8 Receiver_Counter=0;
 
    // Received_Requests[Receiver_Counter]=received_data;
     
@@ -75,6 +75,7 @@ void process_received_data(U8 received_data)
         // which_switch(received_data_only);
         //switch 3la el button el adas
         //call corresponding function aw change the corresponding flag
+        Command_Handler(received_data);
     } 
     else 
     {

@@ -3,6 +3,7 @@
 #include "APP/Clock_Date_App.h"
 #include "APP/Stop_Watch_App.h"
 #include "SERVICE/COMM/UART_COMM.h"
+#include "HAL/SWITCH/HAL_SWITCH.h"
 extern unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS_CLK_MODE];
 extern unit_Info_t Stop_Watch_Digits[NUMBER_OF_DIGITS_STOPW_MODE];
 
@@ -48,12 +49,14 @@ typedef struct
 typedef struct 
 {
     U8 DATA;
-    Switch_Status_t Switch_Status;
-    Switch_Status_t Switch_PrevStatus;
+    u32 Switch_Status;
+    u32 Switch_PrevStatus;
 }Ctrl_Switches_Data_t;
 /*-------------------------------------------------------------------*/
 
 /*------------------------------Functions-----------------------------*/
     void Application_Runnable(void);
     void TX_Communication_Manager(U8 RAW_DATA);
+    void Toggle_Mode(void);
+    void Command_Handler(u8 command);
 /*--------------------------------------------------------------------*/
