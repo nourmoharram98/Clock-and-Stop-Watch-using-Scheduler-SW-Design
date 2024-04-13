@@ -85,8 +85,8 @@ typedef struct
                     /*--------*/
 
                     /*For OTYPE*/
-                    if ( ((GPIO_pincfg->Pin_Mode) & (FIRST_TWO_BITS_MASK)) == OUTPUT_MODE )
-                    {
+                    // if ( ((GPIO_pincfg->Pin_Mode) & (FIRST_TWO_BITS_MASK)) == OUTPUT_MODE )
+                    // {
 
                         /*Reciece the value of OTYPE in Local variable*/
                             Local_RegCpy = ((GPIOx_Peri_t*)(GPIO_pincfg->Port))->GPIOx_OTYPER;    
@@ -103,7 +103,7 @@ typedef struct
                         /*Send the configuration to the register*/
                             ((GPIOx_Peri_t*)(GPIO_pincfg->Port))->GPIOx_OTYPER = Local_RegCpy;
                         /*--------------------------------------*/
-                    }
+                    // }
                     /*---------*/  
 
                     /*For PUPDR*/
@@ -127,8 +127,8 @@ typedef struct
                     /*--------*/
 
                     /*For Speed*/
-                    if (((GPIO_pincfg->Pin_Mode) & (FIRST_TWO_BITS_MASK)) == OUTPUT_MODE )
-                    {
+                    // if (((GPIO_pincfg->Pin_Mode) & (FIRST_TWO_BITS_MASK)) == OUTPUT_MODE )
+                    // {
                         /*Reciece the value of MODE in Local variable*/
                             Local_RegCpy = ((GPIOx_Peri_t*)(GPIO_pincfg->Port))->GPIOx_OSPEEDR;    
                         /*-------------------------------------------*/
@@ -144,7 +144,7 @@ typedef struct
                         /*Send the configuration to the register*/
                             ((GPIOx_Peri_t*)(GPIO_pincfg->Port))->GPIOx_OSPEEDR = Local_RegCpy; 
                         /*--------------------------------------*/
-                    }
+                    // }
                     /*--------*/
                 }
                 
