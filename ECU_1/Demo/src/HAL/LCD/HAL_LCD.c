@@ -29,7 +29,7 @@
 #define INDEX_FOR_LINE_4 0X50
 #define WRITE_ON_DDRAM_INDEX 0X80
 
-#define BUFFER_SIZE         35
+#define BUFFER_SIZE         50
 
 typedef enum
 {
@@ -590,7 +590,6 @@ static void LCD_WriteNumber_Proc(void) // 2ms
 
         case LCD_WriteCharacter:
             LCD_WriteData(CircularBuffer.buffer[CircularBuffer.tail].number+48 );//4
-
             if( Global_EnablePinState == LCD_ENABLE_LOW )
             {
                 Global_WriteState = LCD_WriteDone;

@@ -14,7 +14,7 @@
 #define SWITCH_STATUS_CHECKS_THRESHOLD				5
 
 extern const SWITCH_CONFIGURATIONS arrOfSwitches[Number_Of_Switches];
-volatile static u8 Switch_ActualStatus[Number_Of_Switches]={1};
+volatile static u8 Switch_ActualStatus[Number_Of_Switches]={1,1};
 
 /**
  * @brief enumeration for switch status if it's mode is internal pull up
@@ -74,7 +74,7 @@ Sys_enuErrorStates_t HAL_SWITCH_enuGetSwitchState(u8 SWITCH,u32 *Switch_Status)
 	{
 		Error_Status=NULL_POINTER_ERROR;
 	}
-    else if (SWITCH < SWITCH_NUMONE || SWITCH >= Number_Of_Switches)
+    else if (SWITCH < SWITCH_MODE || SWITCH >= Number_Of_Switches)
     {
         Error_Status = INVALID_INPUT_VALUE;
     }
