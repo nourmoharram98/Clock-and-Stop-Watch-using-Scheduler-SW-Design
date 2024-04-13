@@ -590,7 +590,6 @@ static void LCD_WriteNumber_Proc(void) // 2ms
 
         case LCD_WriteCharacter:
             LCD_WriteData(CircularBuffer.buffer[CircularBuffer.tail].number+48 );//4
-
             if( Global_EnablePinState == LCD_ENABLE_LOW )
             {
                 Global_WriteState = LCD_WriteDone;

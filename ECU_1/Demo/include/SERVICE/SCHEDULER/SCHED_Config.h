@@ -25,6 +25,8 @@ typedef enum
 {
     Clock_Date,
     StopWatch,
+    Sender,
+    Receiver,
     Manager,
     Control_Switch,
     LCD,
@@ -40,3 +42,5 @@ extern void Manager_Runnable            (void);
 extern void LCD_Runnable                (void);
 extern void Switch_Debouncing_Runnable  (void);
 extern void ControlSwitches_Runnable    (void);
+extern void Sender_Manager_Runnable     (void);
+extern void Receiver_Manager_Runnable   (void);

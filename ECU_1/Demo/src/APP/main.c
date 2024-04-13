@@ -12,6 +12,8 @@
 
 #include "MCAL/SYSTICK/SYSTICK.h"
 
+#include "MCAL/USART/STM32F401cc_MCAL_USART.h"
+
 #include "SERVICE/SCHEDULER/SCHED.h"
 
 #define RCC_TEST                0
@@ -324,7 +326,7 @@ int main ()
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIA );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIB );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIC );
-
+    RCC_SetAPB2Peripheral       (APB2ENR_USART1);
     // SysTick inits
     SysTick_SetClockSource(SysTick_CLOCK_SOURCE_AHB_8);
     SysTick_SetCurrentVal(0);
@@ -332,8 +334,18 @@ int main ()
     HAL_SWITCH_Init();
     LCD_InitAsync();
     LED_Init();
-    SCHED_Init                  ();
-    SCHED_Start                 ();
+    USART_Pins_Init();
+    NVIC_EnableIRQ(USART1_IRQn);
+    USART_Init();
+    u8 x='N';
+    USART_Request_t Requestone={
+        .length=1,
+        .PtrtoBuffer=&x,
+        .USART_ID=USART1
+    };
+    USART_SendByte(Requestone);
+    // SCHED_Init                  ();
+    // SCHED_Start                 ();
 }
 
 #endif

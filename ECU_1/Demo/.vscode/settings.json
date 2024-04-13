@@ -12,6 +12,10 @@
         "app_config.h": "c",
         "led.h": "c",
         "led_config.h": "c",
-        "nvic.h": "c"
+        "nvic.h": "c",
+        "stm32f401cc_mcal_usart.h": "c",
+        "uart_comm.h": "c",
+        "error_states.h": "c",
+        "mcal_usart_config.h": "c"
     }
 }

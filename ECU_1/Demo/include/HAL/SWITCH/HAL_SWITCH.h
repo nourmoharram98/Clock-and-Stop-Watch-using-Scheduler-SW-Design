@@ -40,8 +40,8 @@
  */
 typedef enum
 {
-	Switch_Released,/**< Switch_Released */
-	Switch_Pressed/**< Switch_Pressed */
+	Switch_Released, /**< Switch_Released */
+	Switch_Pressed   /**< Switch_Pressed */
 }Switch_Status_t;
 
 

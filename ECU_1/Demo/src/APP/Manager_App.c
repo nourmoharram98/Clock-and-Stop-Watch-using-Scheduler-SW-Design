@@ -55,8 +55,17 @@
     #include "HAL/SWITCH/HAL_SWITCH.h"
     #include "APP/Manager.h"
     #include "HAL/LED/LED.h"
+    #include "MCAL/USART/STM32F401cc_MCAL_USART.h"
+    #include "SERVICE/COMM/UART_COMM.h"
 /*--------------------------------------------------------------------*/
-
+/*-----------------------Buttons Macros Data--------------------------*/
+#define MODE_BUTTON                         1
+#define OK_BUTTON                           2 
+#define EDIT_BUTTON                         3
+#define UP_BUTTON                           4
+#define DOWN_BUTTON                         5
+#define RIGHT_BUTTON                        6
+#define LEFT_BUTTON                         7
 /*----------------------------Global Variables-----------------------*/
     u32 Mode=Clock_Mode;
     Operation_Types_t Operation_type=Init_Operation;
@@ -64,17 +73,20 @@
 /*--------------------------------------------------------------------*/
 
 /*----------------------------STATIC FUNCTION-------------------------*/
-    static void Print_ClockFrame();
-    static void Print_StopWatchFrame();
-    static void print_frame_thread(Modes_t Copy_Mode);
-    static void DisplayOnLCD(Modes_t Copy_Mode);
-    static void ChangePrintState(Modes_t Copy_Mode,u8 Copy_PrintState);
+    static void Print_ClockFrame               ( );
+    static void Print_StopWatchFrame           ( );
+    static void print_frame_thread             (Modes_t Copy_Mode);
+    static void DisplayOnLCD                   (Modes_t Copy_Mode);
+    static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
+
+    // static void USART_MOCK_SendByteAsynchZC    (USART_MOCK_Request_t USART_Request);
+    // static void USART_MOCK_ReceiveByteAsynchZC (USART_MOCK_Request_t USART_Request);
 /*--------------------------------------------------------------------*/
 
 void Manager_Runnable(void)
 {
-    u32 Previous_Mode = Mode^1;
-    ChangePrintState(Previous_Mode,DIGIT_STATE_NOT_PRINT);
+    u32 Alternative_Mode = Mode^1;
+    ChangePrintState(Alternative_Mode,DIGIT_STATE_NOT_PRINT);
     
     switch(Operation_type)
     {
@@ -89,11 +101,14 @@ void Manager_Runnable(void)
         break;
 
         case GeneralEdit_Operation:
-            //GeneralEditMode(Mode);
+            //GeneralEditMode();
         break;
 
         case DigitEdit_Operation:
-           // DigitEditMode(Mode);
+           // DigitEditMode();
+           //search 3la el element el 3yzeno 
+           //tkhleh not print
+           //DisplayOnLCD(Mode);
         break;
         
         default:
@@ -198,71 +213,130 @@ static void ChangePrintState(Modes_t Copy_Mode,u8 Copy_PrintState)
 }
 
 void ControlSwitches_Runnable(void)
-{
-    
-    u32 Switch_Mode_Status=0;
-    u32 Switch_Ok_Status=0;
-    static u32 Previous_state_Mode=0;
-    static u32 Switch_Ok_Prev_state=0;
+{ 
 
-    HAL_SWITCH_enuGetSwitchState( SWITCH_NUMONE , &Switch_Mode_Status );
-    HAL_SWITCH_enuGetSwitchState(SWITCH_NUMTWO,&Switch_Ok_Status);
-    
-    if(Switch_Mode_Status==1)
-    {
-        Previous_state_Mode=Switch_Mode_Status;
-    }
-    else if(Previous_state_Mode==1 && Switch_Mode_Status==0)
-    {
-        //Send unique data via uart
-        Mode ^=1;
-        Operation_type=Init_Operation;
-        Previous_state_Mode=Switch_Mode_Status;
-    }
-
-
-
-    if( Switch_Ok_Status==1 )
-    {
-        Switch_Ok_Prev_state=Switch_Ok_Status;
-    }
-    else if( ( Switch_Ok_Prev_state==1 && Switch_Ok_Status==0 ) )
-    {
-        //send unique data via uart
-
-        StopWatch_Status^=1;
-
-        Switch_Ok_Prev_state=Switch_Ok_Status;
-
-        switch ( Mode )
+    /*Setting Switch Data To be sent*/
+        static Ctrl_Switches_Data_t Ctrl_Switches_Data [2] = 
         {
-            case Clock_Mode :
+            [SWITCH_MODE]=
+            {
+                .DATA = 1 ,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
+            [SWITCH_OK] 
+            {
+                .DATA = 2 ,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
+            // [SWITCH_EDIT] 
+            // {
+            //     .DATA = 3 ,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // ,
+            // [SWITCH_UP] 
+            // {
+            //     .DATA = 4,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // ,
+            // [SWITCH_DOWN] 
+            // {
+            //     .DATA = 5,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // , 
+            // [SWITCH_LEFT] 
+            // {
+            //     .DATA = 6,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+            // ,
+            // [SWITCH_RIGHT] 
+            // {
+            //     .DATA = 7,
+            //     .Switch_Status = Switch_Released,
+            //     .Switch_PrevStatus = Switch_Released
+            // }
+        };
+    /*------------------------------*/
 
-                switch (Operation_type)
+    /*SWITCH Reading and Sending Data*/
+        U8 Switches_Iter;
+
+        for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
+        {
+            /*Read Switch State*/
+                HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
+            /*---------------------*/ 
+
+            /*Single Realise Press signal handling and sending data via uart*/
+                if(Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Pressed)
                 {
-                    case GeneralEdit_Operation :
-                        Operation_type = Idle_Operation ;
-                    break;
-
-                    case DigitEdit_Operation :
-                        Operation_type = GeneralEdit_Operation;
-                    break;
-
-                    default :
-
-                    break;
+                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus = Ctrl_Switches_Data[Switches_Iter].Switch_Status;
                 }
+                else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
+                {
+                    /*Send unique data via uart*/
+                        TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+                    /*------------------------*/
 
-            break;
-
-            case StopWatch_Mode :
-                StopWatch_Status ^=1;
-            break;
-
-            default:
-                /*Do Nothing*/
-            break;
+                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+                }
+            /*--------------------------------------------------------------*/    
         }
+    /*-------------------------------*/
 
+}
+
+void Command_Handler(u8 command)
+{
+   // static u8 Edit_counter=0;
+    switch(command)
+    {
+        case MODE_BUTTON:
+            Toggle_Mode();
+            break;
+        case EDIT_BUTTON:
+            break;
+        case OK_BUTTON:
+            break;
+        case UP_BUTTON:
+            break;
+        case DOWN_BUTTON:
+            break;
+        case RIGHT_BUTTON:  
+            break;
+        case LEFT_BUTTON:
+            break;
+        default:
+            break;
     }
 }
+
+void Toggle_Mode(void)
+{
+    Mode ^=1;
+    Operation_type=Init_Operation;
+}
+void Sender_Manager_Runnable(void)
+{
+    Communication_Sender();
+}
+
+
+void Receiver_Manager_Runnable(void)
+{
+    Communication_Receiver();
+}
+
+//yara's functions
+
