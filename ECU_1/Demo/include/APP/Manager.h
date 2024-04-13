@@ -54,5 +54,6 @@ typedef struct
 /*-------------------------------------------------------------------*/
 
 /*------------------------------Functions-----------------------------*/
-void Application_Runnable(void);
+    void Application_Runnable(void);
+    void TX_Communication_Manager(U8 RAW_DATA);
 /*--------------------------------------------------------------------*/

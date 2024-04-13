@@ -56,6 +56,7 @@
     #include "APP/Manager.h"
     #include "HAL/LED/LED.h"
     #include "MCAL/USART/STM32F401cc_MCAL_USART.h"
+    #include "SERVICE/COMM/UART_COMM.h"
 /*--------------------------------------------------------------------*/
 
 /*----------------------------Global Variables-----------------------*/
@@ -77,8 +78,8 @@
 
 void Manager_Runnable(void)
 {
-    u32 Previous_Mode = Mode^1;
-    ChangePrintState(Previous_Mode,DIGIT_STATE_NOT_PRINT);
+    u32 Alternative_Mode = Mode^1;
+    ChangePrintState(Alternative_Mode,DIGIT_STATE_NOT_PRINT);
     
     switch(Operation_type)
     {
@@ -93,11 +94,14 @@ void Manager_Runnable(void)
         break;
 
         case GeneralEdit_Operation:
-            //GeneralEditMode(Mode);
+            //GeneralEditMode();
         break;
 
         case DigitEdit_Operation:
-           // DigitEditMode(Mode);
+           // DigitEditMode();
+           //search 3la el element el 3yzeno 
+           //tkhleh not print
+           DisplayOnLCD(Mode);
         break;
         
         default:
@@ -209,58 +213,54 @@ void ControlSwitches_Runnable(void)
         {
             [SWITCH_MODE]=
             {
-                .DATA = 14 ,
+                .DATA = 1 ,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
             ,
             [SWITCH_OK] 
             {
-                .DATA = 10 ,
+                .DATA = 2 ,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
             ,
             [SWITCH_EDIT] 
             {
-                .DATA = 6 ,
+                .DATA = 3 ,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
             ,
             [SWITCH_UP] 
             {
-                .DATA = 8,
+                .DATA = 4,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
             ,
             [SWITCH_DOWN] 
             {
-                .DATA = 4,
+                .DATA = 5,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
             , 
             [SWITCH_LEFT] 
             {
-                .DATA = 2,
+                .DATA = 6,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
             ,
             [SWITCH_RIGHT] 
             {
-                .DATA = 12,
+                .DATA = 7,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
         };
     /*------------------------------*/
-
-    /*Creating SWITCHs INSTANCE*/
-        //USART_Request_t SWITCH_Request [7];
-    /*-------------------------*/
 
     /*SWITCH Reading and Sending Data*/
         U8 Switches_Iter;
@@ -279,17 +279,7 @@ void ControlSwitches_Runnable(void)
                 else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
                 {
                     /*Send unique data via uart*/
-
-                        Comm_Manager(U8 RAW_Data); 
-
-                        /*Initilzating with the propriate data*/
-                            SWITCH_Request[Switches_Iter].USART_ID = Ctrl_Switches_Data[Switches_Iter].DATA;
-                        /*------------------------------------*/
-
-                        /*SEND the data*/
-                            USART_MOCK_SendByteAsynchZC    (SWITCH_Request[Switches_Iter]);  
-                        /*-------------*/
-
+                        TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
                     /*------------------------*/
 
                     Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
@@ -300,15 +290,6 @@ void ControlSwitches_Runnable(void)
 
 }
 
-// void USART_MOCK_SEND_DATA_RUNNABLE (void)
-// {
-
-// }
-
-// void USART_MOCK_RECEIVE_DATA_RUNNABLE (void)
-// {
-
-// }
 
 void Sender_Manager_Runnable(void)
 {
@@ -320,3 +301,6 @@ void Receiver_Manager_Runnable(void)
 {
     Communication_Receiver();
 }
+
+//yara's functions
+

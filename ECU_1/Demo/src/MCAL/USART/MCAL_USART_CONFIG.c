@@ -1,6 +1,6 @@
 #include "./MCAL/USART/STM32F401cc_MCAL_USART.h"
 #include "./MCAL/USART/MCAL_USART_CONFIG.h"
-
+#include "./MCAL/GPIO/GPIO.h"
 
 
 const USART_Configurations_t USARTs_Configurations[Number_Of_USARTS]=
@@ -25,5 +25,20 @@ const USART_Configurations_t USARTs_Configurations[Number_Of_USARTS]=
     }
 };
 
+
+const GPIO_Pin_t USART_Pins[USART_PINS_NUM]={
+    [USART_TX_PIN]={
+        .Pin_Mode=GPIO_MODE_AF_PP,
+        .Pin_Speed=GPIO_SPEED_MED,
+        .Port=GPIO_PORT_B_,
+        .Pin_num=GPIO_PIN_6
+    },
+    [USART_RX_PIN]={
+        .Pin_Mode=GPIO_MODE_AF_PP,
+        .Pin_Speed=GPIO_SPEED_MED,
+        .Port=GPIO_PORT_B_,
+        .Pin_num=GPIO_PIN_7
+    }
+};
 
 const u32 USART_CLKFreqs[Number_Of_USARTS]={16000000,16000000};

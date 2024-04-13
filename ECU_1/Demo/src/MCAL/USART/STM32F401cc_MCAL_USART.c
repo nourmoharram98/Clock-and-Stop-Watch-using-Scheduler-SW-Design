@@ -1,7 +1,7 @@
 #include"Std_Types.h"
 #include"Error_states.h"
 #include"MCAL/USART/STM32F401cc_MCAL_USART.h"
-
+#include"MCAL/GPIO/GPIO.h"
 /**
  * @brief Macros used in implementation
  * 
@@ -62,6 +62,7 @@ typedef struct
 
 const USART_Configurations_t USARTs_Configurations[Number_Of_USARTS];
 const u32 USART_CLKFreqs[Number_Of_USARTS];
+extern const GPIO_Pin_t USART_Pins[USART_PINS_NUM];
 Tx_ReqHandling_t tx_requests[Number_Of_USARTS];
 Rx_ReqHandling_t rx_requests[Number_Of_USARTS];
 
@@ -122,6 +123,23 @@ Sys_enuErrorStates_t USART_Init(void)
     return Error_Status;
 }
 
+
+Sys_enuErrorStates_t USART_Pins_Init(void)
+{
+    Sys_enuErrorStates_t Error_Status=NOT_OK;
+    GPIO_Pin_t Local_Pin_Data;
+    for(u8 index=0;index<USART_PINS_NUM;index++)
+    {
+        Local_Pin_Data.Port=USART_Pins[index].Port;
+        Local_Pin_Data.Pin_num=USART_Pins[index].Pin_num;
+        Local_Pin_Data.Pin_Mode=USART_Pins[index].Pin_Mode;
+        Local_Pin_Data.Pin_Speed=USART_Pins[index].Pin_Speed;
+        GPIO_Init(&Local_Pin_Data);
+        GPIO_CFG_AlternateFunction(Local_Pin_Data.Port,Local_Pin_Data.Pin_num,GPIO_FUNC_AF7);
+    }
+
+    return Error_Status;
+}
 
 Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
 {
