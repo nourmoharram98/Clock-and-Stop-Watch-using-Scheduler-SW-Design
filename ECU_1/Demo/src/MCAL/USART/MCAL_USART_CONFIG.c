@@ -30,13 +30,13 @@ const GPIO_Pin_t USART_Pins[USART_PINS_NUM]={
     [USART_TX_PIN]={
         .Pin_Mode=GPIO_MODE_AF_PP,
         .Pin_Speed=GPIO_SPEED_MED,
-        .Port=GPIO_PORT_B_,
+        .Port=GPIO_PORT_B,
         .Pin_num=GPIO_PIN_6
     },
     [USART_RX_PIN]={
         .Pin_Mode=GPIO_MODE_AF_PP,
         .Pin_Speed=GPIO_SPEED_MED,
-        .Port=GPIO_PORT_B_,
+        .Port=GPIO_PORT_B,
         .Pin_num=GPIO_PIN_7
     }
 };

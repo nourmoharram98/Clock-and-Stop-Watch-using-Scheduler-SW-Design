@@ -135,7 +135,7 @@ Sys_enuErrorStates_t USART_Pins_Init(void)
         Local_Pin_Data.Pin_Mode=USART_Pins[index].Pin_Mode;
         Local_Pin_Data.Pin_Speed=USART_Pins[index].Pin_Speed;
         GPIO_Init(&Local_Pin_Data);
-        GPIO_CFG_AlternateFunction(Local_Pin_Data.Port,Local_Pin_Data.Pin_num,GPIO_FUNC_AF7);
+        GPIO_CFG_AlternateFunction(USART_Pins[index].Port,USART_Pins[index].Pin_num,GPIO_FUNC_AF7);
     }
 
     return Error_Status;
