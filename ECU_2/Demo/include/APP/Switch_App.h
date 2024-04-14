@@ -13,9 +13,14 @@
 #define CMD_SET     1
 #define CMD_RESET   0
 
-#define NUM_SWITCHES 3
+#define NUM_SWITCHES 7
 
 // Define switch indices for easier access
-#define MODE_SWITCH_INDEX  0
-#define OK_SWITCH_INDEX    1
-#define EDIT_SWITCH_INDEX  2
+#define MODE_SWITCH_INDEX   0
+#define OK_SWITCH_INDEX     1
+#define EDIT_SWITCH_INDEX   2
+
+#define UP_SWITCH_INDEX     3
+#define DOWN_SWITCH_INDEX   4
+#define LEFT_SWITCH_INDEX   5
+#define RIGHT_SWITCH_INDEX  6

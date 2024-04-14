@@ -15,6 +15,8 @@
  * @brief LEAP YEAR AND MONTHS DAYS HANDLING
 */
 
+unit_Info_t EDIT_CURSOR={.x_pos=1,.y_pos=1};
+
 unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
 {
     [DeciSecond_hundred]=
@@ -132,7 +134,7 @@ static int days_in_month(int month, int year)
 void Clock_Date_Runnable(void) 
 {
 
-    // Update Deci, Sec , Min , Hours and Days, months, Years
+// Update Deci, Sec , Min , Hours and Days, months, Years
 
     Clock_Date_Digits[DeciSecond_hundred].value++;
     Clock_Date_Digits[DeciSecond_hundred].digit_state=DIGIT_STATE_PRINT;
@@ -305,6 +307,7 @@ void Clock_Date_Runnable(void)
         }
 
     }
+  
 }
 
 

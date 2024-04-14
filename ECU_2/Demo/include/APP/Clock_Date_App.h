@@ -62,6 +62,8 @@
 
 #define Deci_Hundred_Position     12
 
+
+
 typedef struct 
 {
           u8    value;

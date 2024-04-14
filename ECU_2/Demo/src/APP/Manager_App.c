@@ -52,7 +52,7 @@
  #include "Std_Types.h"
  #include "HAL/LCD/LCD.h"
  #include "APP/Manager.h"
-
+ #include "APP/Clock_Date_App.h"
 
  #define Manager_Periodicity 4
 
@@ -120,6 +120,11 @@ typedef enum
         CLOCK_OPERATING_RUN
     }CLOCK_OPERATING_STATES_t;
 
+    typedef enum 
+    {
+        CLOCK_EDITING_GENERAL,
+        CLOCK_EDITING_DIGIT
+    }CLOCK_EDITING_STATE_t ;
 /*-------------------------------------------------------------------*/
 
 
@@ -143,13 +148,28 @@ typedef enum
 
 
 /*---------------------------Static Functions------------------------*/
-    static void CLOCK_OPERATING_INIT_THREAD(void);
-    static void CLOCK_OPERATING_RUN_THREAD(void);
-    static void CLOCK_THREAD(void);
+    static void CLOCK_PROGRAM(void);//CLOCK MAIN PROGRAM
+        static void CLOCK_OPERATING_PROCESS(void);//CLOCK OPERATING PROCESS
+            static void CLOCK_OPERATING_INIT_THREAD(void);
+            static void CLOCK_OPERATING_RUN_THREAD(void);
+                static void CLOCK_OPERATING_RUN_PRINT_FUNCTION(void);
+                static void CLOCK_OPERATING_RUN_MODE_CMD_FUNCTION(void);
+                static void CLOCK_OPERATING_RUN_EDIT_CMD_FUNCTION(void);
 
-    static void STOP_WATCH_THREAD(void);
-    static void STOP_WATCH_INIT_THREAD(void);
-    static void STOP_WATCH_RUN_THREAD(void);
+        static void CLOCK_EDITING_PROCESS(void);
+            static void CLOCK_EDITING_GENERAL_THREAD(void);
+                static void CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION(void);
+                static void CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION(void);
+
+            static void CLOCK_EDITING_DIGIT_THREAD(void);
+                static void CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION(void);
+                static void CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION(void);
+
+
+    static void STOP_WATCH_PROGRAM(void);
+        static void STOP_WATCH_OPERATING_PROCESS(void);
+            static void STOP_WATCH_INIT_THREAD(void);
+            static void STOP_WATCH_RUN_THREAD(void);
 /*-------------------------------------------------------------------*/
 
 
@@ -161,7 +181,7 @@ typedef enum
 
 /*----------------------------General Modes -------------------------*/
 
-MODE_t    MODE                                = MODE_CLOCK;
+MODE_t    PROGRAM_MODE                                = MODE_CLOCK;
 COMMAND_t COMMAND                             = COMMAND_IDLE;
 /*-------------------------------------------------------------------*/
 
@@ -175,6 +195,7 @@ static CLOCK_OPERATING_STATES_t      CLOCK_OPERATING_STATE      = CLOCK_OPERATIN
 static INIT_STATES_t CLOCK_OPERATING_INIT_STATE = SET_CURSOR_FIRST_LINE;
 static OPERATING_RUN_STATES_t  CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;
 
+static CLOCK_EDITING_STATE_t         CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
     
 /*-------------------------------------------------------------------*/
 
@@ -195,27 +216,43 @@ static OPERATING_RUN_STATES_t STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
 void Application_Runnable(void)
 {
 
-    switch (MODE)
+    switch (PROGRAM_MODE)
     {
         case MODE_CLOCK:
-            CLOCK_THREAD();
+            CLOCK_PROGRAM();
         break;
 
         case MODE_STOPWATCH:
-            STOP_WATCH_THREAD();
+            STOP_WATCH_PROGRAM();
         break;    
 
     }
 
 }
 
-/*----------------------------------CLOCK_THREAD---------------------------------*/
+/**************************** CLOCK IMPLEMENTATION ************************************/
 
-    /*--------------------------CLOCK_THREAD_Manager---------------------------*/
-        static void CLOCK_THREAD(void)
+
+    static void CLOCK_PROGRAM(void)
         {
-  
+            switch (CLOCK.OPTION)
+            {
 
+            case CLOCK_OPTION_OPERATING:
+            CLOCK_OPERATING_PROCESS();
+                break;
+
+            case CLOCK_OPTION_EDITING:
+            CLOCK_EDITING_PROCESS();
+
+                break;
+            default:
+                break;
+            }   
+        }
+        
+        static void CLOCK_OPERATING_PROCESS(void)
+        {
             switch (CLOCK_OPERATING_STATE)
             {
                 case CLOCK_OPERATING_INIT:
@@ -229,12 +266,10 @@ void Application_Runnable(void)
                 default:
 
                 break;
-            }     
+            }              
         }
-    /*-------------------------------------------------------------------------*/
-
-    /*--------------------------CLK_print_frame_thread-------------------------*/
-        static void CLOCK_OPERATING_INIT_THREAD() //period = 4
+            
+            static void CLOCK_OPERATING_INIT_THREAD(void) //period = 4
         {
              CLOCK.COUNTER+=Manager_Periodicity;
              for(int i=0;i<15;i++)
@@ -293,15 +328,15 @@ void Application_Runnable(void)
             }
 
         }   
-    
-    /*-------------------------------------------------------------------------*/
-
-    /*------------------------------CLK_RUN_THREAD-----------------------------*/
-
-
-        static void CLOCK_OPERATING_RUN_THREAD(void)
+            static void CLOCK_OPERATING_RUN_THREAD(void)
         {
-            if(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+            CLOCK_OPERATING_RUN_PRINT_FUNCTION   (); // FUNCTION USED TO PRINT ALL CHANGED DIGITS
+            CLOCK_OPERATING_RUN_MODE_CMD_FUNCTION(); // FUNCTION USED TO CHANGE TO THE OTHER PROGRAM MODE
+            CLOCK_OPERATING_RUN_EDIT_CMD_FUNCTION(); // FUNCTION USED TO CHANGE TO EDITING PROCESS
+        }
+                static void CLOCK_OPERATING_RUN_PRINT_FUNCTION(void)
+        {
+                        if(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
             {
                 switch (CLOCK_OPERATING_RUN_STATE)
                 {
@@ -334,148 +369,220 @@ void Application_Runnable(void)
                     CLOCK_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
                 }
             }
+        }
+                static void CLOCK_OPERATING_RUN_MODE_CMD_FUNCTION(void)
+        {
             if(CMD[MODE_SWITCH_INDEX]==1)
             {
-                MODE=MODE_STOPWATCH;
+                PROGRAM_MODE=MODE_STOPWATCH;
                 STOP_WATCH_OPERATING_STATE      = STOP_WATCH_INIT;
                 STOP_WATCH_OPERATING_RUN_STATE  = SET_CURSOR;                
 
-            }            
+            }
+        }
+                static void CLOCK_OPERATING_RUN_EDIT_CMD_FUNCTION(void)
+        {
+
+            if(CMD[EDIT_SWITCH_INDEX]==1)
+            {
+                CLOCK.OPTION=CLOCK_OPTION_EDITING;
+
+            }  
         }
 
-    /*-------------------------------------------------------------------------*/
-    
-/*-------------------------------------------------------------------------------*/
-static void STOP_WATCH_THREAD()
-{
-    switch (STOP_WATCH_OPERATING_STATE)
-    {
-        case STOP_WATCH_INIT:
-            STOP_WATCH_INIT_THREAD();
-            break;
 
-        case STOP_WATCH_RUN:
-            STOP_WATCH_RUN_THREAD();
-            break;
-
-        default:
-            break;
-    }   
-}
-
-
-static void STOP_WATCH_INIT_THREAD(void)
-{
-             STOP_WATCH.COUNTER+=Manager_Periodicity;
-             for(int i=0;i<7;i++)
-             {
-                Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
-             }             
-            switch(STOP_WATCH_INIT_STATE)
+        static void CLOCK_EDITING_PROCESS(void)
+        {
+            switch (CLOCK_EDITING_STATE)
             {
-                case SET_CURSOR_FIRST_LINE:
-                   LCD_ClearScreenAsync();
-                    STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
+            case CLOCK_EDITING_GENERAL:
+                CLOCK_EDITING_GENERAL_THREAD();
                 break;
-                case PRINT_FIRST_LINE:
-
-                    LCD_enuWriteStringAsync("STOPWATCH",9); // (16 x 2) x 2 = 64 ms  -> 70 ms
-                    
-                    STOP_WATCH_INIT_STATE=WAIT_1;
-
+            case CLOCK_EDITING_DIGIT:
+                CLOCK_EDITING_DIGIT_THREAD();
                 break;
-
-                case WAIT_1:
-                    if(STOP_WATCH.COUNTER>=70)
-                    {
-                        STOP_WATCH.COUNTER=0;
-                    STOP_WATCH_INIT_STATE=SET_CURSOR_SECOND_LINE;
-                    }
-                break;
-
-                case SET_CURSOR_SECOND_LINE:
                 
-                    LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
-                
-                    STOP_WATCH_INIT_STATE = PRINT_SECOND_LINE;
-                    STOP_WATCH.COUNTER=0;
+            
+            default:
                 break;
+            }          
+        }
 
-                case PRINT_SECOND_LINE:
-                    LCD_enuWriteStringAsync("    :  :  : 00",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
-                    STOP_WATCH_INIT_STATE=WAIT_2;
-                break;
-
-                case WAIT_2:
-                    if(STOP_WATCH.COUNTER>=70)
-                    {
-                        STOP_WATCH.COUNTER=0;
-                        STOP_WATCH_INIT_STATE=END;
-                    }
-                break;
-
-                case END:
-                    STOP_WATCH_OPERATING_STATE = STOP_WATCH_RUN;
-                    STOP_WATCH.COUNTER=0;
-                    STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
-                    STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
-                break;  
+            static void CLOCK_EDITING_GENERAL_THREAD(void)
+            {
+                CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION();
+                CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION();
             }
-}
-static void STOP_WATCH_RUN_THREAD(void)
-{
-             if(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
-            {
-                switch (STOP_WATCH_OPERATING_RUN_STATE)
+               static void CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION(void)
                 {
-                    case SET_CURSOR:
-                        LCD_SetCursorPosAsync(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].x_pos, Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].y_pos);
-                        STOP_WATCH_OPERATING_RUN_STATE = WRITE_NUMBER;
+                    if(CMD[OK_SWITCH_INDEX]==1)
+                    {
+                        CLOCK.OPTION=CLOCK_OPTION_OPERATING;
+
+                    }   
+                }
+               static void CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION(void)
+               {
+                    if(CMD[EDIT_SWITCH_INDEX]==1)
+                    {
+                        CLOCK_EDITING_STATE=CLOCK_EDITING_DIGIT;
+
+                    }   
+               } 
+            static void CLOCK_EDITING_DIGIT_THREAD(void)
+            {
+                CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION();
+                CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION();
+            }
+                static void CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION(void)
+                {
+                    if(CMD[OK_SWITCH_INDEX]==1)
+                    {
+                        CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
+
+                    }   
+                }
+                static void CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION(void)
+                {
+                    if(CMD[EDIT_SWITCH_INDEX]==1)
+                    {
+                        CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
+                    }   
+                }
+
+/**************************** STOP WATCH IMPLEMENTATION *******************************/
+    static void STOP_WATCH_PROGRAM()
+        {
+            STOP_WATCH_OPERATING_PROCESS();
+        }
+        static void STOP_WATCH_OPERATING_PROCESS(void)
+        {
+            switch (STOP_WATCH_OPERATING_STATE)
+            {
+                case STOP_WATCH_INIT:
+                    STOP_WATCH_INIT_THREAD();
                     break;
 
-                    case WRITE_NUMBER:
-                        LCD_enuWriteNumber(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].value);
+                case STOP_WATCH_RUN:
+                    STOP_WATCH_RUN_THREAD();
+                    break;
 
-                        STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+                default:
+                    break;
+            }             
+        }
+            static void STOP_WATCH_INIT_THREAD(void)
+        {
+                    STOP_WATCH.COUNTER+=Manager_Periodicity;
+                    for(int i=0;i<7;i++)
+                    {
+                        Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+                    }             
+                    switch(STOP_WATCH_INIT_STATE)
+                    {
+                        case SET_CURSOR_FIRST_LINE:
+                        LCD_ClearScreenAsync();
+                            STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
+                        break;
+                        case PRINT_FIRST_LINE:
 
-                        Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                            LCD_enuWriteStringAsync("STOPWATCH",9); // (16 x 2) x 2 = 64 ms  -> 70 ms
+                            
+                            STOP_WATCH_INIT_STATE=WAIT_1;
+
+                        break;
+
+                        case WAIT_1:
+                            if(STOP_WATCH.COUNTER>=70)
+                            {
+                                STOP_WATCH.COUNTER=0;
+                            STOP_WATCH_INIT_STATE=SET_CURSOR_SECOND_LINE;
+                            }
+                        break;
+
+                        case SET_CURSOR_SECOND_LINE:
                         
+                            LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+                        
+                            STOP_WATCH_INIT_STATE = PRINT_SECOND_LINE;
+                            STOP_WATCH.COUNTER=0;
+                        break;
+
+                        case PRINT_SECOND_LINE:
+                            LCD_enuWriteStringAsync("    :  :  : 00",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+                            STOP_WATCH_INIT_STATE=WAIT_2;
+                        break;
+
+                        case WAIT_2:
+                            if(STOP_WATCH.COUNTER>=70)
+                            {
+                                STOP_WATCH.COUNTER=0;
+                                STOP_WATCH_INIT_STATE=END;
+                            }
+                        break;
+
+                        case END:
+                            STOP_WATCH_OPERATING_STATE = STOP_WATCH_RUN;
+                            STOP_WATCH.COUNTER=0;
+                            STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
+                            STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+                        break;  
+                    }
+        }
+            static void STOP_WATCH_RUN_THREAD(void)
+        {
+                    if(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+                    {
+                        switch (STOP_WATCH_OPERATING_RUN_STATE)
+                        {
+                            case SET_CURSOR:
+                                LCD_SetCursorPosAsync(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].x_pos, Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].y_pos);
+                                STOP_WATCH_OPERATING_RUN_STATE = WRITE_NUMBER;
+                            break;
+
+                            case WRITE_NUMBER:
+                                LCD_enuWriteNumber(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].value);
+
+                                STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+
+                                Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                                
+                                STOP_WATCH_DIGIT_ITERATOR++;
+                                if(STOP_WATCH_DIGIT_ITERATOR > 6)
+                                {
+                                    STOP_WATCH_DIGIT_ITERATOR= 0;
+                                }
+                            break; 
+                        }   
+                    }
+                    else // DIGIT_STATE_NOT_PRINT
+                    {
                         STOP_WATCH_DIGIT_ITERATOR++;
                         if(STOP_WATCH_DIGIT_ITERATOR > 6)
                         {
-                            STOP_WATCH_DIGIT_ITERATOR= 0;
+                            STOP_WATCH_DIGIT_ITERATOR = 0;
+                            STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
                         }
-                    break; 
-                }   
-            }
-            else // DIGIT_STATE_NOT_PRINT
-            {
-                STOP_WATCH_DIGIT_ITERATOR++;
-                if(STOP_WATCH_DIGIT_ITERATOR > 6)
-                {
-                    STOP_WATCH_DIGIT_ITERATOR = 0;
-                    STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
-                }
-            }
-            if(CMD[MODE_SWITCH_INDEX]==1)
-            {
-                MODE=MODE_CLOCK;
-                CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
-                CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
+                    }
+                    if(CMD[MODE_SWITCH_INDEX]==1)
+                    {
+                        PROGRAM_MODE=MODE_CLOCK;
+                        CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
+                        CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
 
-            } 
-            if(CMD[OK_SWITCH_INDEX]==1)
-            {
-                STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
-            }
-            if(CMD[EDIT_SWITCH_INDEX]==1)
-            {
-            for(int i=0;i<7;i++)
-             {
-                Stop_Watch_Digits[i].value=0;
-                Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
-             }   
-            }
-}
+                    } 
+                    if(CMD[OK_SWITCH_INDEX]==1)
+                    {
+                        STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
+                    }
+                    if(CMD[EDIT_SWITCH_INDEX]==1)
+                    {
+                    for(int i=0;i<7;i++)
+                    {
+                        Stop_Watch_Digits[i].value=0;
+                        Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+                    }   
+                    }
+        }
 
 

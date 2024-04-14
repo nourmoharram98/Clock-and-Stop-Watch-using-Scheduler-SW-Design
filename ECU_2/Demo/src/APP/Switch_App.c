@@ -13,9 +13,14 @@ uint32 CMD[NUM_SWITCHES]={CMD_RESET};
 void ControlSwitches_Runnable(void)
 {
     // Get the current state of each switch
-    HAL_SWITCH_enuGetSwitchState (SWITCH_MODE , &switch_states[MODE_SWITCH_INDEX]);
-    HAL_SWITCH_enuGetSwitchState (SWITCH_OK   , &switch_states[OK_SWITCH_INDEX]  );
-    HAL_SWITCH_enuGetSwitchState (SWITCH_EDIT , &switch_states[EDIT_SWITCH_INDEX]);
+    HAL_SWITCH_enuGetSwitchState (SWITCH_MODE  , &switch_states[MODE_SWITCH_INDEX] );
+    HAL_SWITCH_enuGetSwitchState (SWITCH_OK    , &switch_states[OK_SWITCH_INDEX]   );
+    HAL_SWITCH_enuGetSwitchState (SWITCH_EDIT  , &switch_states[EDIT_SWITCH_INDEX] );
+
+    HAL_SWITCH_enuGetSwitchState (SWITCH_UP    , &switch_states[UP_SWITCH_INDEX]   );
+    HAL_SWITCH_enuGetSwitchState (SWITCH_DOWN  , &switch_states[DOWN_SWITCH_INDEX] );
+    HAL_SWITCH_enuGetSwitchState (SWITCH_LEFT  , &switch_states[LEFT_SWITCH_INDEX] );
+    HAL_SWITCH_enuGetSwitchState (SWITCH_RIGHT , &switch_states[RIGHT_SWITCH_INDEX]);
 
     for(int i=0;i<NUM_SWITCHES;i++)
     {
