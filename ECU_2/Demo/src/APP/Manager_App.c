@@ -137,8 +137,17 @@ typedef enum
     {
         uint8 x_pos;
         uint8 y_pos;
-        uint8 value;
+        sint8 value;
     }EDIT_CURSOR_t;
+
+    typedef enum 
+    {
+        DIGIT_EDIT_PRINT1,
+        DIGIT_EDIT_PRINT2,
+        DIGIT_EDIT_SET_CURSOR1,
+        DIGIT_EDIT_PRINT3,
+        DIGIT_EDIT_SET_CURSOR2
+    }DIGIT_EDIT_STATE_t;
 /*-------------------------------------------------------------------*/
 
 
@@ -181,6 +190,8 @@ typedef enum
             static void CLOCK_EDITING_DIGIT_THREAD(void);
                 static void CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION(void);
                 static void CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION(void);
+                static void CLOCK_EDITING_DIGIT_UP_CMD_FUNCTION(void);
+                static void CLOCK_EDITING_DIGIT_DOWN_CMD_FUNCTION(void);
 
 
     static void STOP_WATCH_PROGRAM(void);
@@ -216,6 +227,7 @@ static CLOCK_EDITING_STATE_t         CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
 static EDIT_CURSOR_t EDIT_TEMP_VALUE={.x_pos=1,.y_pos=7};
 static sint8 EDIT_INDEX=0;
 static GENERAL_EDIT_STATE_t GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT1;
+static DIGIT_EDIT_STATE_t   DIGIT_EDIT_STATE=0;
 /*-------------------------------------------------------------------*/
 
 /*-------------------------- STOP WATCH MODE ------------------------*/
@@ -521,17 +533,72 @@ void Application_Runnable(void)
                     EDIT_TEMP_VALUE.value=Clock_Date_Digits[EDIT_INDEX].value;
 
                }
+            
             static void CLOCK_EDITING_DIGIT_THREAD(void)
             {
+                if(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+                {
+                    Clock_Date_Digits[EDIT_INDEX].digit_state=DIGIT_STATE_NOT_PRINT;//disable printing the real value of the edit digit
+
+                    switch (DIGIT_EDIT_STATE)
+                    {
+                    case DIGIT_EDIT_PRINT1:
+                        LCD_SetCursorPosAsync(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].x_pos, Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].y_pos);
+                        DIGIT_EDIT_STATE=DIGIT_EDIT_PRINT2;
+                        break;
+                    case DIGIT_EDIT_PRINT2:
+                        LCD_enuWriteNumber(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].value);
+                        DIGIT_EDIT_STATE=DIGIT_EDIT_SET_CURSOR1;
+                        break;
+                    case DIGIT_EDIT_SET_CURSOR1:
+                        LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
+                        DIGIT_EDIT_STATE=DIGIT_EDIT_PRINT3;
+                        break;
+                    case DIGIT_EDIT_PRINT3:
+                        LCD_enuWriteNumber(EDIT_TEMP_VALUE.value);
+                        DIGIT_EDIT_STATE=DIGIT_EDIT_SET_CURSOR2;
+
+                        break;
+                    case DIGIT_EDIT_SET_CURSOR2:
+                        LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
+                        Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                        CLOCK_DIGIT_ITERATOR++;
+                        if(CLOCK_DIGIT_ITERATOR > 14)
+                        {
+                            CLOCK_DIGIT_ITERATOR= 0;
+                        }
+                        DIGIT_EDIT_STATE=DIGIT_EDIT_PRINT1;
+
+                        break;
+                    default:
+                        break;
+                    }
+
+                }else
+                {
+                    CLOCK_DIGIT_ITERATOR++;
+                    if(CLOCK_DIGIT_ITERATOR > 14)
+                    {
+                        CLOCK_DIGIT_ITERATOR = 0;
+                        GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT1; // Reset mystate when wrapping around
+                    }
+                }
+
+                CLOCK_EDITING_DIGIT_UP_CMD_FUNCTION();
+                CLOCK_EDITING_DIGIT_DOWN_CMD_FUNCTION();
                 CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION();
                 CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION();
+
             }
                 static void CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION(void)
                 {
                     if(CMD[OK_SWITCH_INDEX]==1)
                     {
-                        CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
+                        Clock_Date_Digits[EDIT_INDEX].value=EDIT_TEMP_VALUE.value; //for saving
 
+                        Clock_Date_Digits[EDIT_INDEX].digit_state=DIGIT_STATE_PRINT;
+
+                        CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
                     }   
                 }
                 static void CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION(void)
@@ -539,9 +606,122 @@ void Application_Runnable(void)
                     if(CMD[EDIT_SWITCH_INDEX]==1)
                     {
                         CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
-                    }   
-                }
 
+                        Clock_Date_Digits[EDIT_INDEX].digit_state=DIGIT_STATE_PRINT;
+
+                    } 
+                }
+                static void CLOCK_EDITING_DIGIT_UP_CMD_FUNCTION(void)
+                {
+                   if(CMD[UP_SWITCH_INDEX]==1)
+                    {
+                        EDIT_TEMP_VALUE.value++;
+
+                        /*Days Handling*/
+
+                            /*Days Tens*/
+                                if(EDIT_INDEX==Day_tens)
+                                {
+                                    if(EDIT_TEMP_VALUE.value>3)
+                                    {
+                                        EDIT_TEMP_VALUE.value=0;
+                                    }
+                                }
+                            /*---------*/   
+
+                            /*Days Units*/
+                                if(EDIT_INDEX==Day_unit)
+                                {
+
+                                    if (Clock_Date_Digits[Day_tens].value == 0)
+                                    {
+                                        if(EDIT_TEMP_VALUE.value>9)
+                                        {
+                                            EDIT_TEMP_VALUE.value=1;
+                                        }
+                                    }
+
+                                    if (Clock_Date_Digits[Day_tens].value > 0 && Clock_Date_Digits[Day_tens].value < 3 )
+                                    {
+                                        if(EDIT_TEMP_VALUE.value>9)
+                                        {
+                                            EDIT_TEMP_VALUE.value=0;
+                                        }
+                                    }
+
+                                    if(Clock_Date_Digits[Day_tens].value == 3)
+                                    {
+                                        if ( EDIT_TEMP_VALUE.value>1 )
+                                        {
+                                            EDIT_TEMP_VALUE.value=0;
+                                        }
+                                    }
+                                    
+                                }
+                            /*----------*/   
+
+                        /*-------------*/
+
+                        /*Month Handling*/
+
+                            /*Month tens*/
+                                if(EDIT_INDEX==Month_tens)
+                                {
+                                    if(EDIT_TEMP_VALUE.value>1)
+                                    {
+                                        EDIT_TEMP_VALUE.value=0;
+                                    }
+                                }
+                            /*----------*/    
+
+                            /*Month unit*/
+                                if(EDIT_INDEX == Month_unit)
+                                {
+                                    if ( Clock_Date_Digits[Month_tens].value == 0 )
+                                    {
+                                        if (EDIT_TEMP_VALUE.value > 9)
+                                        {
+                                            EDIT_TEMP_VALUE.value=1;
+                                        }
+                                    }
+
+                                    if ( Clock_Date_Digits[Month_tens].value == 1 )
+                                    {
+                                        if (EDIT_TEMP_VALUE.value > 1)
+                                        {
+                                            EDIT_TEMP_VALUE.value=0;
+                                        }
+                                    }
+                                }
+                            /*----------*/
+
+                        /*-------------*/
+
+                        /*Year Handling*/
+
+                            
+
+
+                        /*-------------*/
+
+
+                    }   
+
+                }
+                static void CLOCK_EDITING_DIGIT_DOWN_CMD_FUNCTION(void)
+                {
+                   if(CMD[DOWN_SWITCH_INDEX]==1)
+                    {
+                        if(EDIT_INDEX==Day_tens)
+                        {
+                        EDIT_TEMP_VALUE.value--;
+                        if(EDIT_TEMP_VALUE.value<1)
+                        {
+                            EDIT_TEMP_VALUE.value=3;
+                        }
+                        }
+                    }  
+                }
 /**************************** STOP WATCH IMPLEMENTATION *******************************/
     static void STOP_WATCH_PROGRAM()
         {
