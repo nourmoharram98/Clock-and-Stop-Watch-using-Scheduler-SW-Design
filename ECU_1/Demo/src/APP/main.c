@@ -317,7 +317,6 @@ int main ()
 #endif
 
 #if DEMO_TEST_1
-
 int main ()
 {
     RCC_EnableClock				( CLK_HSI );
@@ -327,7 +326,6 @@ int main ()
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIB );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIC );
     RCC_SetAPB2Peripheral       (APB2ENR_USART1);
-    // SysTick inits
     SysTick_SetClockSource(SysTick_CLOCK_SOURCE_AHB_8);
     SysTick_SetCurrentVal(0);
     SysTick_EnableInterrupt();
@@ -337,19 +335,32 @@ int main ()
     USART_Pins_Init();
     NVIC_EnableIRQ(USART1_IRQn);
     USART_Init();
-    u8 x[2]="N";
+   u8 x;
     USART_Request_t Requestone={
-        .length=2,
-        .PtrtoBuffer=x,
+        .length=1,
+        .PtrtoBuffer=&x,
         .USART_ID=USART1
     };
-    USART_SendByte(Requestone);
-    while(1)
-    {
+   // USART_SendByte(Requestone);
+   //USART_SendByteAsynchZC(Requestone);
+     USART_ReceiveByteAsynchZC(Requestone);
+//     LED_SetStatus(Nour_LED,LED_SET_ON);
 
-    }
-    // SCHED_Init                  ();
-    // SCHED_Start                 ();
+//    while(1)
+//    {
+//         if(x=='M')
+//         {
+//             LED_SetStatus(Nour_LED,LED_SET_ON);
+//         }
+//         if(x=='N')
+//         {
+//             LED_SetStatus(Nour_LED,LED_SET_OFF);
+//         }
+//    }
+    
+    SCHED_Init                  ();
+    SCHED_Start                 ();
+
 }
 
 #endif

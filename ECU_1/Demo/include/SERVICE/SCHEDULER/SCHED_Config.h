@@ -25,12 +25,12 @@ typedef enum
 {
     Clock_Date,
     StopWatch,
-    Sender,
-    Receiver,
-    Manager,
     Control_Switch,
+    Receiver,
+    Sender,
+    Manager,
     LCD,
-    Switch_Debouncing,
+   Switch_Debouncing,
     _Runnable_no
 } RunnablePriority_t;
 

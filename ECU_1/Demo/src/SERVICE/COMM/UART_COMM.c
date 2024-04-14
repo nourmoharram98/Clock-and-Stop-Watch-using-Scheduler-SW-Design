@@ -2,9 +2,14 @@
 
 #define DATA_SIZE 4 // Size of data in bits
 
+//from USART.c and carry the received request
+extern u8 Received_Request;
+
+
+
 u8 Requests_Buffer[NUMBER_OF_REQUESTS];
 //u8 Received_Requests[NUMBER_OF_REQUESTS];
-static u8 ComMnager_counter=0;
+volatile u8 ComMnager_counter=0;
 
 // Communication Manager function
 void TX_Communication_Manager(U8 RAW_DATA) 
@@ -75,7 +80,7 @@ void process_received_data(U8 received_data)
         // which_switch(received_data_only);
         //switch 3la el button el adas
         //call corresponding function aw change the corresponding flag
-        Command_Handler(received_data);
+        Command_Handler(received_data_only);
     } 
     else 
     {
@@ -119,6 +124,7 @@ Sys_enuErrorStates_t Communication_Sender(void)
                 .USART_ID=USART1,
                 .PtrtoBuffer=&Copy_Data,
                 .length=1,
+                .CallBack=NULL_POINTER
             };
 
             USART_SendByte(Local_Data);
@@ -135,24 +141,13 @@ Sys_enuErrorStates_t Communication_Receiver(void)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
 
-    // local variable to carry received data
-    u8 Received_Data=0;
 
-    //local USART Request to carry request configurations
-    USART_Request_t Local_ReceivedData=
-    {
-        .USART_ID=USART1,
-        .PtrtoBuffer=&Received_Data,
-        .length=1,
-    };
-
-    //check USART Bus for new data
-    USART_GetByte(Local_ReceivedData);
-
-    //save the data to Received Requests buffer
-    if(Received_Data!=0)
-    {
-        process_received_data(Received_Data);        
+    
+    if(Received_Request!=0)
+    { 
+        process_received_data(Received_Request);    
+        //Command_Handler(Received_Request);
+        Received_Request=0;
     }
     else
     {

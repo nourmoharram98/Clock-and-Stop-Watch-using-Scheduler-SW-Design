@@ -54,7 +54,7 @@ void process_received_data(uint8_t received_data) {
 }
 
 int main() {
-    uint8_t input_data = 0b1111; // Example input data
+    uint8_t input_data = 0b0001; // Example input data
 
     Communication_Manager(input_data);
 

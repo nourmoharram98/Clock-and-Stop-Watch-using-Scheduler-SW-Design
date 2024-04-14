@@ -59,13 +59,13 @@
     #include "SERVICE/COMM/UART_COMM.h"
 /*--------------------------------------------------------------------*/
 /*-----------------------Buttons Macros Data--------------------------*/
-#define MODE_BUTTON                         1
-#define OK_BUTTON                           2 
-#define EDIT_BUTTON                         3
-#define UP_BUTTON                           4
-#define DOWN_BUTTON                         5
-#define RIGHT_BUTTON                        6
-#define LEFT_BUTTON                         7
+#define MODE_BUTTON_Data                         7
+#define OK_BUTTON_Data                           1 
+#define EDIT_BUTTON_Data                         2
+#define UP_BUTTON_Data                           3
+#define DOWN_BUTTON_Data                         4
+#define RIGHT_BUTTON_Data                        5
+#define LEFT_BUTTON_Data                         6
 /*----------------------------Global Variables-----------------------*/
     u32 Mode=Clock_Mode;
     Operation_Types_t Operation_type=Init_Operation;
@@ -220,7 +220,7 @@ void ControlSwitches_Runnable(void)
         {
             [SWITCH_MODE]=
             {
-                .DATA = 1 ,
+                .DATA = 7,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
@@ -285,8 +285,16 @@ void ControlSwitches_Runnable(void)
                 }
                 else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
                 {
+                    
+                    // USART_Request_t Requestsend={
+                    //     .length=1,
+                    //     .PtrtoBuffer=&Ctrl_Switches_Data[Switches_Iter].DATA,
+                    //     .USART_ID=USART1
+                    // };
                     /*Send unique data via uart*/
-                        TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+                       TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+                     //   USART_SendByte(Requestsend); 
+
                     /*------------------------*/
 
                     Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
@@ -302,20 +310,21 @@ void Command_Handler(u8 command)
    // static u8 Edit_counter=0;
     switch(command)
     {
-        case MODE_BUTTON:
+        case MODE_BUTTON_Data:
             Toggle_Mode();
             break;
-        case EDIT_BUTTON:
+        case EDIT_BUTTON_Data:
+            
             break;
-        case OK_BUTTON:
+        case OK_BUTTON_Data:
             break;
-        case UP_BUTTON:
+        case UP_BUTTON_Data:
             break;
-        case DOWN_BUTTON:
+        case DOWN_BUTTON_Data:
             break;
-        case RIGHT_BUTTON:  
+        case RIGHT_BUTTON_Data:  
             break;
-        case LEFT_BUTTON:
+        case LEFT_BUTTON_Data:
             break;
         default:
             break;

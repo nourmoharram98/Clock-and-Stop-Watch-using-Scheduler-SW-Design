@@ -24,6 +24,10 @@
  * @brief USART Registers
  * 
  */
+
+extern void Toggle_Mode(void);
+//to be externed in UART_COMM.c
+u8 Received_Request=0;
 typedef struct 
 {
     volatile u32 SR;
@@ -144,7 +148,7 @@ Sys_enuErrorStates_t USART_Pins_Init(void)
 Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-    volatile u16 TIME_OUT=5000;
+    volatile u16 TIME_OUT=3000;
     if(USART_Request.USART_ID>=Number_Of_USARTS)
     {
         Error_Status=INVALID_INPUT_VALUE;
@@ -163,13 +167,14 @@ Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 |= USART_TE_ENABLE;
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR=*(USART_Request.PtrtoBuffer);
 
-        while(~(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR&USART_TC_FLAG)&&TIME_OUT)
+        //while(~(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR&USART_TC_FLAG)&&TIME_OUT)
+        while(TIME_OUT)
         {
             TIME_OUT--;
         }
 
       
-        //((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 &= ~(USART_TE_ENABLE);
+        ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 &= ~(USART_TE_ENABLE);
 
        // USART_Request.CallBack();
         tx_requests[USART_Request.USART_ID].ReqState=USART_RQST_STATE_READY;
@@ -182,7 +187,7 @@ Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
 Sys_enuErrorStates_t USART_GetByte(USART_Request_t USART_Request)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-    u32 TIME_OUT=100000;
+    u32 TIME_OUT=3000;
     if(USART_Request.USART_ID>=Number_Of_USARTS)
     {
         Error_Status=INVALID_INPUT_VALUE;
@@ -325,18 +330,48 @@ void USART1_IRQHandler(void)
 
         }
     }
-    if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->SR&USART_RXNE_FLAG && rx_requests[USART1].ReqState==USART_RQST_STATE_BUSY)
+    // if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->SR&USART_RXNE_FLAG && rx_requests[USART1].ReqState==USART_RQST_STATE_BUSY)
+    // {
+    //     if(rx_requests[USART1].Buffer.Pos_Index < rx_requests[USART1].Buffer.size)
+    //     {
+    //         rx_requests[USART1].Buffer.dataByte[rx_requests[USART1].Buffer.Pos_Index]=((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR;
+    //         rx_requests[USART1].Buffer.Pos_Index++;
+    //         if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR=='N')
+    //         {
+    //             Toggle_Mode();
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RE_ENABLE);
+    //         // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RXNEIE_ENABLE);
+    //         // rx_requests[USART1].ReqState=USART_RQST_STATE_READY;
+    //         rx_requests[USART1].Buffer.Pos_Index=0;
+    //         if(rx_requests[USART1].CallBack!=NULL_POINTER)
+    //         {
+    //             rx_requests[USART1].CallBack();
+    //         }
+    //         else
+    //         {
+    //             // do nothing
+    //         }
+    //     }
+    // }
+     if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->SR&USART_RXNE_FLAG && rx_requests[USART1].ReqState==USART_RQST_STATE_BUSY)
     {
         if(rx_requests[USART1].Buffer.Pos_Index < rx_requests[USART1].Buffer.size)
         {
             rx_requests[USART1].Buffer.dataByte[rx_requests[USART1].Buffer.Pos_Index]=((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR;
+            Received_Request=((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR;
             rx_requests[USART1].Buffer.Pos_Index++;
+
         }
         else
         {
-            ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RE_ENABLE);
-            ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RXNEIE_ENABLE);
-            rx_requests[USART1].ReqState=USART_RQST_STATE_BUSY;
+            // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RE_ENABLE);
+            // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RXNEIE_ENABLE);
+            // rx_requests[USART1].ReqState=USART_RQST_STATE_READY;
+            rx_requests[USART1].Buffer.Pos_Index=0;
             if(rx_requests[USART1].CallBack!=NULL_POINTER)
             {
                 rx_requests[USART1].CallBack();
