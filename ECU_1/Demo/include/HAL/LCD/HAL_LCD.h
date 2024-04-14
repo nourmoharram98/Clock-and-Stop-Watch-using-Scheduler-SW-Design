@@ -23,6 +23,12 @@
 #define LCD_DISPLAY_COL_START   0
 #define LCD_DISPLAY_COL_END     15
 
+/**
+ * @brief Macros for enabling and disabling the cursor and blink
+ * 
+ */
+#define LCD_CURSOR_BLINK_ON     0x0f
+#define LCD_CURSOR_BLINK_OFF    0x0c
 
 typedef void (*LCD_CBFUNC_t)(void);
 
@@ -58,6 +64,7 @@ Sys_enuErrorStates_t LCD_InitAsync(void);
 Sys_enuErrorStates_t LCD_ClearScreenAsync(void);
 Sys_enuErrorStates_t LCD_SetCursorPosAsync(u8 Copy_LCDPosx,u8 Copy_LCDPosy);
 Sys_enuErrorStates_t LCD_WriteStringAsync(const char *ptrToString,u8 String_size);
+Sys_enuErrorStates_t LCD_WriteCommandAsync(const char command);
 Sys_enuErrorStates_t LCD_GetStatus(u32* PtrToLCDstatus);
 
 Sys_enuErrorStates_t LCD_WriteSetCB(LCD_CBFUNC_t PtrTofunc);

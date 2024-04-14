@@ -29,7 +29,7 @@
 #define INDEX_FOR_LINE_4 0X50
 #define WRITE_ON_DDRAM_INDEX 0X80
 
-#define BUFFER_SIZE         50
+#define BUFFER_SIZE         100
 
 typedef enum
 {
@@ -43,6 +43,7 @@ typedef enum
     LCD_ReqWrite,
     LCD_ReqClear,
     LCD_ReqSetPos,
+    LCD_ReqWriteCommand,
     LCD_ReqWriteNumber,
 }LCD_UserRequestType;
 
@@ -81,6 +82,7 @@ typedef struct
 {
     const char *UserString; //buffer
     u8 Len;
+    u8 Command;
     LCD_UserRequestState State;
     LCD_UserRequestType Type;
     LCD_PosCord CurrentPos;
@@ -119,6 +121,7 @@ static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand);
 static Sys_enuErrorStates_t LCD_WriteData(char Copy_LCDData);
 static void LCD_WriteNumber_Proc(void);// 2ms
 static Sys_enuErrorStates_t LCD_ClearDisplayProcess(void);
+static Sys_enuErrorStates_t LCD_WriteCommandProcess(void);
 
 //static Sys_enuErrorStates_t LCD_Helper_Clear(void);
 //static Sys_enuErrorStates_t LCD_OverFlowHandler(void);
@@ -155,6 +158,8 @@ void LCD_Runnable(void)
                     case LCD_ReqWriteNumber:
                         LCD_WriteNumber_Proc();
                         break;
+                    case LCD_ReqWriteCommand:
+                        LCD_WriteCommandProcess();
                     default:
                         break;
                 }
@@ -375,6 +380,26 @@ static Sys_enuErrorStates_t LCD_ClearDisplayProcess(void)
 }
 
 
+static Sys_enuErrorStates_t LCD_WriteCommandProcess(void)
+{
+    Sys_enuErrorStates_t Error_Status=NOT_OK;
+    Error_Status=LCD_WriteCommand(CircularBuffer.buffer[CircularBuffer.tail].Command);
+    if(Global_EnablePinState==LCD_ENABLE_LOW)
+    {
+        CircularBuffer.buffer[CircularBuffer.tail].State=LCD_ReqReady; //normal setposition call
+        CircularBuffer.buffer[CircularBuffer.tail].Type=LCD_NoReq;
+        CircularBuffer.buffer[CircularBuffer.tail].Command=0x00;
+        CircularBuffer.tail++;
+        CircularBuffer.count--;
+        if(CircularBuffer.tail==BUFFER_SIZE)
+        {
+            CircularBuffer.tail=0;
+        }
+    }
+
+   return Error_Status;
+}
+
 static Sys_enuErrorStates_t LCD_WriteCommand(char Copy_LCDCommand)
 {
    Sys_enuErrorStates_t Error_Status=NOT_OK;
@@ -538,6 +563,27 @@ Sys_enuErrorStates_t LCD_ClearScreenAsync(void)
     else
     {
         CircularBuffer.buffer[CircularBuffer.head].Type=LCD_ReqClear;
+        CircularBuffer.head++;
+        CircularBuffer.count++;
+        if(CircularBuffer.head==BUFFER_SIZE&&CircularBuffer.count<BUFFER_SIZE)
+        {
+            CircularBuffer.head=0;
+        }
+    }
+    return Error_Status;
+}
+
+Sys_enuErrorStates_t LCD_WriteCommandAsync(const char command)
+{
+    Sys_enuErrorStates_t Error_Status=NOT_OK;
+    if(CircularBuffer.count==BUFFER_SIZE)
+    {
+        Error_Status=LCD_BUFFER_REQUESTS_FULL;
+    }
+    else
+    {
+        CircularBuffer.buffer[CircularBuffer.head].Type=LCD_ReqWriteCommand;
+        CircularBuffer.buffer[CircularBuffer.head].Command=command;
         CircularBuffer.head++;
         CircularBuffer.count++;
         if(CircularBuffer.head==BUFFER_SIZE&&CircularBuffer.count<BUFFER_SIZE)

@@ -50,39 +50,53 @@
 */
 
 /*--------------------------------Includes----------------------------*/
-    #include "Std_Types.h"
-    #include "HAL/LCD/HAL_LCD.h"
-    #include "HAL/SWITCH/HAL_SWITCH.h"
-    #include "APP/Manager.h"
-    #include "HAL/LED/LED.h"
-    #include "MCAL/USART/STM32F401cc_MCAL_USART.h"
-    #include "SERVICE/COMM/UART_COMM.h"
+#include "Std_Types.h"
+#include "HAL/LCD/HAL_LCD.h"
+#include "HAL/SWITCH/HAL_SWITCH.h"
+#include "APP/Manager.h"
+#include "HAL/LED/LED.h"
+#include "MCAL/USART/STM32F401cc_MCAL_USART.h"
+#include "SERVICE/COMM/UART_COMM.h"
 /*--------------------------------------------------------------------*/
-/*-----------------------Buttons Macros Data--------------------------*/
+/*-----------------------Buttons Macros Raw-Data(Without CRC)--------------------------*/
 #define MODE_BUTTON_Data                         7
-#define OK_BUTTON_Data                           1 
+#define OK_BUTTON_Data                           5  //Q  
 #define EDIT_BUTTON_Data                         2
-#define UP_BUTTON_Data                           3
-#define DOWN_BUTTON_Data                         4
-#define RIGHT_BUTTON_Data                        5
+#define UP_BUTTON_Data                           4
+#define DOWN_BUTTON_Data                         3
+#define RIGHT_BUTTON_Data                        0
 #define LEFT_BUTTON_Data                         6
+/*-----------------------Stop Watch modes--------------------------*/
+#define STOP_WATCH_STOP                          0
+#define STOP_WATCH_START                         1
 /*----------------------------Global Variables-----------------------*/
-    u32 Mode=Clock_Mode;
-    Operation_Types_t Operation_type=Init_Operation;
-    extern u8 StopWatch_Status;
+/**
+ * @brief Mode: carry the Mode of operation (Clock-Date or Stop-Watch)
+ * @brief Operation_type: carry the type of running operation (check for the enumeration in Manager.h)
+ * @brief StopWatch_Status: carry the status of stop Watch STOP_WATCH_STOP or STOP_WATCH_START
+ */
+u32 Mode=Clock_Mode;
+Operation_Types_t Operation_type=Init_Operation;
+extern u8 StopWatch_Status;
+u8 Global_X_Pos=0;
+u8 Global_Y_Pos=6;
 /*--------------------------------------------------------------------*/
 
 /*----------------------------STATIC FUNCTION-------------------------*/
-    static void Print_ClockFrame               ( );
-    static void Print_StopWatchFrame           ( );
-    static void print_frame_thread             (Modes_t Copy_Mode);
-    static void DisplayOnLCD                   (Modes_t Copy_Mode);
-    static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
+static void Print_ClockFrame               ( );
+static void Print_StopWatchFrame           ( );
+static void print_frame_thread             (Modes_t Copy_Mode);
+static void DisplayOnLCD                   (Modes_t Copy_Mode);
+static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
 
-    // static void USART_MOCK_SendByteAsynchZC    (USART_MOCK_Request_t USART_Request);
-    // static void USART_MOCK_ReceiveByteAsynchZC (USART_MOCK_Request_t USART_Request);
+  
 /*--------------------------------------------------------------------*/
 
+/**
+ * @brief Manager runnable that check for the system mode and its operation states
+ * @note operation state must start at Init_Operation then move to Idle Operation then any state can come
+ * in order to prevent any undefined behaviour since before Idle_Operation the digits not all printed yet
+ */
 void Manager_Runnable(void)
 {
     u32 Alternative_Mode = Mode^1;
@@ -97,18 +111,22 @@ void Manager_Runnable(void)
         break;
 
         case Idle_Operation:
+            /**
+             * @brief Disable the cursor and blink only
+             * 
+             */
+            LCD_WriteCommandAsync(LCD_CURSOR_BLINK_OFF);
             DisplayOnLCD(Mode);
+            //Operation_type=GeneralEdit_Operation; for testing the up switch
         break;
 
         case GeneralEdit_Operation:
-            //GeneralEditMode();
+            DisplayOnLCD(Mode);
+            GeneralEditMode();
         break;
 
         case DigitEdit_Operation:
            // DigitEditMode();
-           //search 3la el element el 3yzeno 
-           //tkhleh not print
-           //DisplayOnLCD(Mode);
         break;
         
         default:
@@ -118,7 +136,7 @@ void Manager_Runnable(void)
   
 }
 
-static void print_frame_thread(Modes_t Copy_Mode) //period = 4
+static void print_frame_thread(Modes_t Copy_Mode) 
 {
     switch(Copy_Mode)
     {
@@ -216,7 +234,7 @@ void ControlSwitches_Runnable(void)
 { 
 
     /*Setting Switch Data To be sent*/
-        static Ctrl_Switches_Data_t Ctrl_Switches_Data [2] = 
+        static Ctrl_Switches_Data_t Ctrl_Switches_Data [3] = 
         {
             [SWITCH_MODE]=
             {
@@ -227,7 +245,7 @@ void ControlSwitches_Runnable(void)
             ,
             [SWITCH_OK] 
             {
-                .DATA = 2 ,
+                .DATA = 5 ,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
@@ -239,13 +257,13 @@ void ControlSwitches_Runnable(void)
             //     .Switch_PrevStatus = Switch_Released
             // }
             // ,
-            // [SWITCH_UP] 
-            // {
-            //     .DATA = 4,
-            //     .Switch_Status = Switch_Released,
-            //     .Switch_PrevStatus = Switch_Released
-            // }
-            // ,
+            [SWITCH_UP] 
+            {
+                .DATA = 4,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
             // [SWITCH_DOWN] 
             // {
             //     .DATA = 5,
@@ -285,18 +303,10 @@ void ControlSwitches_Runnable(void)
                 }
                 else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
                 {
-                    
-                    // USART_Request_t Requestsend={
-                    //     .length=1,
-                    //     .PtrtoBuffer=&Ctrl_Switches_Data[Switches_Iter].DATA,
-                    //     .USART_ID=USART1
-                    // };
-                    /*Send unique data via uart*/
-                       TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
-                     //   USART_SendByte(Requestsend); 
+                    /*Send unique data to TX_Communication_Manager*/
+                    TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
 
-                    /*------------------------*/
-
+                    /*------reset the switch status---------*/
                     Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
                 }
             /*--------------------------------------------------------------*/    
@@ -305,6 +315,11 @@ void ControlSwitches_Runnable(void)
 
 }
 
+/**
+ * @brief function used to handle the input requests received from USART.
+ * @note  the function execute every 10 msec periodicity
+ * @param command 
+ */
 void Command_Handler(u8 command)
 {
    // static u8 Edit_counter=0;
@@ -314,11 +329,12 @@ void Command_Handler(u8 command)
             Toggle_Mode();
             break;
         case EDIT_BUTTON_Data:
-            
             break;
         case OK_BUTTON_Data:
+            OK_Switch_Pressed();
             break;
         case UP_BUTTON_Data:
+            UP_Switch_Pressed();
             break;
         case DOWN_BUTTON_Data:
             break;
@@ -331,10 +347,84 @@ void Command_Handler(u8 command)
     }
 }
 
+/**
+ * @brief Mode switch function to toggle between mode
+ * 
+ */
 void Toggle_Mode(void)
 {
     Mode ^=1;
     Operation_type=Init_Operation;
+}
+
+/**
+ * @brief Ok switch function
+ * @note need to handle both general edit and digit edit operations
+ */
+void OK_Switch_Pressed(void)
+{
+    if(Mode==Clock_Mode)
+    {
+        switch (Operation_type)
+        {
+        case GeneralEdit_Operation:
+            //return to Idle Operation
+            Operation_type=Idle_Operation;
+            break;
+        case DigitEdit_Operation:
+            //save the changes
+            break;
+        default:
+            break;
+        }
+    }
+    else if(Mode==StopWatch_Mode)
+    {
+        StopWatch_Status ^=1;
+    }
+    else
+    {
+        //do nothing
+    }
+}
+/**
+ * @brief UP switch function to mock functionality only (yara will handle another one)
+ * 
+ */
+void UP_Switch_Pressed(void)
+{
+    if(Mode==Clock_Mode)
+    {
+        switch(Operation_type)
+        {
+            case GeneralEdit_Operation:
+                if(Global_X_Pos==0)
+                {
+                    Global_X_Pos=1;
+                }
+                else if(Global_X_Pos==1)
+                {
+                    Global_X_Pos=0;
+                }
+                LCD_SetCursorPosAsync(Global_X_Pos,Global_Y_Pos);
+                break;
+            case DigitEdit_Operation:
+                break;
+            default:
+                break;
+        }
+    }
+    else
+    {
+
+    }
+}
+
+void GeneralEditMode(void)
+{
+    LCD_SetCursorPosAsync(Global_X_Pos,Global_Y_Pos);
+    LCD_WriteCommandAsync(LCD_CURSOR_BLINK_ON);
+    
 }
 void Sender_Manager_Runnable(void)
 {
