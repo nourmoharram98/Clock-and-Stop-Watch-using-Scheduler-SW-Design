@@ -344,8 +344,8 @@ int main ()
         .USART_ID=USART1
     };
     USART_SendByte(Requestone);
-    // SCHED_Init                  ();
-    // SCHED_Start                 ();
+    SCHED_Init                  ();
+    SCHED_Start                 ();
 }
 
 #endif

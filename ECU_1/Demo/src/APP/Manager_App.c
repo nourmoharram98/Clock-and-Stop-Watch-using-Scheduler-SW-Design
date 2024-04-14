@@ -220,7 +220,7 @@ void ControlSwitches_Runnable(void)
         {
             [SWITCH_MODE]=
             {
-                .DATA = 1 ,
+                .DATA = 7 ,
                 .Switch_Status = Switch_Released,
                 .Switch_PrevStatus = Switch_Released
             }
