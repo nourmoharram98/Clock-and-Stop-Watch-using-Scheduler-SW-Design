@@ -125,6 +125,20 @@ typedef enum
         CLOCK_EDITING_GENERAL,
         CLOCK_EDITING_DIGIT
     }CLOCK_EDITING_STATE_t ;
+
+    typedef enum 
+    {
+        GENERAL_EDIT_PRINT1,
+        GENERAL_EDIT_PRINT2,
+        GENERAL_EDIT_SET_CURSOR
+    }GENERAL_EDIT_STATE_t;
+
+    typedef struct
+    {
+        uint8 x_pos;
+        uint8 y_pos;
+        uint8 value;
+    }EDIT_CURSOR_t;
 /*-------------------------------------------------------------------*/
 
 
@@ -160,6 +174,9 @@ typedef enum
             static void CLOCK_EDITING_GENERAL_THREAD(void);
                 static void CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION(void);
                 static void CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION(void);
+                static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void);
+                static void CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION(void);
+                static void CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION(void);
 
             static void CLOCK_EDITING_DIGIT_THREAD(void);
                 static void CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION(void);
@@ -196,7 +213,9 @@ static INIT_STATES_t CLOCK_OPERATING_INIT_STATE = SET_CURSOR_FIRST_LINE;
 static OPERATING_RUN_STATES_t  CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;
 
 static CLOCK_EDITING_STATE_t         CLOCK_EDITING_STATE=CLOCK_EDITING_GENERAL;
-    
+static EDIT_CURSOR_t EDIT_TEMP_VALUE={.x_pos=1,.y_pos=7};
+static sint8 EDIT_INDEX=0;
+static GENERAL_EDIT_STATE_t GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT1;
 /*-------------------------------------------------------------------*/
 
 /*-------------------------- STOP WATCH MODE ------------------------*/
@@ -336,7 +355,7 @@ void Application_Runnable(void)
         }
                 static void CLOCK_OPERATING_RUN_PRINT_FUNCTION(void)
         {
-                        if(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+            if(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
             {
                 switch (CLOCK_OPERATING_RUN_STATE)
                 {
@@ -386,8 +405,8 @@ void Application_Runnable(void)
             if(CMD[EDIT_SWITCH_INDEX]==1)
             {
                 CLOCK.OPTION=CLOCK_OPTION_EDITING;
-
-            }  
+                EDIT_INDEX=0;
+            }
         }
 
 
@@ -410,8 +429,50 @@ void Application_Runnable(void)
 
             static void CLOCK_EDITING_GENERAL_THREAD(void)
             {
+                CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION();
+
+                if(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+                {
+                    switch (GENERAL_EDIT_STATE)
+                    {
+                    case GENERAL_EDIT_PRINT1:
+                        LCD_SetCursorPosAsync(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].x_pos, Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].y_pos);
+                        GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT2;
+                        break;
+                    case GENERAL_EDIT_PRINT2:
+                        LCD_enuWriteNumber(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].value);
+                        GENERAL_EDIT_STATE=GENERAL_EDIT_SET_CURSOR;
+                        
+                        break;
+                    case GENERAL_EDIT_SET_CURSOR:
+                        LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
+                        GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT1;
+                        Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                        CLOCK_DIGIT_ITERATOR++;
+                        if(CLOCK_DIGIT_ITERATOR > 14)
+                        {
+                            CLOCK_DIGIT_ITERATOR= 0;
+                        }               
+                        break;
+                    
+                    default:
+                        break;
+                    }                    
+                }
+                else
+                {
+                CLOCK_DIGIT_ITERATOR++;
+                if(CLOCK_DIGIT_ITERATOR > 14)
+                {
+                    CLOCK_DIGIT_ITERATOR = 0;
+                    GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT1; // Reset mystate when wrapping around
+                }
+                }
+
                 CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION();
                 CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION();
+                CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION();
+                CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION();
             }
                static void CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION(void)
                 {
@@ -429,6 +490,37 @@ void Application_Runnable(void)
 
                     }   
                } 
+               static void CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION(void)
+               {
+                    if(CMD[LEFT_SWITCH_INDEX]==1)
+                    {
+                        EDIT_INDEX--;
+                        if(EDIT_INDEX<0)
+                        {
+                            EDIT_INDEX=11;
+                        }
+
+                    }   
+               }
+               static void CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION(void)
+               {
+                    if(CMD[RIGHT_SWITCH_INDEX]==1)
+                    {
+                        EDIT_INDEX++;
+                        if(EDIT_INDEX>11)
+                        {
+                            EDIT_INDEX=0;
+                        }
+
+                    } 
+               }
+               static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void)
+               {
+                    EDIT_TEMP_VALUE.x_pos=Clock_Date_Digits[EDIT_INDEX].x_pos;
+                    EDIT_TEMP_VALUE.y_pos=Clock_Date_Digits[EDIT_INDEX].y_pos;
+                    EDIT_TEMP_VALUE.value=Clock_Date_Digits[EDIT_INDEX].value;
+
+               }
             static void CLOCK_EDITING_DIGIT_THREAD(void)
             {
                 CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION();

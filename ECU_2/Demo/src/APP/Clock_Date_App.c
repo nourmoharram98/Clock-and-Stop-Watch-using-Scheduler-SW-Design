@@ -15,7 +15,7 @@
  * @brief LEAP YEAR AND MONTHS DAYS HANDLING
 */
 
-unit_Info_t EDIT_CURSOR={.x_pos=1,.y_pos=1};
+
 
 unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
 {

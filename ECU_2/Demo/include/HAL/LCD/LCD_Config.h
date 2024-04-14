@@ -76,7 +76,7 @@
                 //1 -> on
             /*---------------------------*/        
 
-            #define Curser_BlinkingState 0
+            #define Curser_BlinkingState 1
         /*-----------------------------------*/  
 
         /*------Curser or Display Shift------*/
