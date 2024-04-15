@@ -42,7 +42,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     [Clock_Date]=
     {
         .TaskName="Clock Data APP",
-        .InitialDelayMS=200,
+        .InitialDelayMS=50,
         .PeriodicityMS=100,
         .CallBack=Clock_Date_Runnable 
     }
@@ -50,40 +50,38 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     [StopWatch]=
     {
         .TaskName="Stop Watch APP",
-        .InitialDelayMS=200,
+        .InitialDelayMS=50,
         .PeriodicityMS=100,
         .CallBack=Stopwatch_Runnable
-    }
-    ,
-     [Sender]=
-    {
-        .TaskName="Sender runnable",
-        .InitialDelayMS=200,
-        .PeriodicityMS=50,
-        .CallBack=Sender_Manager_Runnable
     },
-     [Receiver]=
+    [Control_Switch]=
+    {
+        .TaskName="ControlSwitches_Runnable",
+        .InitialDelayMS=100,
+        .PeriodicityMS=50,
+        .CallBack=ControlSwitches_Runnable
+    },
+    [Receiver]=
     {
         .TaskName="Receiver runnable",
-        .InitialDelayMS=200,
+        .InitialDelayMS=50,
         .PeriodicityMS=10,
         .CallBack=Receiver_Manager_Runnable
+    },
+    [Sender]=
+    {
+        .TaskName="Sender runnable",
+        .InitialDelayMS=100,
+        .PeriodicityMS=100,
+        .CallBack=Sender_Manager_Runnable
     },
     [Manager]=
     {
         .TaskName="Manager",
-        .InitialDelayMS=200,
-        .PeriodicityMS=50,
+        .InitialDelayMS=50,
+        .PeriodicityMS=10,
         .CallBack=Manager_Runnable
     },
-     [Control_Switch]=
-    {
-        .TaskName="ControlSwitches_Runnable",
-        .InitialDelayMS=0,
-        .PeriodicityMS=50,
-        .CallBack=ControlSwitches_Runnable
-    }
-    ,
     [LCD]=
     {
         .TaskName="LCD APP",

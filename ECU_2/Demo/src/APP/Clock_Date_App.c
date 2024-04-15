@@ -15,6 +15,8 @@
  * @brief LEAP YEAR AND MONTHS DAYS HANDLING
 */
 
+
+
 unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
 {
     [DeciSecond_hundred]=
@@ -61,13 +63,13 @@ unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
         .digit_state=DIGIT_STATE_PRINT
     },
     [Day_unit]={
-        .value=1,
+        .value=9,
         .x_pos=1,
         .y_pos=8,
         .digit_state=DIGIT_STATE_PRINT
     },
     [Day_tens]={
-        .value=3,
+        .value=2,
         .x_pos=1,
         .y_pos=7,
         .digit_state=DIGIT_STATE_PRINT
@@ -79,7 +81,7 @@ unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS]=
         .digit_state=DIGIT_STATE_PRINT
     },
     [Month_tens]={
-        .value=1,
+        .value=0,
         .x_pos=1,
         .y_pos=10,
         .digit_state=DIGIT_STATE_PRINT
@@ -132,10 +134,10 @@ static int days_in_month(int month, int year)
 void Clock_Date_Runnable(void) 
 {
 
-    // Update Deci, Sec , Min , Hours and Days, months, Years
+// Update Deci, Sec , Min , Hours and Days, months, Years
 
-    Clock_Date_Digits[DeciSecond_hundred].value++;
-    Clock_Date_Digits[DeciSecond_hundred].digit_state=DIGIT_STATE_PRINT;
+Clock_Date_Digits[DeciSecond_hundred].value++;
+Clock_Date_Digits[DeciSecond_hundred].digit_state=DIGIT_STATE_PRINT;
 
 
     if (Clock_Date_Digits[DeciSecond_hundred].value > 9) 
@@ -145,67 +147,67 @@ void Clock_Date_Runnable(void)
 
         Clock_Date_Digits[Second_unit].value++;
         Clock_Date_Digits[Second_unit].digit_state=DIGIT_STATE_PRINT;
-
-
-        if (Clock_Date_Digits[Second_unit].value > 9) 
-        {
-            Clock_Date_Digits[Second_unit].value = 0;
-            Clock_Date_Digits[Second_unit].digit_state=DIGIT_STATE_PRINT;
-
-            Clock_Date_Digits[Second_tens].value++;
-            Clock_Date_Digits[Second_tens].digit_state=DIGIT_STATE_PRINT;
-
-
-            if (Clock_Date_Digits[Second_tens].value > 5) 
-            {
-                Clock_Date_Digits[Second_tens].value = 0;
-                Clock_Date_Digits[Second_tens].digit_state=DIGIT_STATE_PRINT;
-
-                Clock_Date_Digits[Minutes_unit].value++;
-                Clock_Date_Digits[Minutes_unit].digit_state=DIGIT_STATE_PRINT;
-
-
-                if (Clock_Date_Digits[Minutes_unit].value > 9) 
-                {
-                    Clock_Date_Digits[Minutes_unit].value = 0;
-                    Clock_Date_Digits[Minutes_unit].digit_state=DIGIT_STATE_PRINT;
-
-                    Clock_Date_Digits[Minutes_tens].value++;
-                    Clock_Date_Digits[Minutes_tens].digit_state=DIGIT_STATE_PRINT;
-
-                    if (Clock_Date_Digits[Minutes_tens].value > 5) 
-                    {
-                        Clock_Date_Digits[Minutes_tens].value = 0;
-                        Clock_Date_Digits[Minutes_tens].digit_state=DIGIT_STATE_PRINT;
-
-                        Clock_Date_Digits[Hours_unit].value++;
-                        Clock_Date_Digits[Hours_unit].digit_state=DIGIT_STATE_PRINT;
-
-                        if (Clock_Date_Digits[Hours_unit].value > 9) 
-                        {
-                            Clock_Date_Digits[Hours_unit].value = 0;
-                            Clock_Date_Digits[Hours_unit].digit_state=DIGIT_STATE_PRINT;
-
-                            Clock_Date_Digits[Hours_tens].value++;
-                            Clock_Date_Digits[Hours_tens].digit_state=DIGIT_STATE_PRINT;
-                        }
-                        if ((Clock_Date_Digits[Hours_tens].value >= 2) && (Clock_Date_Digits[Hours_unit].value >= 3)) 
-                        {
-                            // Reset hours to 0 if it exceeds 23
-                            Clock_Date_Digits[Hours_tens].value = 0;
-                            Clock_Date_Digits[Hours_tens].digit_state=DIGIT_STATE_PRINT;
-
-                            Clock_Date_Digits[Hours_unit].value = 0;
-                            Clock_Date_Digits[Hours_unit].digit_state=DIGIT_STATE_PRINT;
-
-                            Clock_Date_Digits[Day_unit].value++;
-                            Clock_Date_Digits[Day_unit].digit_state=DIGIT_STATE_PRINT;
-                        }
-                    }
-                }
-            }
-        }
     }
+
+    if (Clock_Date_Digits[Second_unit].value > 9) 
+    {
+        Clock_Date_Digits[Second_unit].value = 0;
+        Clock_Date_Digits[Second_unit].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Second_tens].value++;
+        Clock_Date_Digits[Second_tens].digit_state=DIGIT_STATE_PRINT;
+    }
+
+    if (Clock_Date_Digits[Second_tens].value > 5) 
+    {
+        Clock_Date_Digits[Second_tens].value = 0;
+        Clock_Date_Digits[Second_tens].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Minutes_unit].value++;
+        Clock_Date_Digits[Minutes_unit].digit_state=DIGIT_STATE_PRINT;
+
+    }
+
+    if (Clock_Date_Digits[Minutes_unit].value > 9) 
+    {
+        Clock_Date_Digits[Minutes_unit].value = 0;
+        Clock_Date_Digits[Minutes_unit].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Minutes_tens].value++;
+        Clock_Date_Digits[Minutes_tens].digit_state=DIGIT_STATE_PRINT;
+    }
+
+    if (Clock_Date_Digits[Minutes_tens].value > 5) 
+    {
+        Clock_Date_Digits[Minutes_tens].value = 0;
+        Clock_Date_Digits[Minutes_tens].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Hours_unit].value++;
+        Clock_Date_Digits[Hours_unit].digit_state=DIGIT_STATE_PRINT;
+    }
+
+    if (Clock_Date_Digits[Hours_unit].value > 9) 
+    {
+        Clock_Date_Digits[Hours_unit].value = 0;
+        Clock_Date_Digits[Hours_unit].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Hours_tens].value++;
+        Clock_Date_Digits[Hours_tens].digit_state=DIGIT_STATE_PRINT;
+    }
+
+    if ((Clock_Date_Digits[Hours_tens].value >= 2) && (Clock_Date_Digits[Hours_unit].value > 3)) 
+    {
+        // Reset hours to 0 if it exceeds 23
+        Clock_Date_Digits[Hours_tens].value = 0;
+        Clock_Date_Digits[Hours_tens].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Hours_unit].value = 0;
+        Clock_Date_Digits[Hours_unit].digit_state=DIGIT_STATE_PRINT;
+
+        Clock_Date_Digits[Day_unit].value++;
+        Clock_Date_Digits[Day_unit].digit_state=DIGIT_STATE_PRINT;
+    }
+
 
     // Update day, month, year
 
@@ -217,7 +219,7 @@ void Clock_Date_Runnable(void)
 
     if ( Clock_Date_Digits[Day_unit].value > 9 )
     {
-        Clock_Date_Digits[Day_unit].value=1;
+        Clock_Date_Digits[Day_unit].value=0;
         Clock_Date_Digits[Day_unit].digit_state=DIGIT_STATE_PRINT;
 
         Clock_Date_Digits[Day_tens].value++;
@@ -235,7 +237,6 @@ void Clock_Date_Runnable(void)
 
         Clock_Date_Digits[Month_unit].value++;
         Clock_Date_Digits[Month_unit].digit_state=DIGIT_STATE_PRINT;
-
     }
 
     if(Clock_Date_Digits[Month_unit].value>9)
@@ -245,7 +246,6 @@ void Clock_Date_Runnable(void)
 
         Clock_Date_Digits[Month_tens].value=1;
         Clock_Date_Digits[Month_tens].digit_state=DIGIT_STATE_PRINT;
-
     }
 
     if (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value > 2) 
@@ -258,7 +258,6 @@ void Clock_Date_Runnable(void)
 
         Clock_Date_Digits[Years_unit].value++;
         Clock_Date_Digits[Years_unit].digit_state=DIGIT_STATE_PRINT;
-
     }    
 
     if (Clock_Date_Digits[Years_unit].value > 9) 
@@ -268,44 +267,39 @@ void Clock_Date_Runnable(void)
 
         Clock_Date_Digits[Years_tens].value++;
         Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
+    }
 
-        if (Clock_Date_Digits[Years_tens].value > 9) 
-        {
-            Clock_Date_Digits[Years_tens].value = 0;
-            Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
+    if (Clock_Date_Digits[Years_tens].value > 9) 
+    {
+        Clock_Date_Digits[Years_tens].value = 0;
+        Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
 
-            Clock_Date_Digits[Years_hundreds].value++;
-            Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
+        Clock_Date_Digits[Years_hundreds].value++;
+        Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
+    }
 
-            if (Clock_Date_Digits[Years_hundreds].value > 9) 
-            {
-                Clock_Date_Digits[Years_hundreds].value = 0;
-                Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
+    if (Clock_Date_Digits[Years_hundreds].value > 9) 
+    {
+        Clock_Date_Digits[Years_hundreds].value = 0;
+        Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
 
-                Clock_Date_Digits[Years_thousand].value++;
-                Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
+        Clock_Date_Digits[Years_thousand].value++;
+        Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
+    }
 
-                if (Clock_Date_Digits[Years_thousand].value > 9) 
-                {
-                    Clock_Date_Digits[Years_thousand].value = 0;
-                    Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
+    if (Clock_Date_Digits[Years_thousand].value > 9) 
+    {
+        Clock_Date_Digits[Years_thousand].value = 0;
+        Clock_Date_Digits[Years_thousand].digit_state=DIGIT_STATE_PRINT;
 
-                    Clock_Date_Digits[Years_hundreds].value = 0;
-                    Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
+        Clock_Date_Digits[Years_hundreds].value = 0;
+        Clock_Date_Digits[Years_hundreds].digit_state=DIGIT_STATE_PRINT;
 
 
-                    Clock_Date_Digits[Years_tens].value     = 0;
-                    Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
+        Clock_Date_Digits[Years_tens].value     = 0;
+        Clock_Date_Digits[Years_tens].digit_state=DIGIT_STATE_PRINT;
 
-                    Clock_Date_Digits[Years_unit].value     = 0;
-                    Clock_Date_Digits[Years_unit].digit_state     = DIGIT_STATE_PRINT;
-
-                }
-            }
-        }
-
+        Clock_Date_Digits[Years_unit].value     = 0;
+        Clock_Date_Digits[Years_unit].digit_state     = DIGIT_STATE_PRINT;
     }
 }
-
-
-

@@ -14,3 +14,4 @@ Sys_enuErrorStates_t Communication_Sender(void);
 Sys_enuErrorStates_t Communication_Receiver(void);
 
 extern void Command_Handler(u8 command);
+extern void Toggle_Mode(void);

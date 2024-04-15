@@ -18,26 +18,37 @@
 #define DIGIT_STATE_PRINT          1
 #define DIGIT_STATE_NOT_PRINT      2
 
-#define DeciSecond_hundred         0
-#define Second_unit                1
-#define Second_tens                2
+#define Day_tens                   0
+#define Day_unit                   1
 
-#define Minutes_unit               3
-#define Minutes_tens               4
+#define Month_tens                 2
+#define Month_unit                 3
 
-#define Hours_unit                 5
-#define Hours_tens                 6
+#define Years_thousand             4
+#define Years_hundreds             5
+#define Years_tens                 6
+#define Years_unit                 7
 
-#define Day_unit                   7
-#define Day_tens                   8
+#define Hours_tens                 8
+#define Hours_unit                 9
 
-#define Month_unit                 9
-#define Month_tens                 10
+#define Minutes_tens               10
+#define Minutes_unit               11
 
-#define Years_thousand             11
-#define Years_hundreds             12
-#define Years_tens                 13
-#define Years_unit                 14
+#define Second_tens                12
+#define Second_unit                13
+
+
+#define DeciSecond_hundred         14
+
+
+
+
+
+
+
+
+
 
 
 #define Day_Tens_Position         7
@@ -61,6 +72,8 @@
 #define Seconds_Units_Position    10
 
 #define Deci_Hundred_Position     12
+
+
 
 typedef struct 
 {

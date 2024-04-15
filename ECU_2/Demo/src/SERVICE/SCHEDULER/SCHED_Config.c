@@ -59,15 +59,31 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Manager",
         .InitialDelayMS=200,
-        .PeriodicityMS=6,
+        .PeriodicityMS=4,
         .CallBack=Application_Runnable
+    }
+    ,
+    [Control_Switch]=
+    {
+        .TaskName="Manager",
+        .InitialDelayMS=0,
+        .PeriodicityMS=4,
+        .CallBack=ControlSwitches_Runnable
     }
     ,
     [LCD]=
     {
         .TaskName="LCD APP",
         .InitialDelayMS=0,
-        .PeriodicityMS=2,
+        .PeriodicityMS=1,
         .CallBack=LCD_Runnable_Manager
+    }
+    ,
+    [Switch_Debouncing]=
+    {
+        .TaskName="Switch Debouncing Runnable",
+        .InitialDelayMS=0,
+        .PeriodicityMS=10,
+        .CallBack=Switch_Debouncing_Runnable
     }
 };

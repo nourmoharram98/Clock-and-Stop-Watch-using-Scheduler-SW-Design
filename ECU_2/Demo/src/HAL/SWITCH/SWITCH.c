@@ -11,10 +11,10 @@
 #include"MCAL/GPIO/GPIO.h"
 #include"HAL/SWITCH/HAL_SWITCH.h"
 
-#define SWITCH_STATUS_CHECKS_THRESHOLD				5
+#define SWITCH_STATUS_CHECKS_THRESHOLD				3
 
 extern const SWITCH_CONFIGURATIONS arrOfSwitches[Number_Of_Switches];
-static u8 Switch_ActualStatus[Number_Of_Switches]={1};
+volatile static u8 Switch_ActualStatus[Number_Of_Switches]={1};
 
 /**
  * @brief enumeration for switch status if it's mode is internal pull up
@@ -46,7 +46,9 @@ typedef enum
 void HAL_SWITCH_Init(void)
 {
 	GPIO_Pin_t Switch;
-	Switch.Pin_Speed = GPIO_SPEED_MED;
+
+	Switch.Pin_Speed = GPIO_SPEED_HIGH;
+
 	for(u8 index=0;index<Number_Of_Switches;index++)
 	{
 		Switch.Port=arrOfSwitches[index].port;
@@ -72,7 +74,7 @@ Sys_enuErrorStates_t HAL_SWITCH_enuGetSwitchState(u8 SWITCH,u32 *Switch_Status)
 	{
 		Error_Status=NULL_POINTER_ERROR;
 	}
-    else if ( SWITCH >= Number_Of_Switches)
+    else if (SWITCH < SWITCH_MODE || SWITCH >= Number_Of_Switches)
     {
         Error_Status = INVALID_INPUT_VALUE;
     }
@@ -92,8 +94,9 @@ Sys_enuErrorStates_t HAL_SWITCH_enuGetSwitchState(u8 SWITCH,u32 *Switch_Status)
 		 *            (0)
 		 *  SWITCH_CONNECTION_MODE_INTPD	   SWITCH_PRESSED(1)					SWITCH_RELEASED(0)
 		 */
-
-		*Switch_Status=Switch_ActualStatus[SWITCH]^arrOfSwitches[SWITCH].SWITCH_CONNECTION_MODE;
+	
+		//*Switch_Status= ! Switch_ActualStatus[SWITCH] ^ arrOfSwitches[SWITCH].SWITCH_CONNECTION_MODE;
+        *Switch_Status = !( (Switch_ActualStatus[SWITCH]) ^ (( (arrOfSwitches[SWITCH].SWITCH_PIN_MODE)  >> FOUR_BIT_OFFSET ) & 0x01) ) ;
 		Error_Status=OK;
 	}
     return Error_Status;
@@ -103,8 +106,8 @@ Sys_enuErrorStates_t HAL_SWITCH_enuGetSwitchState(u8 SWITCH,u32 *Switch_Status)
 void Switch_Debouncing_Runnable(void)
 {
 	U8 current_status=0;
-	static u32 Switch_PreviousStatus[Number_Of_Switches]={0};
-	static u8 Switch_Counters[Number_Of_Switches]={0};
+	volatile static u32 Switch_PreviousStatus[Number_Of_Switches]={0};
+	volatile static u8 Switch_Counters[Number_Of_Switches]={0};
 	for(u8 index=0;index<Number_Of_Switches;index++)
 	{
 		GPIO_Get_PinValue(arrOfSwitches[index].port,arrOfSwitches[index].Switch_Pin,&current_status);
