@@ -54,27 +54,12 @@
  #include "APP/Manager.h"
  #include "APP/Clock_Date_App.h"
 
- #define Manager_Periodicity 4
 
 
 /********************************************************************/
 
 /*------------------------------Types Defs---------------------------*/
-    /**/
-/*-------------------------------------------------------------------*/
-
-/*------------------------------ COMMANDS ---------------------------*/
-    typedef enum 
-    {
-        COMMAND_EDIT,
-        COMMAND_OK  ,
-        COMMAND_MODE,
-        COMMAND_UP,
-        COMMAND_DOWN,
-        COMMAND_LEFT,
-        COMMAND_RIGHT,
-        COMMAND_IDLE
-    }COMMAND_t;
+    #define Manager_Periodicity 4
 /*-------------------------------------------------------------------*/
 
 /*----------------------------General Modes -------------------------*/
@@ -86,9 +71,9 @@
     
     typedef struct 
     {
-        uint8 COUNTER;
-        uint8 OPTION; //running operating or editing
-    }strMODE_t;
+        uint8 COUNTER;  // counter for w8g for the next step
+        uint8 OPTION;   // running operating or editing
+    }strMODE_t;         // str -> struct
 
     typedef enum 
     {
@@ -108,7 +93,7 @@
     }OPERATING_RUN_STATES_t;
 /*-------------------------------------------------------------------*/
 
-/*---------------------------- CLOCK Mode ---------------------------*/ 
+/*----------------------- CLOCK Mode def types ----------------------*/ 
     typedef enum 
     {
         CLOCK_OPTION_OPERATING,
@@ -151,7 +136,7 @@
     }DIGIT_EDIT_STATE_t;
 /*-------------------------------------------------------------------*/
 
-/*-------------------------- STOP/WATCH Mode ------------------------*/ 
+/*---------------------- STOPWATCH Mode def types -------------------*/ 
     typedef enum 
     {
         STOP_WATCH_OPTION_OPERATING
@@ -165,33 +150,40 @@
 /*-------------------------------------------------------------------*/
 
 /*---------------------------Static Functions------------------------*/
-    static void CLOCK_PROGRAM(void);//CLOCK MAIN PROGRAM
-        static void CLOCK_OPERATING_PROCESS(void);//CLOCK OPERATING PROCESS
-            static void CLOCK_OPERATING_INIT_THREAD(void);
-            static void CLOCK_OPERATING_RUN_THREAD(void);
-                static void CLOCK_OPERATING_RUN_PRINT_FUNCTION(void);
-                static void CLOCK_OPERATING_RUN_MODE_CMD_FUNCTION(void);
-                static void CLOCK_OPERATING_RUN_EDIT_CMD_FUNCTION(void);
 
-        static void CLOCK_EDITING_PROCESS(void);
-            static void CLOCK_EDITING_GENERAL_THREAD(void);
-                static void CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION(void);
-                static void CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION(void);
-                static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void);
-                static void CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION(void);
-                static void CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION(void);
+    /*Clock Mode static functions*/
+        static void CLOCK_PROGRAM(void);//CLOCK MAIN PROGRAM
 
-            static void CLOCK_EDITING_DIGIT_THREAD(void);
-                static void CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION(void);
-                static void CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION(void);
-                static void CLOCK_EDITING_DIGIT_UP_CMD_FUNCTION(void);
-                static void CLOCK_EDITING_DIGIT_DOWN_CMD_FUNCTION(void);
+            static void CLOCK_OPERATING_PROCESS(void);//CLOCK OPERATING PROCESS
+                static void CLOCK_OPERATING_INIT_THREAD(void);
+                static void CLOCK_OPERATING_RUN_THREAD(void);
+                    static void CLOCK_OPERATING_RUN_PRINT_FUNCTION(void);
+                    static void CLOCK_OPERATING_RUN_MODE_CMD_FUNCTION(void);
+                    static void CLOCK_OPERATING_RUN_EDIT_CMD_FUNCTION(void);
 
+            static void CLOCK_EDITING_PROCESS(void);
 
-    static void STOP_WATCH_PROGRAM(void);
-        static void STOP_WATCH_OPERATING_PROCESS(void);
-            static void STOP_WATCH_INIT_THREAD(void);
-            static void STOP_WATCH_RUN_THREAD(void);
+                static void CLOCK_EDITING_GENERAL_THREAD(void);
+                    static void CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION(void);
+                    static void CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION(void);
+                    static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void);
+                    static void CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION(void);
+                    static void CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION(void);
+
+                static void CLOCK_EDITING_DIGIT_THREAD(void);
+                    static void CLOCK_EDITING_DIGIT_OK_CMD_FUNCTION(void);
+                    static void CLOCK_EDITING_DIGIT_EDIT_CMD_FUNCTION(void);
+                    static void CLOCK_EDITING_DIGIT_UP_CMD_FUNCTION(void);
+                    static void CLOCK_EDITING_DIGIT_DOWN_CMD_FUNCTION(void);
+    /*---------------------------*/
+
+    /*Stopwatch mode static functions*/
+        static void STOP_WATCH_PROGRAM(void);
+            static void STOP_WATCH_OPERATING_PROCESS(void);
+                static void STOP_WATCH_INIT_THREAD(void);
+                static void STOP_WATCH_RUN_THREAD(void);
+    /*-------------------------------*/        
+
 /*-------------------------------------------------------------------*/
 
 /*-------------------------leap Year Handling------------------------*/
@@ -224,7 +216,6 @@
 
 /*----------------------------General Modes -------------------------*/
     MODE_t    PROGRAM_MODE                        = MODE_CLOCK;
-    COMMAND_t COMMAND                             = COMMAND_IDLE;
 /*-------------------------------------------------------------------*/
 
 /*---------------------------- CLOCK Mode ---------------------------*/
@@ -312,10 +303,12 @@
     {
         CLOCK.COUNTER+=Manager_Periodicity;
 
-        for(int i=0;i<15;i++)
-        {
-            Clock_Date_Digits[i].digit_state=DIGIT_STATE_PRINT;
-        }
+        /*If first operation or witch from stopwatch print all numbers again*/
+            for(int i=0;i<15;i++)
+            {
+                Clock_Date_Digits[i].digit_state=DIGIT_STATE_PRINT;
+            }
+        /*------------------------------------------------------------------*/
 
         switch(CLOCK_OPERATING_INIT_STATE)
         {
@@ -391,6 +384,7 @@
                     Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
                     
                     CLOCK_DIGIT_ITERATOR++;
+
                     if(CLOCK_DIGIT_ITERATOR > 14)
                     {
                         CLOCK_DIGIT_ITERATOR= 0;
@@ -413,10 +407,9 @@
     {
         if(CMD[MODE_SWITCH_INDEX]==1)
         {
-            PROGRAM_MODE=MODE_STOPWATCH;
+            PROGRAM_MODE                    = MODE_STOPWATCH;
             STOP_WATCH_OPERATING_STATE      = STOP_WATCH_INIT;
             STOP_WATCH_OPERATING_RUN_STATE  = SET_CURSOR;                
-
         }
     }
 
@@ -455,18 +448,17 @@
         {
             switch (GENERAL_EDIT_STATE)
             {
-            case GENERAL_EDIT_PRINT1:
+            case GENERAL_EDIT_PRINT1: //setcursor to any changed digit
                 LCD_SetCursorPosAsync(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].x_pos, Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].y_pos);
                 GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT2;
             break;
 
-            case GENERAL_EDIT_PRINT2:
+            case GENERAL_EDIT_PRINT2: //print any changed digit
                 LCD_enuWriteNumber(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].value);
-                GENERAL_EDIT_STATE=GENERAL_EDIT_SET_CURSOR;
-                
+                GENERAL_EDIT_STATE=GENERAL_EDIT_SET_CURSOR;        
             break;
 
-            case GENERAL_EDIT_SET_CURSOR:
+            case GENERAL_EDIT_SET_CURSOR: //setcursor to edit Arrow
                 LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
                 GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT1;
                 Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
@@ -517,19 +509,6 @@
 
     static void CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION(void)
     {
-        if(CMD[LEFT_SWITCH_INDEX]==1)
-        {
-            EDIT_INDEX--;
-            if(EDIT_INDEX<0)
-            {
-                EDIT_INDEX=11;
-            }
-
-        }   
-    }
-
-    static void CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION(void)
-    {
         if(CMD[RIGHT_SWITCH_INDEX]==1)
         {
             EDIT_INDEX++;
@@ -537,8 +516,19 @@
             {
                 EDIT_INDEX=0;
             }
+        }  
+    }
 
-        } 
+    static void CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION(void)
+    {
+       if(CMD[LEFT_SWITCH_INDEX]==1)
+        {
+            EDIT_INDEX--;
+            if(EDIT_INDEX<0)
+            {
+                EDIT_INDEX=11;
+            }
+        }   
     }
 
     static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void)
@@ -546,7 +536,6 @@
         EDIT_TEMP_VALUE.x_pos=Clock_Date_Digits[EDIT_INDEX].x_pos;
         EDIT_TEMP_VALUE.y_pos=Clock_Date_Digits[EDIT_INDEX].y_pos;
         EDIT_TEMP_VALUE.value=Clock_Date_Digits[EDIT_INDEX].value;
-
     }
             
     static void CLOCK_EDITING_DIGIT_THREAD(void)
@@ -682,6 +671,14 @@
                 /*Hour Units*/
                     if(EDIT_INDEX==Hours_unit)
                     {
+                        if (Clock_Date_Digits[Hours_tens].value == 0)
+                        {
+                            if(EDIT_TEMP_VALUE.value > 9)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+
                         if (Clock_Date_Digits[Hours_tens].value == 1)
                         {
                             if(EDIT_TEMP_VALUE.value>9)
@@ -697,13 +694,6 @@
                                 EDIT_TEMP_VALUE.value=0;
                             }
                         }
-                        if (Clock_Date_Digits[Hours_tens].value == 0)
-                        {
-                            if(EDIT_TEMP_VALUE.value > 9)
-                            {
-                                EDIT_TEMP_VALUE.value=0;
-                            }
-                        }
                     }
                 /*----------*/
                 
@@ -714,156 +704,156 @@
                 /*Day tens*/
                         if (EDIT_INDEX==Day_tens)
                         {
-                        /*Reset to zero*/
-                            if ( Clock_Date_Digits[Day_unit].value > 0 )
-                            {
-                                /*Feb*/
-                                    if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
-                                    {
-                                        if (IsLeapYear_edit(year))
+                            /*Reset to zero*/
+                                if ( Clock_Date_Digits[Day_unit].value > 0 )
+                                {
+                                    /*Feb*/
+                                        if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
                                         {
-                                            if ( EDIT_TEMP_VALUE.value > 2 )
+                                            if (IsLeapYear_edit(year))
                                             {
-                                                EDIT_TEMP_VALUE.value=0;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (Clock_Date_Digits[Day_unit].value > 8  )
-                                            {
-                                                if(EDIT_TEMP_VALUE.value>1)
+                                                if ( EDIT_TEMP_VALUE.value > 2 )
                                                 {
                                                     EDIT_TEMP_VALUE.value=0;
                                                 }
                                             }
-                                            else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
+                                            else
                                             {
-                                                EDIT_TEMP_VALUE.value=0;
-                                            }
-                                        }
-                                    }
-                                /*---*/
-
-                                /* 30 day months*/
-                                    else if (
-                                                Clock_Date_Digits[Month_unit].value == 4 ||
-                                                Clock_Date_Digits[Month_unit].value == 6 ||   
-                                                Clock_Date_Digits[Month_unit].value == 9 ||    
-                                                (Clock_Date_Digits[Month_unit].value == 1
-                                                &&
-                                                Clock_Date_Digits[Month_tens].value == 1)  
-                                            )
-
-                                            {
-                                                if (Clock_Date_Digits[Day_unit].value==0 && EDIT_TEMP_VALUE.value>3)
+                                                if (Clock_Date_Digits[Day_unit].value > 8  )
                                                 {
-                                                    EDIT_TEMP_VALUE.value=0;
-                                                }
-                                                else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value>2 )
-                                                {
-                                                    EDIT_TEMP_VALUE.value=0;
-                                                }
-                                            }
-                                /*--------------*/
-
-                                /* 31 days month */
-                                        else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
-                                                Clock_Date_Digits[Month_unit].value  == 3                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 5                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 7                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 8                                                ||
-                                                (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
-                                                (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
-                                                )
-                                                {
-                                                    if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value>2)
-                                                    {
-                                                        EDIT_TEMP_VALUE.value=0;
-                                                    }
-                                                    else if ((Clock_Date_Digits[Day_unit].value <= 1) && EDIT_TEMP_VALUE.value>3)
+                                                    if(EDIT_TEMP_VALUE.value>1)
                                                     {
                                                         EDIT_TEMP_VALUE.value=0;
                                                     }
                                                 }
-                                /*---------------*/    
-                            }    
-                        /*------------*/    
-
-                        /*Reset to one*/
-                            else if ( Clock_Date_Digits[Day_unit].value == 0 )
-                            {
-                                /*Feb*/
-                                    if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
-                                    {
-                                        if (IsLeapYear_edit(year))
-                                        {
-                                            if (Clock_Date_Digits[Day_unit].value > 8 && EDIT_TEMP_VALUE.value > 2 )
-                                            {
-                                                EDIT_TEMP_VALUE.value=1;
-                                            }
-                                            else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
-                                            {
-                                                EDIT_TEMP_VALUE.value=1;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (Clock_Date_Digits[Day_unit].value > 7 && EDIT_TEMP_VALUE.value > 2 )
-                                            {
-                                                EDIT_TEMP_VALUE.value=1;
-                                            }
-                                            else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
-                                            {
-                                                EDIT_TEMP_VALUE.value=1;
-                                            }
-                                        }
-                                    }
-                                /*---*/
-
-                                /* 30 day months*/
-                                    else if (
-                                                Clock_Date_Digits[Month_unit].value == 4 ||
-                                                Clock_Date_Digits[Month_unit].value == 6 ||   
-                                                Clock_Date_Digits[Month_unit].value == 9 ||    
-                                                (Clock_Date_Digits[Month_unit].value == 1
-                                                &&
-                                                Clock_Date_Digits[Month_tens].value == 1)  
-                                            )
-
-                                            {
-                                                if (Clock_Date_Digits[Day_unit].value==0 && EDIT_TEMP_VALUE.value>3)
+                                                else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
                                                 {
-                                                    EDIT_TEMP_VALUE.value=1;
-                                                }
-                                                else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value>2 )
-                                                {
-                                                    EDIT_TEMP_VALUE.value=1;
+                                                    EDIT_TEMP_VALUE.value=0;
                                                 }
                                             }
-                                /*--------------*/
+                                        }
+                                    /*---*/
 
-                                /* 31 days month */
-                                        else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
-                                                Clock_Date_Digits[Month_unit].value  == 3                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 5                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 7                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 8                                                ||
-                                                (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
-                                                (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                    /* 30 day months*/
+                                        else if (
+                                                    Clock_Date_Digits[Month_unit].value == 4 ||
+                                                    Clock_Date_Digits[Month_unit].value == 6 ||   
+                                                    Clock_Date_Digits[Month_unit].value == 9 ||    
+                                                    (Clock_Date_Digits[Month_unit].value == 1
+                                                    &&
+                                                    Clock_Date_Digits[Month_tens].value == 1)  
                                                 )
+
                                                 {
-                                                    if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value>2)
+                                                    if (Clock_Date_Digits[Day_unit].value==0 && EDIT_TEMP_VALUE.value>3)
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=0;
+                                                    }
+                                                    else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value>2 )
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=0;
+                                                    }
+                                                }
+                                    /*--------------*/
+
+                                    /* 31 days month */
+                                            else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
+                                                    Clock_Date_Digits[Month_unit].value  == 3                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 5                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 7                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 8                                                ||
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                                    )
+                                                    {
+                                                        if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value>2)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=0;
+                                                        }
+                                                        else if ((Clock_Date_Digits[Day_unit].value <= 1) && EDIT_TEMP_VALUE.value>3)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=0;
+                                                        }
+                                                    }
+                                    /*---------------*/    
+                                }    
+                            /*------------*/    
+
+                            /*Reset to one*/
+                                else if ( Clock_Date_Digits[Day_unit].value == 0 )
+                                {
+                                    /*Feb*/
+                                        if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                                        {
+                                            if (IsLeapYear_edit(year))
+                                            {
+                                                if (Clock_Date_Digits[Day_unit].value > 8 && EDIT_TEMP_VALUE.value > 2 )
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                                else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Clock_Date_Digits[Day_unit].value > 7 && EDIT_TEMP_VALUE.value > 2 )
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                                else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                            }
+                                        }
+                                    /*---*/
+
+                                    /* 30 day months*/
+                                        else if (
+                                                    Clock_Date_Digits[Month_unit].value == 4 ||
+                                                    Clock_Date_Digits[Month_unit].value == 6 ||   
+                                                    Clock_Date_Digits[Month_unit].value == 9 ||    
+                                                    (Clock_Date_Digits[Month_unit].value == 1
+                                                    &&
+                                                    Clock_Date_Digits[Month_tens].value == 1)  
+                                                )
+
+                                                {
+                                                    if (Clock_Date_Digits[Day_unit].value==0 && EDIT_TEMP_VALUE.value>3)
                                                     {
                                                         EDIT_TEMP_VALUE.value=1;
                                                     }
-                                                    else if ((Clock_Date_Digits[Day_unit].value <= 1) && EDIT_TEMP_VALUE.value>3)
+                                                    else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value>2 )
                                                     {
                                                         EDIT_TEMP_VALUE.value=1;
                                                     }
                                                 }
-                                /*---------------*/    
-                            }   
-                        /*---------*/
+                                    /*--------------*/
+
+                                    /* 31 days month */
+                                            else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
+                                                    Clock_Date_Digits[Month_unit].value  == 3                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 5                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 7                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 8                                                ||
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                                    )
+                                                    {
+                                                        if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value>2)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=1;
+                                                        }
+                                                        else if ((Clock_Date_Digits[Day_unit].value <= 1) && EDIT_TEMP_VALUE.value>3)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=1;
+                                                        }
+                                                    }
+                                    /*---------------*/    
+                                }   
+                            /*---------*/
                         }
                 /*--------*/   
 
@@ -1011,9 +1001,7 @@
                 /*----------*/
 
             /*-------------------*/
-
         }   
-
     }
 
     static void CLOCK_EDITING_DIGIT_DOWN_CMD_FUNCTION(void)
@@ -1376,6 +1364,7 @@
             /*-------------------*/
         }   
     }  
+    
 /*------------------------------------------------------------------------------------*/    
                 
 /**************************** STOP WATCH IMPLEMENTATION *******************************/
@@ -1390,131 +1379,131 @@
         {
             case STOP_WATCH_INIT:
                 STOP_WATCH_INIT_THREAD();
-                break;
+            break;
 
             case STOP_WATCH_RUN:
                 STOP_WATCH_RUN_THREAD();
-                break;
-
-            default:
-                break;
-        }             
-    }
-    
-static void STOP_WATCH_INIT_THREAD(void)
-{
-    STOP_WATCH.COUNTER+=Manager_Periodicity;
-
-    for(int i=0;i<7;i++)
-    {
-        Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
-    }     
-
-    switch(STOP_WATCH_INIT_STATE)
-    {
-        case SET_CURSOR_FIRST_LINE:
-            LCD_ClearScreenAsync();
-            STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
-        break;
-
-        case PRINT_FIRST_LINE:
-            LCD_enuWriteStringAsync("STOPWATCH",9); // (16 x 2) x 2 = 64 ms  -> 70 ms
-            STOP_WATCH_INIT_STATE=WAIT_1;
-        break;
-
-        case WAIT_1:
-            if(STOP_WATCH.COUNTER>=70)
-            {
-                STOP_WATCH.COUNTER=0;
-                STOP_WATCH_INIT_STATE=SET_CURSOR_SECOND_LINE;
-            }
-        break;
-
-        case SET_CURSOR_SECOND_LINE:
-            LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
-            STOP_WATCH_INIT_STATE = PRINT_SECOND_LINE;
-            STOP_WATCH.COUNTER=0;
-        break;
-
-        case PRINT_SECOND_LINE:
-            LCD_enuWriteStringAsync("    :  :  : 00",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
-            STOP_WATCH_INIT_STATE=WAIT_2;
-        break;
-
-        case WAIT_2:
-            if(STOP_WATCH.COUNTER>=70)
-            {
-                STOP_WATCH.COUNTER=0;
-                STOP_WATCH_INIT_STATE=END;
-            }
-        break;
-
-        case END:
-            STOP_WATCH_OPERATING_STATE = STOP_WATCH_RUN;
-            STOP_WATCH.COUNTER=0;
-            STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
-            STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
-        break;  
-    }
-}
-
-static void STOP_WATCH_RUN_THREAD(void)
-{
-    if(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
-    {
-        switch (STOP_WATCH_OPERATING_RUN_STATE)
-        {
-            case SET_CURSOR:
-                LCD_SetCursorPosAsync(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].x_pos, Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].y_pos);
-                STOP_WATCH_OPERATING_RUN_STATE = WRITE_NUMBER;
             break;
 
-            case WRITE_NUMBER:
-                LCD_enuWriteNumber(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].value);
-
-                STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
-
-                Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
-                
-                STOP_WATCH_DIGIT_ITERATOR++;
-                if(STOP_WATCH_DIGIT_ITERATOR > 6)
-                {
-                    STOP_WATCH_DIGIT_ITERATOR= 0;
-                }
-            break; 
-        }   
+            default:
+                /*Nothing*/
+            break;
+        }             
     }
-    else // DIGIT_STATE_NOT_PRINT
+        
+    static void STOP_WATCH_INIT_THREAD(void)
     {
-        STOP_WATCH_DIGIT_ITERATOR++;
-        if(STOP_WATCH_DIGIT_ITERATOR > 6)
+        STOP_WATCH.COUNTER+=Manager_Periodicity;
+
+        for(int i=0;i<7;i++)
         {
-            STOP_WATCH_DIGIT_ITERATOR = 0;
-            STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
+            Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+        }     
+
+        switch(STOP_WATCH_INIT_STATE)
+        {
+            case SET_CURSOR_FIRST_LINE:
+                LCD_ClearScreenAsync();
+                STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
+            break;
+
+            case PRINT_FIRST_LINE:
+                LCD_enuWriteStringAsync("STOPWATCH",9); // (16 x 2) x 2 = 64 ms  -> 70 ms
+                STOP_WATCH_INIT_STATE=WAIT_1;
+            break;
+
+            case WAIT_1:
+                if(STOP_WATCH.COUNTER>=70)
+                {
+                    STOP_WATCH.COUNTER=0;
+                    STOP_WATCH_INIT_STATE=SET_CURSOR_SECOND_LINE;
+                }
+            break;
+
+            case SET_CURSOR_SECOND_LINE:
+                LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+                STOP_WATCH_INIT_STATE = PRINT_SECOND_LINE;
+                STOP_WATCH.COUNTER=0;
+            break;
+
+            case PRINT_SECOND_LINE:
+                LCD_enuWriteStringAsync("    :  :  : 00",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+                STOP_WATCH_INIT_STATE=WAIT_2;
+            break;
+
+            case WAIT_2:
+                if(STOP_WATCH.COUNTER>=70)
+                {
+                    STOP_WATCH.COUNTER=0;
+                    STOP_WATCH_INIT_STATE=END;
+                }
+            break;
+
+            case END:
+                STOP_WATCH_OPERATING_STATE = STOP_WATCH_RUN;
+                STOP_WATCH.COUNTER=0;
+                STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
+                STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+            break;  
         }
     }
-    
-    if(CMD[MODE_SWITCH_INDEX]==1)
-    {
-        PROGRAM_MODE=MODE_CLOCK;
-        CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
-        CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
 
-    } 
-    if(CMD[OK_SWITCH_INDEX]==1)
+    static void STOP_WATCH_RUN_THREAD(void)
     {
-        STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
+        if(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+        {
+            switch (STOP_WATCH_OPERATING_RUN_STATE)
+            {
+                case SET_CURSOR:
+                    LCD_SetCursorPosAsync(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].x_pos, Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].y_pos);
+                    STOP_WATCH_OPERATING_RUN_STATE = WRITE_NUMBER;
+                break;
+
+                case WRITE_NUMBER:
+                    LCD_enuWriteNumber(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].value);
+
+                    STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+
+                    Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                    
+                    STOP_WATCH_DIGIT_ITERATOR++;
+                    if(STOP_WATCH_DIGIT_ITERATOR > 6)
+                    {
+                        STOP_WATCH_DIGIT_ITERATOR= 0;
+                    }
+                break; 
+            }   
+        }
+        else // DIGIT_STATE_NOT_PRINT
+        {
+            STOP_WATCH_DIGIT_ITERATOR++;
+            if(STOP_WATCH_DIGIT_ITERATOR > 6)
+            {
+                STOP_WATCH_DIGIT_ITERATOR = 0;
+                STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
+            }
+        }
+
+        if(CMD[MODE_SWITCH_INDEX]==1)
+        {
+            PROGRAM_MODE=MODE_CLOCK;
+            CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
+            CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
+
+        } 
+
+        if(CMD[OK_SWITCH_INDEX]==1)
+        {
+            STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
+        }
+
+        if(CMD[EDIT_SWITCH_INDEX]==1)
+        {
+            for(int i=0;i<7;i++)
+            {
+                Stop_Watch_Digits[i].value=0;
+                Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+            }   
+        }
     }
-    if(CMD[EDIT_SWITCH_INDEX]==1)
-    {
-    for(int i=0;i<7;i++)
-    {
-        Stop_Watch_Digits[i].value=0;
-        Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
-    }   
-    }
-}
-
-
-
-
+/*------------------------------------------------------------------------------------*/
