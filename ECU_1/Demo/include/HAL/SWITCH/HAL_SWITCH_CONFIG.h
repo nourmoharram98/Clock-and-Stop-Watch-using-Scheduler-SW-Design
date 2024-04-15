@@ -18,7 +18,7 @@
 typedef enum
 {
 	//SWITCH_MODE,    /**< SWITCH_NUMONE */
-	//SWITCH_OK,    /**< SWITCH_NUMTWO */
+	SWITCH_OK,    /**< SWITCH_NUMTWO */
 	SWITCH_EDIT,
 	//SWITCH_UP,
 	// SWITCH_DOWN,

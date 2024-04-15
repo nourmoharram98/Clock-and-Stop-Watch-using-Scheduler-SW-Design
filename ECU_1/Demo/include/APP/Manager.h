@@ -1,3 +1,5 @@
+#pragma once
+
 #include"Std_Types.h"
 #include "APP/App_Config.h"
 #include "APP/Clock_Date_App.h"

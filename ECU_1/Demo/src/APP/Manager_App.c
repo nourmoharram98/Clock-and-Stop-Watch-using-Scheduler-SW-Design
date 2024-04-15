@@ -63,10 +63,10 @@
     #define MODE_BUTTON_Data                         7  //r
     #define OK_BUTTON_Data                           5  //Q  
     #define EDIT_BUTTON_Data                         6  //d
-    #define UP_BUTTON_Data                           12
-    #define DOWN_BUTTON_Data                         3
-    #define RIGHT_BUTTON_Data                        2  // #
-    #define LEFT_BUTTON_Data                         4  //'G'
+    #define UP_BUTTON_Data                           4  //G
+    #define DOWN_BUTTON_Data                         2  //#
+    #define RIGHT_BUTTON_Data                        1  //UNDEFINED SYMBOL
+    #define LEFT_BUTTON_Data                         3  //'5'
 /*---------------------------------------------------------------------*/
 
 /*-----------------------------Stop Watch modes------------------------*/
@@ -96,6 +96,8 @@
     static void print_frame_thread             (Modes_t Copy_Mode);
     static void DisplayOnLCD                   (Modes_t Copy_Mode);
     static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
+    static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void);
+
 /*--------------------------------------------------------------------*/
 
 /**
@@ -123,11 +125,13 @@ void Manager_Runnable(void)
         break;
 
         case GeneralEdit_Operation:
+            //ChangePrintState(Mode,DIGIT_STATE_PRINT);
             DisplayOnLCD(Mode);
             GeneralEditMode();
         break;
 
         case DigitEdit_Operation:
+           // DisplayOnLCD(Mode);
            // DigitEditMode();
         break;
         
@@ -239,8 +243,15 @@ void ControlSwitches_Runnable(void)
 { 
 
     /*Setting Switch Data To be sent*/
-    static Ctrl_Switches_Data_t Ctrl_Switches_Data [3] = 
+    static Ctrl_Switches_Data_t Ctrl_Switches_Data [4] = 
     {
+        [SWITCH_OK]=
+        {
+            .DATA = 5,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
         [SWITCH_EDIT]=
         {
             .DATA = 6,
@@ -264,7 +275,7 @@ void ControlSwitches_Runnable(void)
         // ,
         [SWITCH_RIGHT] 
         {
-            .DATA = 2,
+            .DATA = 1,
             .Switch_Status = Switch_Released,
             .Switch_PrevStatus = Switch_Released
         }
@@ -309,10 +320,12 @@ void ControlSwitches_Runnable(void)
             else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
             {
                 /*Send unique data to TX_Communication_Manager*/
-                TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+                    TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+                /*-------------------------------------------*/
 
                 /*------reset the switch status---------*/
-                Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+                /*--------------------------------------*/
             }
         /*--------------------------------------------------------------*/    
     }
@@ -335,6 +348,7 @@ void Command_Handler(u8 command)
         break;
 
         case EDIT_BUTTON_Data:
+            Edit_Switch_Pressed();
             /*Nothing*/
         break;
 
@@ -351,10 +365,12 @@ void Command_Handler(u8 command)
         break;
 
         case RIGHT_BUTTON_Data:  
+            Right_Switch_Pressed();
             /*Nothing*/
         break;
 
         case LEFT_BUTTON_Data:
+            Left_Switch_Pressed();
             /*Nothing*/
         break;
 
@@ -362,6 +378,7 @@ void Command_Handler(u8 command)
             /*Nothing*/
         break;
     }
+    command=0;
 }
 
 /**
@@ -489,6 +506,10 @@ void Edit_Switch_Pressed(void)
             
             case DigitEdit_Operation:
                 Operation_type=GeneralEdit_Operation;
+            break;
+
+            default:
+                /**/
             break;
         }
     }
