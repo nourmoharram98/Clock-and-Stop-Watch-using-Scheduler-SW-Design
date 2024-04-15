@@ -50,46 +50,52 @@
 */
 
 /*--------------------------------Includes----------------------------*/
-#include "Std_Types.h"
-#include "HAL/LCD/HAL_LCD.h"
-#include "HAL/SWITCH/HAL_SWITCH.h"
-#include "APP/Manager.h"
-#include "HAL/LED/LED.h"
-#include "MCAL/USART/STM32F401cc_MCAL_USART.h"
-#include "SERVICE/COMM/UART_COMM.h"
-/*--------------------------------------------------------------------*/
-/*-----------------------Buttons Macros Raw-Data(Without CRC)--------------------------*/
-#define MODE_BUTTON_Data                         7
-#define OK_BUTTON_Data                           5  //Q  
-#define EDIT_BUTTON_Data                         2
-#define UP_BUTTON_Data                           4
-#define DOWN_BUTTON_Data                         3
-#define RIGHT_BUTTON_Data                        0
-#define LEFT_BUTTON_Data                         6
-/*-----------------------Stop Watch modes--------------------------*/
-#define STOP_WATCH_STOP                          0
-#define STOP_WATCH_START                         1
+    #include "Std_Types.h"
+    #include "HAL/LCD/HAL_LCD.h"
+    #include "HAL/SWITCH/HAL_SWITCH.h"
+    #include "APP/Manager.h"
+    #include "HAL/LED/LED.h"
+    #include "MCAL/USART/STM32F401cc_MCAL_USART.h"
+    #include "SERVICE/COMM/UART_COMM.h"
+/*---------------------------------------------------------------------*/
+
+/*---------------------Buttons Macros Raw-Data(Without CRC)------------*/
+    #define MODE_BUTTON_Data                         7  //r
+    #define OK_BUTTON_Data                           5  //Q  
+    #define EDIT_BUTTON_Data                         6  //d
+    #define UP_BUTTON_Data                           12
+    #define DOWN_BUTTON_Data                         3
+    #define RIGHT_BUTTON_Data                        2  // #
+    #define LEFT_BUTTON_Data                         4  //'G'
+/*---------------------------------------------------------------------*/
+
+/*-----------------------------Stop Watch modes------------------------*/
+    #define STOP_WATCH_STOP                          0
+    #define STOP_WATCH_START                         1
+/*---------------------------------------------------------------------*/
+
 /*----------------------------Global Variables-----------------------*/
-/**
- * @brief Mode: carry the Mode of operation (Clock-Date or Stop-Watch)
- * @brief Operation_type: carry the type of running operation (check for the enumeration in Manager.h)
- * @brief StopWatch_Status: carry the status of stop Watch STOP_WATCH_STOP or STOP_WATCH_START
- */
-u32 Mode=Clock_Mode;
-Operation_Types_t Operation_type=Init_Operation;
-extern u8 StopWatch_Status;
-u8 Global_X_Pos=0;
-u8 Global_Y_Pos=6;
+    /**
+     * @brief Mode: carry the Mode of operation (Clock-Date or Stop-Watch)
+     * @brief Operation_type: carry the type of running operation (check for the enumeration in Manager.h)
+     * @brief StopWatch_Status: carry the status of stop Watch STOP_WATCH_STOP or STOP_WATCH_START
+     */
+    u32 Mode=Clock_Mode;
+    Operation_Types_t Operation_type=Init_Operation;
+    extern u8 StopWatch_Status;
+    u8 Global_X_Pos=0;
+    u8 Global_Y_Pos=6;
+
+    static EDIT_CURSOR_t EDIT_TEMP_VALUE={.x_pos=1,.y_pos=7};
+    static sint8 EDIT_INDEX=0;
 /*--------------------------------------------------------------------*/
 
 /*----------------------------STATIC FUNCTION-------------------------*/
-static void Print_ClockFrame               ( );
-static void Print_StopWatchFrame           ( );
-static void print_frame_thread             (Modes_t Copy_Mode);
-static void DisplayOnLCD                   (Modes_t Copy_Mode);
-static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
-
-  
+    static void Print_ClockFrame               ( );
+    static void Print_StopWatchFrame           ( );
+    static void print_frame_thread             (Modes_t Copy_Mode);
+    static void DisplayOnLCD                   (Modes_t Copy_Mode);
+    static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
 /*--------------------------------------------------------------------*/
 
 /**
@@ -97,6 +103,8 @@ static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintSta
  * @note operation state must start at Init_Operation then move to Idle Operation then any state can come
  * in order to prevent any undefined behaviour since before Idle_Operation the digits not all printed yet
  */
+
+
 void Manager_Runnable(void)
 {
     u32 Alternative_Mode = Mode^1;
@@ -111,13 +119,7 @@ void Manager_Runnable(void)
         break;
 
         case Idle_Operation:
-            /**
-             * @brief Disable the cursor and blink only
-             * 
-             */
-            LCD_WriteCommandAsync(LCD_CURSOR_BLINK_OFF);
             DisplayOnLCD(Mode);
-            //Operation_type=GeneralEdit_Operation; for testing the up switch
         break;
 
         case GeneralEdit_Operation:
@@ -142,18 +144,16 @@ static void print_frame_thread(Modes_t Copy_Mode)
     {
         case Clock_Mode:
             Print_ClockFrame();
-            break;
+        break;
 
         case StopWatch_Mode:
             Print_StopWatchFrame();
-            break;
+        break;
 
         default:
-
+            /*Nothing*/
         break;
     }
-   
-
 }
 
 static void Print_ClockFrame()
@@ -174,6 +174,11 @@ static void Print_StopWatchFrame()
 
 static void DisplayOnLCD(Modes_t Copy_Mode)
 {
+    /**
+    * @brief Disable the cursor and blink only
+    * 
+    */
+    LCD_WriteCommandAsync(LCD_CURSOR_BLINK_OFF);
     switch(Copy_Mode)
     {
         case Clock_Mode:
@@ -201,7 +206,7 @@ static void DisplayOnLCD(Modes_t Copy_Mode)
         break;
 
         default:
-
+            /*Nothing*/
         break;
     }
 }
@@ -225,7 +230,7 @@ static void ChangePrintState(Modes_t Copy_Mode,u8 Copy_PrintState)
         break;
 
         default:
-
+            /*Nothing*/
         break;
     }
 }
@@ -234,83 +239,83 @@ void ControlSwitches_Runnable(void)
 { 
 
     /*Setting Switch Data To be sent*/
-        static Ctrl_Switches_Data_t Ctrl_Switches_Data [3] = 
+    static Ctrl_Switches_Data_t Ctrl_Switches_Data [3] = 
+    {
+        [SWITCH_EDIT]=
         {
-            [SWITCH_MODE]=
-            {
-                .DATA = 7,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
-            ,
-            [SWITCH_OK] 
-            {
-                .DATA = 5 ,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
-            ,
-            // [SWITCH_EDIT] 
-            // {
-            //     .DATA = 3 ,
-            //     .Switch_Status = Switch_Released,
-            //     .Switch_PrevStatus = Switch_Released
-            // }
-            // ,
-            [SWITCH_UP] 
-            {
-                .DATA = 4,
-                .Switch_Status = Switch_Released,
-                .Switch_PrevStatus = Switch_Released
-            }
-            ,
-            // [SWITCH_DOWN] 
-            // {
-            //     .DATA = 5,
-            //     .Switch_Status = Switch_Released,
-            //     .Switch_PrevStatus = Switch_Released
-            // }
-            // , 
-            // [SWITCH_LEFT] 
-            // {
-            //     .DATA = 6,
-            //     .Switch_Status = Switch_Released,
-            //     .Switch_PrevStatus = Switch_Released
-            // }
-            // ,
-            // [SWITCH_RIGHT] 
-            // {
-            //     .DATA = 7,
-            //     .Switch_Status = Switch_Released,
-            //     .Switch_PrevStatus = Switch_Released
-            // }
-        };
+            .DATA = 6,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        [SWITCH_LEFT] 
+        {
+            .DATA = 4 ,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        // [SWITCH_EDIT] 
+        // {
+        //     .DATA = 3 ,
+        //     .Switch_Status = Switch_Released,
+        //     .Switch_PrevStatus = Switch_Released
+        // }
+        // ,
+        [SWITCH_RIGHT] 
+        {
+            .DATA = 2,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        // [SWITCH_DOWN] 
+        // {
+        //     .DATA = 5,
+        //     .Switch_Status = Switch_Released,
+        //     .Switch_PrevStatus = Switch_Released
+        // }
+        // , 
+        // [SWITCH_LEFT] 
+        // {
+        //     .DATA = 6,
+        //     .Switch_Status = Switch_Released,
+        //     .Switch_PrevStatus = Switch_Released
+        // }
+        // ,
+        // [SWITCH_RIGHT] 
+        // {
+        //     .DATA = 7,
+        //     .Switch_Status = Switch_Released,
+        //     .Switch_PrevStatus = Switch_Released
+        // }
+    };
     /*------------------------------*/
 
     /*SWITCH Reading and Sending Data*/
-        U8 Switches_Iter;
+    U8 Switches_Iter;
 
-        for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
-        {
-            /*Read Switch State*/
-                HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
-            /*---------------------*/ 
+    for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
+    {
+        /*Read Switch State*/
+            HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
+        /*---------------------*/ 
 
-            /*Single Realise Press signal handling and sending data via uart*/
-                if(Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Pressed)
-                {
-                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus = Ctrl_Switches_Data[Switches_Iter].Switch_Status;
-                }
-                else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
-                {
-                    /*Send unique data to TX_Communication_Manager*/
-                    TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+        /*Single Realise Press signal handling and sending data via uart*/
+            if(Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Pressed)
+            {
+                Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus = Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+            }
+            else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
+            {
+                /*Send unique data to TX_Communication_Manager*/
+                TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
 
-                    /*------reset the switch status---------*/
-                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
-                }
-            /*--------------------------------------------------------------*/    
-        }
+                /*------reset the switch status---------*/
+                Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+            }
+        /*--------------------------------------------------------------*/    
+    }
     /*-------------------------------*/
 
 }
@@ -322,28 +327,40 @@ void ControlSwitches_Runnable(void)
  */
 void Command_Handler(u8 command)
 {
-   // static u8 Edit_counter=0;
+    // static u8 Edit_counter=0;
     switch(command)
     {
         case MODE_BUTTON_Data:
             Toggle_Mode();
-            break;
+        break;
+
         case EDIT_BUTTON_Data:
-            break;
+            /*Nothing*/
+        break;
+
         case OK_BUTTON_Data:
             OK_Switch_Pressed();
-            break;
+        break;
+
         case UP_BUTTON_Data:
             UP_Switch_Pressed();
-            break;
+        break;
+
         case DOWN_BUTTON_Data:
-            break;
+            /*Nothing*/
+        break;
+
         case RIGHT_BUTTON_Data:  
-            break;
+            /*Nothing*/
+        break;
+
         case LEFT_BUTTON_Data:
-            break;
+            /*Nothing*/
+        break;
+
         default:
-            break;
+            /*Nothing*/
+        break;
     }
 }
 
@@ -370,12 +387,15 @@ void OK_Switch_Pressed(void)
         case GeneralEdit_Operation:
             //return to Idle Operation
             Operation_type=Idle_Operation;
-            break;
+        break;
+
         case DigitEdit_Operation:
             //save the changes
-            break;
+        break;
+
         default:
-            break;
+            /*Nothing*/
+        break;
         }
     }
     else if(Mode==StopWatch_Mode)
@@ -387,6 +407,7 @@ void OK_Switch_Pressed(void)
         //do nothing
     }
 }
+
 /**
  * @brief UP switch function to mock functionality only (yara will handle another one)
  * 
@@ -407,25 +428,38 @@ void UP_Switch_Pressed(void)
                     Global_X_Pos=0;
                 }
                 LCD_SetCursorPosAsync(Global_X_Pos,Global_Y_Pos);
-                break;
+            break;
+
             case DigitEdit_Operation:
-                break;
+                /*Nothing*/
+            break;
+
             default:
-                break;
+                /*Nothing*/
+            break;
         }
     }
     else
     {
-
+        /*Nothing*/
     }
 }
 
 void GeneralEditMode(void)
 {
-    LCD_SetCursorPosAsync(Global_X_Pos,Global_Y_Pos);
+    CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION();
     LCD_WriteCommandAsync(LCD_CURSOR_BLINK_ON);
-    
+    LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
 }
+
+
+static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void)
+{
+    EDIT_TEMP_VALUE.x_pos=Clock_Date_Digits[EDIT_INDEX].x_pos;
+    EDIT_TEMP_VALUE.y_pos=Clock_Date_Digits[EDIT_INDEX].y_pos;
+    EDIT_TEMP_VALUE.value=Clock_Date_Digits[EDIT_INDEX].value;
+}
+
 void Sender_Manager_Runnable(void)
 {
     Communication_Sender();
@@ -437,5 +471,52 @@ void Receiver_Manager_Runnable(void)
     Communication_Receiver();
 }
 
-//yara's functions
 
+
+void Edit_Switch_Pressed(void)
+{
+    if(Mode==Clock_Mode)
+    {
+        switch(Operation_type)
+        {
+            case Idle_Operation:
+                Operation_type=GeneralEdit_Operation;
+            break;
+            
+            case GeneralEdit_Operation:
+                Operation_type=DigitEdit_Operation;
+            break;
+            
+            case DigitEdit_Operation:
+                Operation_type=GeneralEdit_Operation;
+            break;
+        }
+    }
+    else if(Mode==StopWatch_Mode)
+    {
+        //reset stop watch
+    }
+}
+
+void Down_Switch_Pressed(void)
+{
+
+}
+
+void Right_Switch_Pressed(void)
+{
+    EDIT_INDEX++;
+    if(EDIT_INDEX>11)
+    {
+        EDIT_INDEX=0;
+    }
+    
+}
+void Left_Switch_Pressed(void)
+{
+    EDIT_INDEX--;
+    if(EDIT_INDEX<0)
+    {
+        EDIT_INDEX=11;
+    }
+}

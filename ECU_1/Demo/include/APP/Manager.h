@@ -16,31 +16,38 @@ extern unit_Info_t Clock_Date_Digits[NUMBER_OF_DIGITS_CLK_MODE];
 extern unit_Info_t Stop_Watch_Digits[NUMBER_OF_DIGITS_STOPW_MODE];
 
 /*--------------------------------Types Defs-------------------------*/
-/**
- * @brief enumeration for the operation states in the system
- * 
- */
-typedef enum
-{
-    Init_Operation,
+    /**
+     * @brief enumeration for the operation states in the system
+     * 
+     */
+    typedef enum
+    {
+        Init_Operation,
 
-    Idle_Operation,
+        Idle_Operation,
 
-    GeneralEdit_Operation,
+        GeneralEdit_Operation,
 
-    DigitEdit_Operation,
-}Operation_Types_t;
+        DigitEdit_Operation,
+    }Operation_Types_t;
 
-/**
- * @brief Struct for the Switches Data and status
- * 
- */
-typedef struct 
-{
-    U8 DATA;
-    u32 Switch_Status;
-    u32 Switch_PrevStatus;
-}Ctrl_Switches_Data_t;
+    /**
+     * @brief Struct for the Switches Data and status
+     * 
+     */
+    typedef struct 
+    {
+        U8 DATA;
+        u32 Switch_Status;
+        u32 Switch_PrevStatus;
+    }Ctrl_Switches_Data_t;
+
+    typedef struct
+    {
+        uint8 x_pos;
+        uint8 y_pos;
+        sint8 value;
+    }EDIT_CURSOR_t;
 /*-------------------------------------------------------------------*/
 
 /*------------------------------Functions-----------------------------*/
@@ -52,4 +59,9 @@ typedef struct
     void Command_Handler(u8 command);
     void OK_Switch_Pressed(void);
     void UP_Switch_Pressed(void);
+    void Down_Switch_Pressed(void);
+    void Edit_Switch_Pressed(void);
+    void Right_Switch_Pressed(void);
+    void Left_Switch_Pressed(void);
+
 /*--------------------------------------------------------------------*/

@@ -178,7 +178,7 @@
                 static void CLOCK_EDITING_GENERAL_EDIT_CMD_FUNCTION(void);
                 static void CLOCK_EDITING_GENERAL_OK_CMD_FUNCTION(void);
                 static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void);
-                static void CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION(void);
+                static  void CLOCK_EDITING_GENERAL_EDIT_RIGHT_CMD_FUNCTION(void);
                 static void CLOCK_EDITING_GENERAL_EDIT_LEFT_CMD_FUNCTION(void);
 
             static void CLOCK_EDITING_DIGIT_THREAD(void);
@@ -463,10 +463,9 @@
             case GENERAL_EDIT_PRINT2:
                 LCD_enuWriteNumber(Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].value);
                 GENERAL_EDIT_STATE=GENERAL_EDIT_SET_CURSOR;
-                
             break;
 
-            case GENERAL_EDIT_SET_CURSOR:
+            case GENERAL_EDIT_SET_CURSOR://set edit cusror
                 LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
                 GENERAL_EDIT_STATE=GENERAL_EDIT_PRINT1;
                 Clock_Date_Digits[CLOCK_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
@@ -524,7 +523,6 @@
             {
                 EDIT_INDEX=11;
             }
-
         }   
     }
 
@@ -546,7 +544,6 @@
         EDIT_TEMP_VALUE.x_pos=Clock_Date_Digits[EDIT_INDEX].x_pos;
         EDIT_TEMP_VALUE.y_pos=Clock_Date_Digits[EDIT_INDEX].y_pos;
         EDIT_TEMP_VALUE.value=Clock_Date_Digits[EDIT_INDEX].value;
-
     }
             
     static void CLOCK_EDITING_DIGIT_THREAD(void)
@@ -768,12 +765,12 @@
 
                                 /* 31 days month */
                                         else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
-                                                Clock_Date_Digits[Month_unit].value  == 3                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 5                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 7                                                ||
-                                                Clock_Date_Digits[Month_unit].value  == 8                                                ||
-                                                (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
-                                                (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                                   Clock_Date_Digits[Month_unit].value  == 3                                                ||
+                                                   Clock_Date_Digits[Month_unit].value  == 5                                                ||
+                                                   Clock_Date_Digits[Month_unit].value  == 7                                                ||
+                                                   Clock_Date_Digits[Month_unit].value  == 8                                                ||
+                                                   (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
+                                                   (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
                                                 )
                                                 {
                                                     if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value>2)
@@ -1514,7 +1511,5 @@ static void STOP_WATCH_RUN_THREAD(void)
     }   
     }
 }
-
-
 
 
