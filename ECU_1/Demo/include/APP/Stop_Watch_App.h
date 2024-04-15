@@ -47,3 +47,4 @@
 
 void Stopwatch_Runnable(void);
 
+void Reset_StopWatch(void);

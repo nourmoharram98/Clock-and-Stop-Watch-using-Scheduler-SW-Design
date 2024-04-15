@@ -137,3 +137,11 @@ void Stopwatch_Runnable(void)
     }
    
 }
+
+void Reset_StopWatch(void)
+{
+    for(u8 index=0;index<NUMBER_OF_DIGITS_STOPW_MODE;index++)
+    {
+        Stop_Watch_Digits[index].value=0;
+    }
+}

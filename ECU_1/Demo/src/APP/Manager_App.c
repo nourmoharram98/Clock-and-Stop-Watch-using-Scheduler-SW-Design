@@ -97,6 +97,7 @@
     static void DisplayOnLCD                   (Modes_t Copy_Mode);
     static void ChangePrintState               (Modes_t Copy_Mode , u8 Copy_PrintState);
     static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void);
+    static void DigitPrint(u8 digit,u8 DIGIT_STATE);
 
 /*--------------------------------------------------------------------*/
 
@@ -107,6 +108,55 @@
  */
 
 
+/*-------------------------leap Year Handling------------------------*/
+    u16 year;
+
+    void calculateyear (void)
+    {
+        // Reconstruct the full year value
+        year = Clock_Date_Digits[Years_thousand].value * 1000 +
+            Clock_Date_Digits[Years_hundreds].value * 100 +
+            Clock_Date_Digits[Years_tens].value * 10 +
+            Clock_Date_Digits[Years_unit].value;
+    }
+
+    bool IsLeapYear_edit(u16 year) 
+    {
+        calculateyear();
+        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+/*---------------------------------------------Modes Handlers-----------------------------------------------------*/
+
+void GeneralEditMode(void)
+{
+    CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION();
+    LCD_WriteCommandAsync(LCD_CURSOR_BLINK_ON);
+    LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
+}
+void DigitEditMode(void)
+{
+   // CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION();
+    LCD_WriteCommandAsync(LCD_CURSOR_BLINK_ON);
+    LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
+
+}
+
+
+static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void)
+{
+    EDIT_TEMP_VALUE.x_pos=Clock_Date_Digits[EDIT_INDEX].x_pos;
+    EDIT_TEMP_VALUE.y_pos=Clock_Date_Digits[EDIT_INDEX].y_pos;
+    EDIT_TEMP_VALUE.value=Clock_Date_Digits[EDIT_INDEX].value;
+}
+/*---------------------------------------------Runnables-----------------------------------------------------*/
+
+/*-------------------------------Manager Runnable------------------------------------*/
 void Manager_Runnable(void)
 {
     u32 Alternative_Mode = Mode^1;
@@ -125,14 +175,15 @@ void Manager_Runnable(void)
         break;
 
         case GeneralEdit_Operation:
-            //ChangePrintState(Mode,DIGIT_STATE_PRINT);
+            DigitPrint(EDIT_INDEX,DIGIT_STATE_PRINT);
             DisplayOnLCD(Mode);
             GeneralEditMode();
         break;
 
         case DigitEdit_Operation:
-           // DisplayOnLCD(Mode);
-           // DigitEditMode();
+            DigitPrint(EDIT_INDEX,DIGIT_STATE_NOT_PRINT);
+            DisplayOnLCD(Mode);
+            DigitEditMode();
         break;
         
         default:
@@ -142,6 +193,106 @@ void Manager_Runnable(void)
   
 }
 
+/*-------------------------------Control Switch Runnable-----------------------------*/
+void ControlSwitches_Runnable(void)
+{ 
+
+    /*Setting Switch Data To be sent*/
+    static Ctrl_Switches_Data_t Ctrl_Switches_Data [7] = 
+    {
+        [SWITCH_MODE]=
+        {
+            .DATA = 7,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        [SWITCH_OK]=
+        {
+            .DATA = 5,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        [SWITCH_EDIT] 
+        {
+            .DATA = 6 ,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        [SWITCH_UP] 
+        {
+            .DATA = 4 ,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        [SWITCH_DOWN] 
+        {
+            .DATA = 2,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        ,
+        [SWITCH_LEFT] 
+        {
+            .DATA = 3,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+        , 
+        [SWITCH_RIGHT] 
+        {
+            .DATA = 1,
+            .Switch_Status = Switch_Released,
+            .Switch_PrevStatus = Switch_Released
+        }
+    };
+    /*------------------------------*/
+
+    /*SWITCH Reading and Sending Data*/
+    U8 Switches_Iter;
+
+    for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
+    {
+        /*Read Switch State*/
+            HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
+        /*---------------------*/ 
+
+        /*Single Realise Press signal handling and sending data via uart*/
+            if(Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Pressed)
+            {
+                Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus = Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+            }
+            else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
+            {
+                /*Send unique data to TX_Communication_Manager*/
+                    TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+                /*-------------------------------------------*/
+
+                /*------reset the switch status---------*/
+                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+                /*--------------------------------------*/
+            }
+        /*--------------------------------------------------------------*/    
+    }
+    /*-------------------------------*/
+
+}
+/*-------------------------------Sender Manager Runnable-----------------------------*/
+void Sender_Manager_Runnable(void)
+{
+    Communication_Sender();
+}
+
+/*-------------------------------Receiver Manager Runnable-------------------------- */
+void Receiver_Manager_Runnable(void)
+{
+    Communication_Receiver();
+}
+
+/*-------------------------------Print Frame Functions-------------------------------------------------------*/
 static void print_frame_thread(Modes_t Copy_Mode) 
 {
     switch(Copy_Mode)
@@ -176,6 +327,37 @@ static void Print_StopWatchFrame()
     LCD_WriteStringAsync("    :  :  : 00",14); 
 }
 
+static void ChangePrintState(Modes_t Copy_Mode,u8 Copy_PrintState)
+{
+    switch(Copy_Mode)
+    {
+        case Clock_Mode:
+            for(u8 index=0;index<NUMBER_OF_DIGITS_CLK_MODE;index++)
+            {
+                Clock_Date_Digits[index].digit_state=Copy_PrintState;
+            }
+        break;
+
+        case StopWatch_Mode:
+            for(u8 index=0;index<NUMBER_OF_DIGITS_STOPW_MODE;index++)
+            {
+                Stop_Watch_Digits[index].digit_state=Copy_PrintState;
+            }
+        break;
+
+        default:
+            /*Nothing*/
+        break;
+    }
+}
+
+static void DigitPrint(u8 digit,u8 DIGIT_STATE)
+{
+    Clock_Date_Digits[digit].digit_state=DIGIT_STATE;
+}
+
+
+/*-------------------------------DisplayOnLCD Function----------------------------------------------------------*/
 static void DisplayOnLCD(Modes_t Copy_Mode)
 {
     /**
@@ -215,124 +397,8 @@ static void DisplayOnLCD(Modes_t Copy_Mode)
     }
 }
 
-static void ChangePrintState(Modes_t Copy_Mode,u8 Copy_PrintState)
-{
-    switch(Copy_Mode)
-    {
-        case Clock_Mode:
-            for(u8 index=0;index<NUMBER_OF_DIGITS_CLK_MODE;index++)
-            {
-                Clock_Date_Digits[index].digit_state=Copy_PrintState;
-            }
-        break;
 
-        case StopWatch_Mode:
-            for(u8 index=0;index<NUMBER_OF_DIGITS_STOPW_MODE;index++)
-            {
-                Stop_Watch_Digits[index].digit_state=Copy_PrintState;
-            }
-        break;
-
-        default:
-            /*Nothing*/
-        break;
-    }
-}
-
-void ControlSwitches_Runnable(void)
-{ 
-
-    /*Setting Switch Data To be sent*/
-    static Ctrl_Switches_Data_t Ctrl_Switches_Data [4] = 
-    {
-        [SWITCH_OK]=
-        {
-            .DATA = 5,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        [SWITCH_EDIT]=
-        {
-            .DATA = 6,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        [SWITCH_LEFT] 
-        {
-            .DATA = 4 ,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        // [SWITCH_EDIT] 
-        // {
-        //     .DATA = 3 ,
-        //     .Switch_Status = Switch_Released,
-        //     .Switch_PrevStatus = Switch_Released
-        // }
-        // ,
-        [SWITCH_RIGHT] 
-        {
-            .DATA = 1,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        // [SWITCH_DOWN] 
-        // {
-        //     .DATA = 5,
-        //     .Switch_Status = Switch_Released,
-        //     .Switch_PrevStatus = Switch_Released
-        // }
-        // , 
-        // [SWITCH_LEFT] 
-        // {
-        //     .DATA = 6,
-        //     .Switch_Status = Switch_Released,
-        //     .Switch_PrevStatus = Switch_Released
-        // }
-        // ,
-        // [SWITCH_RIGHT] 
-        // {
-        //     .DATA = 7,
-        //     .Switch_Status = Switch_Released,
-        //     .Switch_PrevStatus = Switch_Released
-        // }
-    };
-    /*------------------------------*/
-
-    /*SWITCH Reading and Sending Data*/
-    U8 Switches_Iter;
-
-    for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
-    {
-        /*Read Switch State*/
-            HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
-        /*---------------------*/ 
-
-        /*Single Realise Press signal handling and sending data via uart*/
-            if(Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Pressed)
-            {
-                Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus = Ctrl_Switches_Data[Switches_Iter].Switch_Status;
-            }
-            else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
-            {
-                /*Send unique data to TX_Communication_Manager*/
-                    TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
-                /*-------------------------------------------*/
-
-                /*------reset the switch status---------*/
-                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
-                /*--------------------------------------*/
-            }
-        /*--------------------------------------------------------------*/    
-    }
-    /*-------------------------------*/
-
-}
-
+/*-----------------------------------------Command Handler--------------------------------------------------*/
 /**
  * @brief function used to handle the input requests received from USART.
  * @note  the function execute every 10 msec periodicity
@@ -344,12 +410,11 @@ void Command_Handler(u8 command)
     switch(command)
     {
         case MODE_BUTTON_Data:
-            Toggle_Mode();
+            Mode_Switch_Pressed();
         break;
 
         case EDIT_BUTTON_Data:
             Edit_Switch_Pressed();
-            /*Nothing*/
         break;
 
         case OK_BUTTON_Data:
@@ -361,17 +426,15 @@ void Command_Handler(u8 command)
         break;
 
         case DOWN_BUTTON_Data:
-            /*Nothing*/
+            Down_Switch_Pressed();
         break;
 
         case RIGHT_BUTTON_Data:  
             Right_Switch_Pressed();
-            /*Nothing*/
         break;
 
         case LEFT_BUTTON_Data:
             Left_Switch_Pressed();
-            /*Nothing*/
         break;
 
         default:
@@ -380,12 +443,13 @@ void Command_Handler(u8 command)
     }
     command=0;
 }
+/*-----------------------------------------Switches Handlers--------------------------------------------------*/
 
 /**
  * @brief Mode switch function to toggle between mode
  * 
  */
-void Toggle_Mode(void)
+void Mode_Switch_Pressed(void)
 {
     Mode ^=1;
     Operation_type=Init_Operation;
@@ -407,7 +471,16 @@ void OK_Switch_Pressed(void)
         break;
 
         case DigitEdit_Operation:
-            //save the changes
+
+            Clock_Date_Digits[EDIT_INDEX].value=EDIT_TEMP_VALUE.value; //for saving
+
+            // for(int i=0;i<15;i++)
+            // {
+            //     Clock_Date_Digits[i].digit_state=DIGIT_STATE_PRINT;
+            // }
+
+            Operation_type=GeneralEdit_Operation;
+            
         break;
 
         default:
@@ -436,19 +509,389 @@ void UP_Switch_Pressed(void)
         switch(Operation_type)
         {
             case GeneralEdit_Operation:
-                if(Global_X_Pos==0)
+                if (EDIT_INDEX <= 7)
                 {
-                    Global_X_Pos=1;
+                    EDIT_INDEX= 8;
                 }
-                else if(Global_X_Pos==1)
+                else 
                 {
-                    Global_X_Pos=0;
+                    EDIT_INDEX= 0;
                 }
-                LCD_SetCursorPosAsync(Global_X_Pos,Global_Y_Pos);
             break;
 
             case DigitEdit_Operation:
-                /*Nothing*/
+
+                EDIT_TEMP_VALUE.value++;
+
+                /*Minutes Reset Handling*/
+
+                    /*Min Tens*/
+                        if(EDIT_INDEX==Minutes_tens)
+                        {
+                            if(EDIT_TEMP_VALUE.value > 5)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*--------*/
+
+                    /*Min Units*/
+                        if(EDIT_INDEX==Minutes_unit)
+                        {
+                            if(EDIT_TEMP_VALUE.value>9)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*---------*/
+
+                /*----------------------*/
+
+                /*Hour reset Handling*/
+
+                    /*Hour Tens*/
+                        if(EDIT_INDEX==Hours_tens)
+                        {
+                            if(EDIT_TEMP_VALUE.value > 2)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*---------*/
+
+                    /*Hour Units*/
+                        if(EDIT_INDEX==Hours_unit)
+                        {
+                            if (Clock_Date_Digits[Hours_tens].value == 1)
+                            {
+                                if(EDIT_TEMP_VALUE.value>9)
+                                {
+                                    EDIT_TEMP_VALUE.value=0;
+                                }
+                            }
+
+                            if (Clock_Date_Digits[Hours_tens].value == 2)
+                            {
+                                if(EDIT_TEMP_VALUE.value > 3)
+                                {
+                                    EDIT_TEMP_VALUE.value=0;
+                                }
+                            }
+                            if (Clock_Date_Digits[Hours_tens].value == 0)
+                            {
+                                if(EDIT_TEMP_VALUE.value > 9)
+                                {
+                                    EDIT_TEMP_VALUE.value=0;
+                                }
+                            }
+                        }
+                    /*----------*/
+                    
+                /*-------------------*/
+
+                /*Days reset Handling*/
+
+                    /*Day tens*/
+                            if (EDIT_INDEX==Day_tens)
+                            {
+                            /*Reset to zero*/
+                                if ( Clock_Date_Digits[Day_unit].value > 0 )
+                                {
+                                    /*Feb*/
+                                        if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                                        {
+                                            if (IsLeapYear_edit(year))
+                                            {
+                                                if ( EDIT_TEMP_VALUE.value > 2 )
+                                                {
+                                                    EDIT_TEMP_VALUE.value=0;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Clock_Date_Digits[Day_unit].value > 8  )
+                                                {
+                                                    if(EDIT_TEMP_VALUE.value>1)
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=0;
+                                                    }
+                                                }
+                                                else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
+                                                {
+                                                    EDIT_TEMP_VALUE.value=0;
+                                                }
+                                            }
+                                        }
+                                    /*---*/
+
+                                    /* 30 day months*/
+                                        else if (
+                                                    Clock_Date_Digits[Month_unit].value == 4 ||
+                                                    Clock_Date_Digits[Month_unit].value == 6 ||   
+                                                    Clock_Date_Digits[Month_unit].value == 9 ||    
+                                                    (Clock_Date_Digits[Month_unit].value == 1
+                                                    &&
+                                                    Clock_Date_Digits[Month_tens].value == 1)  
+                                                )
+
+                                                {
+                                                    if (Clock_Date_Digits[Day_unit].value==0 && EDIT_TEMP_VALUE.value>3)
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=0;
+                                                    }
+                                                    else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value>2 )
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=0;
+                                                    }
+                                                }
+                                    /*--------------*/
+
+                                    /* 31 days month */
+                                            else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
+                                                    Clock_Date_Digits[Month_unit].value  == 3                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 5                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 7                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 8                                                ||
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                                    )
+                                                    {
+                                                        if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value>2)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=0;
+                                                        }
+                                                        else if ((Clock_Date_Digits[Day_unit].value <= 1) && EDIT_TEMP_VALUE.value>3)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=0;
+                                                        }
+                                                    }
+                                    /*---------------*/    
+                                }    
+                            /*------------*/    
+
+                            /*Reset to one*/
+                                else if ( Clock_Date_Digits[Day_unit].value == 0 )
+                                {
+                                    /*Feb*/
+                                        if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                                        {
+                                            if (IsLeapYear_edit(year))
+                                            {
+                                                if (Clock_Date_Digits[Day_unit].value > 8 && EDIT_TEMP_VALUE.value > 2 )
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                                else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Clock_Date_Digits[Day_unit].value > 7 && EDIT_TEMP_VALUE.value > 2 )
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                                else if (Clock_Date_Digits[Day_unit].value < 8 && EDIT_TEMP_VALUE.value > 2)
+                                                {
+                                                    EDIT_TEMP_VALUE.value=1;
+                                                }
+                                            }
+                                        }
+                                    /*---*/
+
+                                    /* 30 day months*/
+                                        else if (
+                                                    Clock_Date_Digits[Month_unit].value == 4 ||
+                                                    Clock_Date_Digits[Month_unit].value == 6 ||   
+                                                    Clock_Date_Digits[Month_unit].value == 9 ||    
+                                                    (Clock_Date_Digits[Month_unit].value == 1
+                                                    &&
+                                                    Clock_Date_Digits[Month_tens].value == 1)  
+                                                )
+
+                                                {
+                                                    if (Clock_Date_Digits[Day_unit].value==0 && EDIT_TEMP_VALUE.value>3)
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=1;
+                                                    }
+                                                    else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value>2 )
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=1;
+                                                    }
+                                                }
+                                    /*--------------*/
+
+                                    /* 31 days month */
+                                            else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
+                                                    Clock_Date_Digits[Month_unit].value  == 3                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 5                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 7                                                ||
+                                                    Clock_Date_Digits[Month_unit].value  == 8                                                ||
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
+                                                    (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                                    )
+                                                    {
+                                                        if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value>2)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=1;
+                                                        }
+                                                        else if ((Clock_Date_Digits[Day_unit].value <= 1) && EDIT_TEMP_VALUE.value>3)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=1;
+                                                        }
+                                                    }
+                                    /*---------------*/    
+                                }   
+                            /*---------*/
+                            }
+                    /*--------*/   
+
+                    /*Days Units*/
+                        if(EDIT_INDEX==Day_unit)
+                        {
+                            if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                            {
+                                if(IsLeapYear_edit(year))
+                                {
+                                    if(EDIT_TEMP_VALUE.value>9)
+                                    {
+                                        EDIT_TEMP_VALUE.value = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    if ( (EDIT_TEMP_VALUE.value>8 && Clock_Date_Digits[Day_tens].value == 2) ||
+                                            (EDIT_TEMP_VALUE.value >9 && Clock_Date_Digits[Day_tens].value < 2))
+                                        {
+                                            EDIT_TEMP_VALUE.value =0;
+                                        }
+                                }
+
+                            }
+                            else if ((Clock_Date_Digits[Month_unit].value == 4 || Clock_Date_Digits[Month_unit].value == 6 || Clock_Date_Digits[Month_unit].value == 9 || (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value==1))&& Clock_Date_Digits[Day_tens].value==3)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }   
+                            else
+                            {   
+                                if (Clock_Date_Digits[Day_tens].value == 0)
+                                {
+                                    if(EDIT_TEMP_VALUE.value>9)
+                                    {
+                                        EDIT_TEMP_VALUE.value=1;
+                                    }
+                                }
+
+                                if (Clock_Date_Digits[Day_tens].value > 0 && Clock_Date_Digits[Day_tens].value < 3 )
+                                {
+                                    if(EDIT_TEMP_VALUE.value>9)
+                                    {
+                                        EDIT_TEMP_VALUE.value=0;
+                                    }
+                                }
+
+                                if(Clock_Date_Digits[Day_tens].value == 3)
+                                {
+                                    if ( EDIT_TEMP_VALUE.value>1 )
+                                    {
+                                        EDIT_TEMP_VALUE.value=0;
+                                    }
+                                }
+
+                            }       
+                        }       
+                    /*----------*/   
+
+                /*-------------------*/
+
+                /*Month reset Handling*/
+
+                    /*Month tens*/
+                        if(EDIT_INDEX==Month_tens)
+                        {
+                            if(EDIT_TEMP_VALUE.value>1)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                            if(Clock_Date_Digits[Month_unit].value==0)
+                            {
+                                EDIT_TEMP_VALUE.value=1;
+                            }
+                            if(Clock_Date_Digits[Month_unit].value>2)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*----------*/    
+
+                    /*Month unit*/
+                        if(EDIT_INDEX == Month_unit)
+                        {
+                            if ( Clock_Date_Digits[Month_tens].value == 0 )
+                            {
+                                if (EDIT_TEMP_VALUE.value > 9)
+                                {
+                                    EDIT_TEMP_VALUE.value=1;
+                                }
+                            }
+
+                            if ( Clock_Date_Digits[Month_tens].value == 1 )
+                            {
+                                if (EDIT_TEMP_VALUE.value > 2)
+                                {
+                                    EDIT_TEMP_VALUE.value=0;
+                                }
+                            }
+                        }
+                    /*----------*/
+
+                /*--------------------*/
+
+                /*Year reset Handling*/
+
+                    /*year Thousand*/
+                        if(EDIT_INDEX==Years_thousand)
+                        {
+                            if(EDIT_TEMP_VALUE.value>9)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*-------------*/
+
+                    /*Year Hundred*/
+                        if(EDIT_INDEX==Years_hundreds)
+                        {
+                            if(EDIT_TEMP_VALUE.value>9)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*------------*/
+
+                    /*Year Tens*/
+                        if(EDIT_INDEX==Years_tens)
+                        {
+                            if(EDIT_TEMP_VALUE.value>9)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*---------*/
+
+                    /*Year Units*/
+                        if(EDIT_INDEX==Years_unit)
+                        {
+                            if(EDIT_TEMP_VALUE.value>9)
+                            {
+                                EDIT_TEMP_VALUE.value=0;
+                            }
+                        }
+                    /*----------*/
+
+                /*-------------------*/
+                LCD_enuWriteNumber(EDIT_TEMP_VALUE.value);
             break;
 
             default:
@@ -462,31 +905,392 @@ void UP_Switch_Pressed(void)
     }
 }
 
-void GeneralEditMode(void)
+void Down_Switch_Pressed(void)
 {
-    CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION();
-    LCD_WriteCommandAsync(LCD_CURSOR_BLINK_ON);
-    LCD_SetCursorPosAsync(EDIT_TEMP_VALUE.x_pos,EDIT_TEMP_VALUE.y_pos);
+    if(Mode==Clock_Mode)
+        {
+            switch(Operation_type)
+            {
+                case GeneralEdit_Operation:
+                    if (EDIT_INDEX <= 7)
+                    {
+                        EDIT_INDEX= 8;
+                    }
+                    else 
+                    {
+                        EDIT_INDEX= 0;
+                    }
+                break;
+
+                case DigitEdit_Operation:
+                    EDIT_TEMP_VALUE.value--;
+
+                    /*Minutes Reset Handling*/
+
+                        /*Min Tens*/
+                            if(EDIT_INDEX==Minutes_tens)
+                            {
+                                if(EDIT_TEMP_VALUE.value < 0)
+                                {
+                                    EDIT_TEMP_VALUE.value=5;
+                                }
+                            }
+                        /*--------*/
+
+                        /*Min Units*/
+                            if(EDIT_INDEX==Minutes_unit)
+                            {
+                                if(EDIT_TEMP_VALUE.value>9)
+                                {
+                                    EDIT_TEMP_VALUE.value=0;
+                                }
+                                if(EDIT_TEMP_VALUE.value<0)
+                                {
+                                    EDIT_TEMP_VALUE.value=9;
+                                }
+                            }
+                        /*---------*/
+
+                    /*----------------------*/
+
+                    /*Hour reset Handling*/
+
+                        /*Hour Tens*/
+                            if(EDIT_INDEX==Hours_tens)
+                            {
+                                if(EDIT_TEMP_VALUE.value <0)
+                                {
+                                    EDIT_TEMP_VALUE.value=2;
+                                }
+                            }
+                        /*---------*/
+
+                        /*Hour Units*/
+                            if(EDIT_INDEX==Hours_unit)
+                            {
+                                if (Clock_Date_Digits[Hours_tens].value == 1)
+                                {
+                                    if(EDIT_TEMP_VALUE.value<0)
+                                    {
+                                        EDIT_TEMP_VALUE.value=9;
+                                    }
+                                }
+
+                                if (Clock_Date_Digits[Hours_tens].value == 2)
+                                {
+                                    if(EDIT_TEMP_VALUE.value <0)
+                                    {
+                                        EDIT_TEMP_VALUE.value=3;
+                                    }
+                                }
+                                if (Clock_Date_Digits[Hours_tens].value == 0)
+                                {
+                                    if(EDIT_TEMP_VALUE.value <0)
+                                    {
+                                        EDIT_TEMP_VALUE.value=9;
+                                    }
+                                }
+                            }
+                        /*----------*/
+                        
+                    /*-------------------*/
+
+                    /*Days reset Handling*/
+
+                        /*Day tens*/
+                                if (EDIT_INDEX==Day_tens)
+                                {
+                                /*Reset to zero*/
+                                    if ( Clock_Date_Digits[Day_unit].value > 0 )
+                                    {
+                                        /*Feb*/
+                                            if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                                            {
+                                                if (IsLeapYear_edit(year))
+                                                {
+                                                    if (Clock_Date_Digits[Day_unit].value > 0 && EDIT_TEMP_VALUE.value <0 )
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=2;
+                                                    }
+                                                    else if (Clock_Date_Digits[Day_unit].value ==0 && EDIT_TEMP_VALUE.value <0)
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=1;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (Clock_Date_Digits[Day_unit].value <= 8 && EDIT_TEMP_VALUE.value <0 )
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=2;
+                                                    }
+                                                    else if (Clock_Date_Digits[Day_unit].value ==0 && EDIT_TEMP_VALUE.value <0)
+                                                    {
+                                                        EDIT_TEMP_VALUE.value=1;
+                                                    }
+                                                }
+                                            }
+                                        /*---*/
+
+                                        /* 30 day months*/
+                                            else if (
+                                                        Clock_Date_Digits[Month_unit].value == 4 ||
+                                                        Clock_Date_Digits[Month_unit].value == 6 ||   
+                                                        Clock_Date_Digits[Month_unit].value == 9 ||    
+                                                        (Clock_Date_Digits[Month_unit].value == 1
+                                                        &&
+                                                        Clock_Date_Digits[Month_tens].value == 1)  
+                                                    )
+
+                                                    {
+                                                        if (Clock_Date_Digits[Day_unit].value==0 && EDIT_TEMP_VALUE.value<0)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=3;
+                                                        }
+                                                        else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value<0 )
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=2;
+                                                        }
+                                                    }
+                                        /*--------------*/
+
+                                        /* 31 days month */
+                                                else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
+                                                        Clock_Date_Digits[Month_unit].value  == 3                                                ||
+                                                        Clock_Date_Digits[Month_unit].value  == 5                                                ||
+                                                        Clock_Date_Digits[Month_unit].value  == 7                                                ||
+                                                        Clock_Date_Digits[Month_unit].value  == 8                                                ||
+                                                        (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
+                                                        (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                                        )
+                                                        {
+                                                            if ((Clock_Date_Digits[Day_unit].value > 1) && EDIT_TEMP_VALUE.value<0)
+                                                            {
+                                                                EDIT_TEMP_VALUE.value=2;
+                                                            }
+                                                            else if ((Clock_Date_Digits[Day_unit].value <= 1) && EDIT_TEMP_VALUE.value<0)
+                                                            {
+                                                                EDIT_TEMP_VALUE.value=3;
+                                                            }
+                                                        }
+                                        /*---------------*/    
+                                    }    
+                                /*------------*/    
+
+                                /*Reset to one*/
+                                    else if ( Clock_Date_Digits[Day_unit].value == 0 )
+                                    {
+                                        /*Feb*/
+                                            if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                                            {
+                                                if ( EDIT_TEMP_VALUE.value <1 )
+                                                {
+                                                    EDIT_TEMP_VALUE.value=2;
+                                                }
+                                            }
+                                        /*---*/
+
+                                        /* 30 day months*/
+                                            else if (
+                                                        Clock_Date_Digits[Month_unit].value == 4 ||
+                                                        Clock_Date_Digits[Month_unit].value == 6 ||   
+                                                        Clock_Date_Digits[Month_unit].value == 9 ||    
+                                                        (Clock_Date_Digits[Month_unit].value == 1
+                                                        &&
+                                                        Clock_Date_Digits[Month_tens].value == 1)  
+                                                    )
+
+                                                    {
+                                                        if (EDIT_TEMP_VALUE.value<1)
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=3;
+                                                        }
+                                                        else if ( Clock_Date_Digits[Day_unit].value>0 && EDIT_TEMP_VALUE.value<1 )
+                                                        {
+                                                            EDIT_TEMP_VALUE.value=2;
+                                                        }
+                                                    }
+                                        /*--------------*/
+
+                                        /* 31 days month */
+                                                else if ( (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value  == 1)   || 
+                                                        Clock_Date_Digits[Month_unit].value  == 3                                                ||
+                                                        Clock_Date_Digits[Month_unit].value  == 5                                                ||
+                                                        Clock_Date_Digits[Month_unit].value  == 7                                                ||
+                                                        Clock_Date_Digits[Month_unit].value  == 8                                                ||
+                                                        (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 0)   ||                                     
+                                                        (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value  == 2)  
+                                                        )
+                                                        {
+                                                            if (EDIT_TEMP_VALUE.value<1)
+                                                            {
+                                                                EDIT_TEMP_VALUE.value=3;
+                                                            }
+                                                        }
+                                        /*---------------*/    
+                                    }   
+                                /*---------*/
+                                }
+                        /*--------*/   
+
+                        /*Days Units*/
+                            if(EDIT_INDEX==Day_unit)
+                            {
+                                if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                                {
+                                    if(IsLeapYear_edit(year))
+                                    {
+                                        if(EDIT_TEMP_VALUE.value<0)
+                                        {
+                                            EDIT_TEMP_VALUE.value = 9;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if ( (EDIT_TEMP_VALUE.value<0 && Clock_Date_Digits[Day_tens].value == 2))
+                                        {
+                                            EDIT_TEMP_VALUE.value =8;
+                                        }
+                                        else if((EDIT_TEMP_VALUE.value <0 && Clock_Date_Digits[Day_tens].value < 2))
+                                        {
+                                            EDIT_TEMP_VALUE.value = 9;
+                                        }
+                                    }
+                                }
+                                else if ((Clock_Date_Digits[Month_unit].value == 4 || Clock_Date_Digits[Month_unit].value == 6 || Clock_Date_Digits[Month_unit].value == 9 || (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value==1))&& Clock_Date_Digits[Day_tens].value==3)
+                                {
+                                    EDIT_TEMP_VALUE.value=0;
+                                }   
+                                else
+                                {   
+                                    if (Clock_Date_Digits[Day_tens].value == 0)
+                                    {
+                                        if(EDIT_TEMP_VALUE.value<1)
+                                        {
+                                            EDIT_TEMP_VALUE.value=9;
+                                        }
+                                    }
+
+                                    if (Clock_Date_Digits[Day_tens].value > 0 && Clock_Date_Digits[Day_tens].value < 3 )
+                                    {
+                                        if(EDIT_TEMP_VALUE.value<0)
+                                        {
+                                            EDIT_TEMP_VALUE.value=9;
+                                        }
+                                    }
+
+                                    if(Clock_Date_Digits[Day_tens].value == 3)
+                                    {
+                                        if ( EDIT_TEMP_VALUE.value<0 )
+                                        {
+                                            EDIT_TEMP_VALUE.value=1;
+                                        }
+                                    }
+                                }       
+                            }       
+                        /*----------*/   
+
+                    /*-------------------*/
+
+                    /*Month reset Handling*/
+
+                        /*Month tens*/
+                            if(EDIT_INDEX==Month_tens)
+                            {
+                                if(EDIT_TEMP_VALUE.value<0)
+                                {
+                                    EDIT_TEMP_VALUE.value=1;
+                                }
+                                if(Clock_Date_Digits[Month_unit].value==0)
+                                {
+                                    EDIT_TEMP_VALUE.value=1;
+                                }
+                                if(Clock_Date_Digits[Month_unit].value>2)
+                                {
+                                    EDIT_TEMP_VALUE.value=0;
+                                }
+                            }
+                        /*----------*/    
+
+                        /*Month unit*/
+                            if(EDIT_INDEX == Month_unit)
+                            {
+                                if ( Clock_Date_Digits[Month_tens].value == 0 )
+                                {
+                                    if (EDIT_TEMP_VALUE.value <1)
+                                    {
+                                        EDIT_TEMP_VALUE.value=9;
+                                    }
+                                }
+
+                                if ( Clock_Date_Digits[Month_tens].value == 1 )
+                                {
+                                    if (EDIT_TEMP_VALUE.value <0)
+                                    {
+                                        EDIT_TEMP_VALUE.value=2;
+                                    }
+                                }
+                            }
+                        /*----------*/
+
+                    /*--------------------*/
+
+                    /*Year reset Handling*/
+
+                        /*year Thousand*/
+                            if(EDIT_INDEX==Years_thousand)
+                            {
+                                if(EDIT_TEMP_VALUE.value<0)
+                                {
+                                    EDIT_TEMP_VALUE.value=9;
+                                }
+                            }
+                        /*-------------*/
+
+                        /*Year Hundred*/
+                            if(EDIT_INDEX==Years_hundreds)
+                            {
+                                if(EDIT_TEMP_VALUE.value<0)
+                                {
+                                    EDIT_TEMP_VALUE.value=9;
+                                }
+                            }
+                        /*------------*/
+
+                        /*Year Tens*/
+                            if(EDIT_INDEX==Years_tens)
+                            {
+                                if(EDIT_TEMP_VALUE.value<0)
+                                {
+                                    EDIT_TEMP_VALUE.value=9;
+                                }
+                            }
+                        /*---------*/
+
+                        /*Year Units*/
+                            if(EDIT_INDEX==Years_unit)
+                            {
+                                if(EDIT_TEMP_VALUE.value<0)
+                                {
+                                    EDIT_TEMP_VALUE.value=9;
+                                }
+                            }
+                        /*----------*/
+
+                    /*-------------------*/
+                LCD_enuWriteNumber(EDIT_TEMP_VALUE.value);
+                break;
+
+                default:
+                    /*Nothing*/
+                break;
+            }
+        }
+        else
+        {
+            /*Nothing*/
+        }
 }
 
-
-static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void)
-{
-    EDIT_TEMP_VALUE.x_pos=Clock_Date_Digits[EDIT_INDEX].x_pos;
-    EDIT_TEMP_VALUE.y_pos=Clock_Date_Digits[EDIT_INDEX].y_pos;
-    EDIT_TEMP_VALUE.value=Clock_Date_Digits[EDIT_INDEX].value;
-}
-
-void Sender_Manager_Runnable(void)
-{
-    Communication_Sender();
-}
-
-
-void Receiver_Manager_Runnable(void)
-{
-    Communication_Receiver();
-}
 
 
 
@@ -516,28 +1320,44 @@ void Edit_Switch_Pressed(void)
     else if(Mode==StopWatch_Mode)
     {
         //reset stop watch
+        Reset_StopWatch();
+        ChangePrintState(Mode,DIGIT_STATE_PRINT);
+
     }
 }
 
-void Down_Switch_Pressed(void)
-{
-
-}
 
 void Right_Switch_Pressed(void)
 {
-    EDIT_INDEX++;
-    if(EDIT_INDEX>11)
+    if(Mode==Clock_Mode&&Operation_type==GeneralEdit_Operation)
     {
-        EDIT_INDEX=0;
+        EDIT_INDEX++;
+        if(EDIT_INDEX>11)
+        {
+            EDIT_INDEX=0;
+        }
     }
+    else
+    {
+
+    }
+   
     
 }
+
 void Left_Switch_Pressed(void)
 {
-    EDIT_INDEX--;
-    if(EDIT_INDEX<0)
+    if(Mode==Clock_Mode&&Operation_type==GeneralEdit_Operation)
     {
-        EDIT_INDEX=11;
+        EDIT_INDEX--;
+        if(EDIT_INDEX<0)
+        {
+            EDIT_INDEX=11;
+        }
     }
+    else
+    {
+
+    }
+  
 }

@@ -57,7 +57,7 @@ extern unit_Info_t Stop_Watch_Digits[NUMBER_OF_DIGITS_STOPW_MODE];
     void TX_Communication_Manager(U8 RAW_DATA);
     void GeneralEditMode(void);
     void DigitEditMode(void);
-    void Toggle_Mode(void);
+    void Mode_Switch_Pressed(void);
     void Command_Handler(u8 command);
     void OK_Switch_Pressed(void);
     void UP_Switch_Pressed(void);
