@@ -26,12 +26,16 @@ typedef enum
     Clock_Date,
     StopWatch,
     Manager,
+    Control_Switch,
+    Switch_Debouncing,
     LCD,
     _Runnable_no
 } RunnablePriority_t;
 
 /*********************************** Runnable prototypers ******************************************/
-extern void Clock_Date_Runnable   (void);
-extern void Stopwatch_Runnable    (void);
-extern void Application_Runnable  (void);
-extern void LCD_Runnable_Manager  (void);
+extern void Clock_Date_Runnable        (void);
+extern void Stopwatch_Runnable         (void);
+extern void Application_Runnable       (void);
+extern void LCD_Runnable_Manager       (void);
+extern void Switch_Debouncing_Runnable  (void);
+extern void ControlSwitches_Runnable    (void);

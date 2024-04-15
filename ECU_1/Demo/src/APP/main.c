@@ -335,7 +335,7 @@ int main ()
     USART_Pins_Init();
     NVIC_EnableIRQ(USART1_IRQn);
     USART_Init();
-   u8 x;
+    u8 x;
     USART_Request_t Requestone={
         .length=1,
         .PtrtoBuffer=&x,

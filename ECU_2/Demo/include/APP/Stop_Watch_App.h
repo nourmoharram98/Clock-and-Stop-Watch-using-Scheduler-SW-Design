@@ -18,8 +18,8 @@
 #define NUMBER_OF_DIGITS           7
 
 
-#define DIGIT_STATE_OPERATING      1
-#define DIGIT_STATE_EDITTING       2
+#define DIGIT_STATE_PRINT          1
+#define DIGIT_STATE_NOT_PRINT      2
 
 #define DeciSecond_hundred         0
 #define Second_unit                1
@@ -45,11 +45,11 @@
 
 
 
-
 typedef struct 
 {
-    u8 value;
-    u8 x_pos;
-    u8 y_pos;
-    u8 digit_state;
+          u8    value;
+   const  u8    max_value;      
+   const  u8    x_pos;
+   const  u8    y_pos;
+          u8    digit_state;  //digit_state -> ( print , not print ) 
 }unit_Info_t;
