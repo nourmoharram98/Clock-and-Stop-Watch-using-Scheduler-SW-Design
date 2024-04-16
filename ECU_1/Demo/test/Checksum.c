@@ -3,21 +3,6 @@
 
 #define DATA_SIZE 4 // Size of data in bits
 
-// Communication Manager function
-void Communication_Manager(uint8_t RAW_DATA) {
-    uint8_t processed_data = append_crc(RAW_DATA);
-    printf("Transmitted data with CRC: %X\n", processed_data);
-
-    // Simulating receiving data
-    process_received_data(processed_data);
-}
-
-// Function to append CRC to data
-uint8_t append_crc(uint8_t data) {
-    uint8_t crc = calculate_crc(data);
-    return (data << 4) | crc; // Append CRC to data
-}
-
 // Function to calculate CRC checksum
 uint8_t calculate_crc(uint8_t data) {
     // CRC polynomial: x^4 + x^3 + 1, represented as 0b11011
@@ -38,6 +23,12 @@ uint8_t calculate_crc(uint8_t data) {
     return crc & 0x0F; // Ensure CRC is 4 bits long
 }
 
+// Function to append CRC to data
+uint8_t append_crc(uint8_t data) {
+    uint8_t crc = calculate_crc(data);
+    return (data << 4) | crc; // Append CRC to data
+}
+
 // Function to process received data and verify CRC
 void process_received_data(uint8_t received_data) {
     uint8_t received_crc = received_data & 0x0F; // Extract received CRC
@@ -53,8 +44,19 @@ void process_received_data(uint8_t received_data) {
     }
 }
 
-int main() {
-    uint8_t input_data = 0b0001; // Example input data
+// Communication Manager function
+void Communication_Manager(uint8_t RAW_DATA) {
+    uint8_t processed_data = append_crc(RAW_DATA);
+    printf("Transmitted data with CRC: %X\n", processed_data);
+
+    // Simulating receiving data
+    process_received_data(processed_data);
+}
+
+
+int main() 
+{
+    uint8_t input_data = 4; // Example input data
 
     Communication_Manager(input_data);
 

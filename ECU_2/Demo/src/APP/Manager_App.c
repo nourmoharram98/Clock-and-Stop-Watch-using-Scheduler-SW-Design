@@ -1398,118 +1398,118 @@
         }             
     }
     
-static void STOP_WATCH_INIT_THREAD(void)
-{
-    STOP_WATCH.COUNTER+=Manager_Periodicity;
-
-    for(int i=0;i<7;i++)
+    static void STOP_WATCH_INIT_THREAD(void)
     {
-        Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
-    }     
+        STOP_WATCH.COUNTER+=Manager_Periodicity;
 
-    switch(STOP_WATCH_INIT_STATE)
-    {
-        case SET_CURSOR_FIRST_LINE:
-            LCD_ClearScreenAsync();
-            STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
-        break;
-
-        case PRINT_FIRST_LINE:
-            LCD_enuWriteStringAsync("STOPWATCH",9); // (16 x 2) x 2 = 64 ms  -> 70 ms
-            STOP_WATCH_INIT_STATE=WAIT_1;
-        break;
-
-        case WAIT_1:
-            if(STOP_WATCH.COUNTER>=70)
-            {
-                STOP_WATCH.COUNTER=0;
-                STOP_WATCH_INIT_STATE=SET_CURSOR_SECOND_LINE;
-            }
-        break;
-
-        case SET_CURSOR_SECOND_LINE:
-            LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
-            STOP_WATCH_INIT_STATE = PRINT_SECOND_LINE;
-            STOP_WATCH.COUNTER=0;
-        break;
-
-        case PRINT_SECOND_LINE:
-            LCD_enuWriteStringAsync("    :  :  : 00",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
-            STOP_WATCH_INIT_STATE=WAIT_2;
-        break;
-
-        case WAIT_2:
-            if(STOP_WATCH.COUNTER>=70)
-            {
-                STOP_WATCH.COUNTER=0;
-                STOP_WATCH_INIT_STATE=END;
-            }
-        break;
-
-        case END:
-            STOP_WATCH_OPERATING_STATE = STOP_WATCH_RUN;
-            STOP_WATCH.COUNTER=0;
-            STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
-            STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
-        break;  
-    }
-}
-
-static void STOP_WATCH_RUN_THREAD(void)
-{
-    if(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
-    {
-        switch (STOP_WATCH_OPERATING_RUN_STATE)
+        for(int i=0;i<7;i++)
         {
-            case SET_CURSOR:
-                LCD_SetCursorPosAsync(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].x_pos, Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].y_pos);
-                STOP_WATCH_OPERATING_RUN_STATE = WRITE_NUMBER;
+            Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+        }     
+
+        switch(STOP_WATCH_INIT_STATE)
+        {
+            case SET_CURSOR_FIRST_LINE:
+                LCD_ClearScreenAsync();
+                STOP_WATCH_INIT_STATE=PRINT_FIRST_LINE;
             break;
 
-            case WRITE_NUMBER:
-                LCD_enuWriteNumber(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].value);
+            case PRINT_FIRST_LINE:
+                LCD_enuWriteStringAsync("STOPWATCH",9); // (16 x 2) x 2 = 64 ms  -> 70 ms
+                STOP_WATCH_INIT_STATE=WAIT_1;
+            break;
 
-                STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
-
-                Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
-                
-                STOP_WATCH_DIGIT_ITERATOR++;
-                if(STOP_WATCH_DIGIT_ITERATOR > 6)
+            case WAIT_1:
+                if(STOP_WATCH.COUNTER>=70)
                 {
-                    STOP_WATCH_DIGIT_ITERATOR= 0;
+                    STOP_WATCH.COUNTER=0;
+                    STOP_WATCH_INIT_STATE=SET_CURSOR_SECOND_LINE;
                 }
-            break; 
-        }   
-    }
-    else // DIGIT_STATE_NOT_PRINT
-    {
-        STOP_WATCH_DIGIT_ITERATOR++;
-        if(STOP_WATCH_DIGIT_ITERATOR > 6)
-        {
-            STOP_WATCH_DIGIT_ITERATOR = 0;
-            STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
+            break;
+
+            case SET_CURSOR_SECOND_LINE:
+                LCD_SetCursorPosAsync(2, 1);             // ( 1 x 2) x 2 = 4 ms take care about lcd refresh rate 16 ms            
+                STOP_WATCH_INIT_STATE = PRINT_SECOND_LINE;
+                STOP_WATCH.COUNTER=0;
+            break;
+
+            case PRINT_SECOND_LINE:
+                LCD_enuWriteStringAsync("    :  :  : 00",14); // (11 x 2) x 2 = 44 ms   -> 60 ms
+                STOP_WATCH_INIT_STATE=WAIT_2;
+            break;
+
+            case WAIT_2:
+                if(STOP_WATCH.COUNTER>=70)
+                {
+                    STOP_WATCH.COUNTER=0;
+                    STOP_WATCH_INIT_STATE=END;
+                }
+            break;
+
+            case END:
+                STOP_WATCH_OPERATING_STATE = STOP_WATCH_RUN;
+                STOP_WATCH.COUNTER=0;
+                STOP_WATCH_INIT_STATE=SET_CURSOR_FIRST_LINE;
+                STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+            break;  
         }
     }
-    
-    if(CMD[MODE_SWITCH_INDEX]==1)
-    {
-        PROGRAM_MODE=MODE_CLOCK;
-        CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
-        CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
 
-    } 
-    if(CMD[OK_SWITCH_INDEX]==1)
+    static void STOP_WATCH_RUN_THREAD(void)
     {
-        STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
+        if(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state == DIGIT_STATE_PRINT)
+        {
+            switch (STOP_WATCH_OPERATING_RUN_STATE)
+            {
+                case SET_CURSOR:
+                    LCD_SetCursorPosAsync(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].x_pos, Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].y_pos);
+                    STOP_WATCH_OPERATING_RUN_STATE = WRITE_NUMBER;
+                break;
+
+                case WRITE_NUMBER:
+                    LCD_enuWriteNumber(Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].value);
+
+                    STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR;
+
+                    Stop_Watch_Digits[STOP_WATCH_DIGIT_ITERATOR].digit_state = DIGIT_STATE_NOT_PRINT;
+                    
+                    STOP_WATCH_DIGIT_ITERATOR++;
+                    if(STOP_WATCH_DIGIT_ITERATOR > 6)
+                    {
+                        STOP_WATCH_DIGIT_ITERATOR= 0;
+                    }
+                break; 
+            }   
+        }
+        else // DIGIT_STATE_NOT_PRINT
+        {
+            STOP_WATCH_DIGIT_ITERATOR++;
+            if(STOP_WATCH_DIGIT_ITERATOR > 6)
+            {
+                STOP_WATCH_DIGIT_ITERATOR = 0;
+                STOP_WATCH_OPERATING_RUN_STATE=SET_CURSOR; // Reset mystate when wrapping around
+            }
+        }
+        
+        if(CMD[MODE_SWITCH_INDEX]==1)
+        {
+            PROGRAM_MODE=MODE_CLOCK;
+            CLOCK_OPERATING_STATE      = CLOCK_OPERATING_INIT;
+            CLOCK_OPERATING_RUN_STATE  = SET_CURSOR;                
+
+        } 
+        if(CMD[OK_SWITCH_INDEX]==1)
+        {
+            STOP_WATCH_OPTION = (STOP_WATCH_OPTION == 0) ? 1 : 0;
+        }
+        if(CMD[EDIT_SWITCH_INDEX]==1)
+        {
+        for(int i=0;i<7;i++)
+        {
+            Stop_Watch_Digits[i].value=0;
+            Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
+        }   
+        }
     }
-    if(CMD[EDIT_SWITCH_INDEX]==1)
-    {
-    for(int i=0;i<7;i++)
-    {
-        Stop_Watch_Digits[i].value=0;
-        Stop_Watch_Digits[i].digit_state=DIGIT_STATE_PRINT;
-    }   
-    }
-}
 
 

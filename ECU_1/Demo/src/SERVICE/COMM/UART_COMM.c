@@ -40,7 +40,7 @@ U8 append_crc(U8 data)
 // Function to calculate CRC checksum
 U8 calculate_crc(U8 data) 
 {
-    // CRC polynomial: x^4 + x^3 + 1, represented as 0b11011
+    // CRC polynomial: x^3 + x^2 + 1, represented as 0b1101
     U8 crc_poly = 0b1101;
     U8 crc = 0; // Initialize CRC to 0
 
