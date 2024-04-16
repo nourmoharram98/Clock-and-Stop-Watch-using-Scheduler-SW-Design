@@ -26,13 +26,13 @@ const SWITCH_CONFIGURATIONS arrOfSwitches[Number_Of_Switches]={
                         },
 		[SWITCH_EDIT]={
                             .port=GPIO_PORT_B,
-                            .Switch_Pin=GPIO_PIN_10,
+                            .Switch_Pin=GPIO_PIN_15,
                             .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
                             .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
         },
 		[SWITCH_UP]={
                             .port=GPIO_PORT_B,
-                            .Switch_Pin=GPIO_PIN_15,
+                            .Switch_Pin=GPIO_PIN_10,
                             .SWITCH_PIN_MODE=SWITCH_PIN_MODE_INTERNALPULLUP,
                             .SWITCH_CONNECTION_MODE=SWITCH_CONNECTION_MODE_INTPU,
 
