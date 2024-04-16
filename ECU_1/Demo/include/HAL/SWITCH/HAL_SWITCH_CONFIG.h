@@ -17,13 +17,13 @@
  */
 typedef enum
 {
-	SWITCH_MODE,    /**< SWITCH_NUMONE */
-	SWITCH_OK,    /**< SWITCH_NUMTWO */
 	SWITCH_EDIT,
 	SWITCH_UP,
 	SWITCH_DOWN,
 	SWITCH_LEFT,
 	SWITCH_RIGHT,
+	SWITCH_MODE,    /**< SWITCH_NUMONE */
+	SWITCH_OK,    /**< SWITCH_NUMTWO */
 	Number_Of_Switches/**< Number_Of_Switches */
 }switch_IDs_t;
 

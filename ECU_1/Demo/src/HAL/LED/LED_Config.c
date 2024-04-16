@@ -16,12 +16,12 @@ const LED_strLEDConfig_t LED_arrOfStrLEDs[NUM_OF_LEDS] =
         
     }
     */
-    [Nour_LED]= 
-    {
-        .Port=                 GPIO_PORT_B,
-        .Pin=                  GPIO_PIN_0,
-        .Connection=           LED_Connection_FW,
-        .Init_Value=           LED_SET_OFF
-    }
+    // [Nour_LED]= 
+    // {
+    //     .Port=                 GPIO_PORT_B,
+    //     .Pin=                  GPIO_PIN_0,
+    //     .Connection=           LED_Connection_FW,
+    //     .Init_Value=           LED_SET_OFF
+    // }
 
  };
