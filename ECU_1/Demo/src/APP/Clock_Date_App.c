@@ -147,7 +147,7 @@ void Clock_Date_Runnable(void)
 {
 
     // Update Deci, Sec , Min , Hours
-
+    //Runnable_Execution_time();
     Clock_Date_Digits[DeciSecond_hundred].value++;
     Clock_Date_Digits[DeciSecond_hundred].digit_state=DIGIT_STATE_PRINT;
     if (Clock_Date_Digits[DeciSecond_hundred].value > 9) 
@@ -305,5 +305,6 @@ void Clock_Date_Runnable(void)
                 }
             }
         }
+        //Runnable_Execution_time();
 
 }

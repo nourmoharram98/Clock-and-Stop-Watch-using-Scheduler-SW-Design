@@ -9,46 +9,6 @@
  * 
 */
 
-/**
- * @brief Implementation of the runnable that will iterate over the digits to print them on LCD 
- * @brief Implementation of the runnable that will check for the switches in the system
- * @brief Implementation of the function that will check for the global flag of the mode (Clock or Stop Watch) and toggle the flag of mode according to current state 
- * @brief Implementation of the function that will check for
- edit mode and enable w disable switches and call function of state 
- machine* @brief 
- * @brief Implementation of the function of edit mode state machine 
-    in General edit mode :
-        -user can use up/down/right/left/ok/edit switches
--if up/down/left/right switches is pressed the function will jump to its relative state
-                                                      
-            Switch  |    Relative state                                      |  Limitation
-            --------|--------------------------------------------------------|--------------------------------
-            Up      |    Decrement the value of cursor set position by 64    |  block decrement if at min row or set to max row
-            Down    |    Increment the value of cursor set position by 64    |  block increment if at max row or 
-            Left    |    Decrement the value of cursor set position by 1     |  block decrement if at min column or
-            Right   |    Increment the value of cursor set position by 1     |  block decrement if at max column or ...
-        
-        -if ok switch pressed the function will change the edit mode to Idle mode
-    in Digit Edit mode:
-        
-            Switch  |    Relative sate                                               |    Limitation
-            --------|----------------------------------------------------------------|---------------------------
-            Up      |  Decrement the value of the digit relative to cursor position  |  no decrement more than 0
-            Down    |  Increment the value of the digit relative to cursor position  |  no increment more than 9
-
-        -up/down switches are checked and their corresponding functions will be called
-        -in case user incremented to boundary values value must overflow again
-    in Idel Edit mode:
-        - inhibit the functionality of the up/down/right/left switches
-        - turn off cursor
- * @brief function for up switch - take in consideration the boundary values and overflow and mode of edit (General or Digit)
- * @brief function for down switch - take in consideration the boundary values and overflow and mode of edit (General or Digit)
- * @brief function for right switch - take in consideration the boundary values and overflow
- * @brief function for left switch - take in consideration the boundary values and overflow
- * 
- * 
-*/
-
 /*--------------------------------Includes----------------------------*/
     #include "Std_Types.h"
     #include "HAL/LCD/HAL_LCD.h"
@@ -157,140 +117,150 @@ static void CLOCK_EDITING_GENERAL_EDIT_CURSOR_SYNC_FUNCTION(void)
 /*---------------------------------------------Runnables-----------------------------------------------------*/
 
 /*-------------------------------Manager Runnable------------------------------------*/
-void Manager_Runnable(void)
-{
-    u32 Alternative_Mode = Mode^1;
-    ChangePrintState(Alternative_Mode,DIGIT_STATE_NOT_PRINT);
-    
-    switch(Operation_type)
+    void Manager_Runnable(void)
     {
-        case Init_Operation:
-            print_frame_thread(Mode);
-            ChangePrintState(Mode,DIGIT_STATE_PRINT);
-            Operation_type=Idle_Operation;
-        break;
-
-        case Idle_Operation:
-            DisplayOnLCD(Mode);
-        break;
-
-        case GeneralEdit_Operation:
-            DigitPrint(EDIT_INDEX,DIGIT_STATE_PRINT);
-            DisplayOnLCD(Mode);
-            GeneralEditMode();
-        break;
-
-        case DigitEdit_Operation:
-            DigitPrint(EDIT_INDEX,DIGIT_STATE_NOT_PRINT);
-            DisplayOnLCD(Mode);
-            DigitEditMode();
-        break;
+       
+       // Runnable_Execution_time();
+        u32 Alternative_Mode = Mode^1;
+        ChangePrintState(Alternative_Mode,DIGIT_STATE_NOT_PRINT);
         
-        default:
-            /*Do Nothing*/
-        break;
+        switch(Operation_type)
+        {
+            case Init_Operation:
+                print_frame_thread(Mode);
+                ChangePrintState(Mode,DIGIT_STATE_PRINT);
+                Operation_type=Idle_Operation;
+            break;
+
+            case Idle_Operation:
+                DisplayOnLCD(Mode);
+            break;
+
+            case GeneralEdit_Operation:
+                DigitPrint(EDIT_INDEX,DIGIT_STATE_PRINT);
+                DisplayOnLCD(Mode);
+                GeneralEditMode();
+            break;
+
+            case DigitEdit_Operation:
+                DigitPrint(EDIT_INDEX,DIGIT_STATE_NOT_PRINT);
+                DisplayOnLCD(Mode);
+                DigitEditMode();
+            break;
+            
+            default:
+                /*Do Nothing*/
+            break;
+        }
+      //  Runnable_Execution_time();
     }
-  
-}
 
 /*-------------------------------Control Switch Runnable-----------------------------*/
-void ControlSwitches_Runnable(void)
-{ 
+    void ControlSwitches_Runnable(void)
+    { 
+      //  Runnable_Execution_time();
 
     /*Setting Switch Data To be sent*/
-    static Ctrl_Switches_Data_t Ctrl_Switches_Data [7] = 
-    {
-        [SWITCH_MODE]=
+        static Ctrl_Switches_Data_t Ctrl_Switches_Data [7] = 
         {
-            .DATA = 7,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        [SWITCH_OK]=
-        {
-            .DATA = 5,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        [SWITCH_EDIT] 
-        {
-            .DATA = 6 ,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        [SWITCH_UP] 
-        {
-            .DATA = 4 ,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        [SWITCH_DOWN] 
-        {
-            .DATA = 2,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        ,
-        [SWITCH_LEFT] 
-        {
-            .DATA = 3,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-        , 
-        [SWITCH_RIGHT] 
-        {
-            .DATA = 1,
-            .Switch_Status = Switch_Released,
-            .Switch_PrevStatus = Switch_Released
-        }
-    };
+            [SWITCH_MODE]=
+            {
+                .DATA = 7,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
+            [SWITCH_OK]=
+            {
+                .DATA = 5,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
+            [SWITCH_EDIT] 
+            {
+                .DATA = 6 ,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
+            [SWITCH_UP] 
+            {
+                .DATA = 4 ,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
+            [SWITCH_DOWN] 
+            {
+                .DATA = 2,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            ,
+            [SWITCH_LEFT] 
+            {
+                .DATA = 3,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+            , 
+            [SWITCH_RIGHT] 
+            {
+                .DATA = 1,
+                .Switch_Status = Switch_Released,
+                .Switch_PrevStatus = Switch_Released
+            }
+        };
     /*------------------------------*/
 
-    /*SWITCH Reading and Sending Data*/
-     U8 Switches_Iter=0;
+        /*SWITCH Reading and Sending Data*/
+        U8 Switches_Iter=0;
 
-    for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
-    {
-        /*Read Switch State*/
-            HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
-        /*---------------------*/ 
+        for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
+        {
+            /*Read Switch State*/
+                HAL_SWITCH_enuGetSwitchState( Switches_Iter ,&Ctrl_Switches_Data[Switches_Iter].Switch_Status );
+            /*---------------------*/ 
 
-        /*Single Realise Press signal handling and sending data via uart*/
-            if(Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Pressed)
-            {
-                Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus = Ctrl_Switches_Data[Switches_Iter].Switch_Status;
-            }
-            else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
-            {
-                /*Send unique data to TX_Communication_Manager*/
-                    TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
-                /*-------------------------------------------*/
+            /*Single Realise Press signal handling and sending data via uart*/
+                if(Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Pressed)
+                {
+                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus = Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+                }
+                else if(Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus == Switch_Pressed && Ctrl_Switches_Data[Switches_Iter].Switch_Status == Switch_Released)
+                {
+                    /*Send unique data to TX_Communication_Manager*/
+                        TX_Communication_Manager(Ctrl_Switches_Data[Switches_Iter].DATA); 
+                    /*-------------------------------------------*/
 
-                /*------reset the switch status---------*/
-                    Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
-                /*--------------------------------------*/
-            }
-        /*--------------------------------------------------------------*/    
+                    /*------reset the switch status---------*/
+                        Ctrl_Switches_Data[Switches_Iter].Switch_PrevStatus=Ctrl_Switches_Data[Switches_Iter].Switch_Status;
+                    /*--------------------------------------*/
+                }
+            /*--------------------------------------------------------------*/    
+        }
+        /*-------------------------------*/
+      //  Runnable_Execution_time();
+
     }
-    /*-------------------------------*/
-
-}
 /*-------------------------------Sender Manager Runnable-----------------------------*/
-void Sender_Manager_Runnable(void)
-{
-    Communication_Sender();
-}
+    void Sender_Manager_Runnable(void)
+    {
+        //Runnable_Execution_time();
+        Communication_Sender();
+       // Runnable_Execution_time();
+
+    }
 
 /*-------------------------------Receiver Manager Runnable-------------------------- */
-void Receiver_Manager_Runnable(void)
-{
-    Communication_Receiver();
-}
+    void Receiver_Manager_Runnable(void)
+    {
+       // Runnable_Execution_time();
+        Communication_Receiver();
+       // Runnable_Execution_time();
+
+    }
 
 /*-------------------------------Print Frame Functions-------------------------------------------------------*/
 static void print_frame_thread(Modes_t Copy_Mode) 

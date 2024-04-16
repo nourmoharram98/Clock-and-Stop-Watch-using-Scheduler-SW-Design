@@ -13,7 +13,7 @@
 #include"Std_Types.h"
 #include"Error_states.h"
 #include"HAL/LCD/HAL_LCD_CONFIG.h"
-
+#include"HAL/SystickReader/SYSTICK_Reader.h"
 #define LCD_DISPLAY_ROW1        0
 #define LCD_DISPLAY_ROW2        1
 #define LCD_DISPLAY_ROW3        2

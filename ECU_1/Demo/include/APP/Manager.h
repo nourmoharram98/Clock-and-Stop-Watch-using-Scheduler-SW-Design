@@ -6,6 +6,7 @@
 #include "APP/Stop_Watch_App.h"
 #include "SERVICE/COMM/UART_COMM.h"
 #include "HAL/SWITCH/HAL_SWITCH.h"
+#include "HAL/SystickReader/SYSTICK_Reader.h"
 /**
  * @brief array that carry Clock-date digits Data
  * 

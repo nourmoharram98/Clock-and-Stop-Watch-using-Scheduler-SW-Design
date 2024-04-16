@@ -107,3 +107,5 @@ SysTick_Error_t SysTick_SetTickMS(uint32 Time);
 SysTick_Error_t SysTick_SetCallBack(Handler_t handler);
 
 SysTick_Error_t SysTick_SetCurrentVal(uint32 CurrentVal);
+
+u32 Systick_STKVAL(void);

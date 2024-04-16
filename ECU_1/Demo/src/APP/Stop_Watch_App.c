@@ -71,6 +71,7 @@ unit_Info_t Stop_Watch_Digits[NUMBER_OF_DIGITS_STOPW_MODE]=
 
 void Stopwatch_Runnable(void)
 {
+    //Runnable_Execution_time();
     if(StopWatch_Status==1 && Mode==StopWatch_Mode)
     {
         Stop_Watch_Digits[DeciSecond_hundred_SW].value++;
@@ -135,6 +136,7 @@ void Stopwatch_Runnable(void)
     {
         //do nothing
     }
+   // Runnable_Execution_time();
    
 }
 

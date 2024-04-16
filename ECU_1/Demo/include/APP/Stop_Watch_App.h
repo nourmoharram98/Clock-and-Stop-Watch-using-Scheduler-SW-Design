@@ -12,6 +12,7 @@
 #pragma once
 
 #include "Std_Types.h"
+#include "HAL/SystickReader/SYSTICK_Reader.h"
 
 
 #define NUMBER_OF_DIGITS_STOPW_MODE           7

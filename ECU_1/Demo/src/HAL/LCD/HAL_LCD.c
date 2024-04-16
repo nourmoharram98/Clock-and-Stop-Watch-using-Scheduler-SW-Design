@@ -136,6 +136,7 @@ static Sys_enuErrorStates_t LCD_WriteCommandProcess(void);
 
 void LCD_Runnable(void)
 {
+   // Runnable_Execution_time();
     switch(Global_LCD_State)
     {
         case LCD_Init:
@@ -173,6 +174,8 @@ void LCD_Runnable(void)
         default:
             break;
     }
+   // Runnable_Execution_time();
+
 }
 
 

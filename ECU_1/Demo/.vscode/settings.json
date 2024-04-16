@@ -16,6 +16,9 @@
         "stm32f401cc_mcal_usart.h": "c",
         "uart_comm.h": "c",
         "error_states.h": "c",
-        "mcal_usart_config.h": "c"
+        "mcal_usart_config.h": "c",
+        "systick_reader.h": "c",
+        "systick_config.h": "c",
+        "systick.h": "c"
     }
 }

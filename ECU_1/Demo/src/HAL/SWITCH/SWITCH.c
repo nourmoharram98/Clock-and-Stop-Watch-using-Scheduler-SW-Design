@@ -105,6 +105,7 @@ Sys_enuErrorStates_t HAL_SWITCH_enuGetSwitchState(u8 SWITCH,u32 *Switch_Status)
 
 void Switch_Debouncing_Runnable(void)
 {
+	//Runnable_Execution_time();
 	U8 current_status=0;
 	volatile static u32 Switch_PreviousStatus[Number_Of_Switches]={0};
 	volatile static u8 Switch_Counters[Number_Of_Switches]={0};
@@ -126,4 +127,6 @@ void Switch_Debouncing_Runnable(void)
 		}
 		Switch_PreviousStatus[index]=current_status;
 	}
+	//Runnable_Execution_time();
+
 }
