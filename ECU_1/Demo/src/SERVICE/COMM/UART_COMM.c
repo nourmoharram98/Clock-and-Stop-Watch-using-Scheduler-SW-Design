@@ -76,10 +76,6 @@ void process_received_data(U8 received_data)
     // Verify CRC
     if (received_crc == calculated_crc) 
     {
-        //Use Data     -> Call function in app layer that switches on the RAW_DATA & act accordigly to the flags
-        // which_switch(received_data_only);
-        //switch 3la el button el adas
-        //call corresponding function aw change the corresponding flag
         Command_Handler(received_data_only);
     } 
     else 
@@ -87,13 +83,6 @@ void process_received_data(U8 received_data)
         //Ignore Data  -> 
     }
 
-    // Receiver_Counter++;
-
-    // //check if counter reach the threshold of  Requests 
-    // if(Receiver_Counter==NUMBER_OF_REQUESTS)
-    // {
-    //     Receiver_Counter=0;
-    // }
 }
 
 Sys_enuErrorStates_t Communication_Sender(void)

@@ -14,7 +14,7 @@
 #define SWITCH_STATUS_CHECKS_THRESHOLD				5
 
 extern const SWITCH_CONFIGURATIONS arrOfSwitches[Number_Of_Switches];
-volatile static u8 Switch_ActualStatus[Number_Of_Switches]={1,1};
+volatile static u8 Switch_ActualStatus[Number_Of_Switches]={1,1,1,1,1,1,1};
 
 /**
  * @brief enumeration for switch status if it's mode is internal pull up

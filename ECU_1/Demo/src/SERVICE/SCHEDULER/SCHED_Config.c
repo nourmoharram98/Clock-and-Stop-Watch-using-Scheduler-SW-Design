@@ -42,7 +42,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     [Clock_Date]=
     {
         .TaskName="Clock Data APP",
-        .InitialDelayMS=50,
+        .InitialDelayMS=200,
         .PeriodicityMS=100,
         .CallBack=Clock_Date_Runnable 
     }
@@ -50,7 +50,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     [StopWatch]=
     {
         .TaskName="Stop Watch APP",
-        .InitialDelayMS=50,
+        .InitialDelayMS=200,
         .PeriodicityMS=100,
         .CallBack=Stopwatch_Runnable
     },
@@ -93,7 +93,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Switch Debouncing Runnable",
         .InitialDelayMS=0,
-        .PeriodicityMS=6,
+        .PeriodicityMS=15,
         .CallBack=Switch_Debouncing_Runnable
     }
 };

@@ -252,7 +252,7 @@ void ControlSwitches_Runnable(void)
     /*------------------------------*/
 
     /*SWITCH Reading and Sending Data*/
-    U8 Switches_Iter;
+     U8 Switches_Iter;
 
     for (Switches_Iter = 0 ;Switches_Iter < Number_Of_Switches ; Switches_Iter++)
     {
