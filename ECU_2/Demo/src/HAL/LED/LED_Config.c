@@ -18,7 +18,7 @@ const LED_strLEDConfig_t LED_arrOfStrLEDs[NUM_OF_LEDS] =
     */
     [LED_RED]= 
     {
-        .Port=                 GPIO_PORT_A,
+        .Port=                 GPIO_A,
         .Pin=                  GPIO_PIN_0,
         .Connection=           LED_Connection_FW,
         .Init_Value=           LED_SET_OFF
@@ -26,7 +26,7 @@ const LED_strLEDConfig_t LED_arrOfStrLEDs[NUM_OF_LEDS] =
     ,
     [LED_YELLOW]= 
     {
-        .Port=                 GPIO_PORT_A,
+        .Port=                 GPIO_A,
         .Pin=                  GPIO_PIN_1,
         .Connection=           LED_Connection_FW,
         .Init_Value=           LED_SET_OFF
@@ -34,7 +34,7 @@ const LED_strLEDConfig_t LED_arrOfStrLEDs[NUM_OF_LEDS] =
     ,
     [LED_GREEN]= 
     {
-        .Port=                 GPIO_PORT_A,
+        .Port=                 GPIO_A,
         .Pin=                  GPIO_PIN_2,
         .Connection=           LED_Connection_FW,
         .Init_Value=           LED_SET_OFF

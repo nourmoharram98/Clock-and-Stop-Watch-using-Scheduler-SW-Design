@@ -42,7 +42,7 @@
     * 
     * @note LEDs Must be configured in LED_config.h and LED_config.c files before using this function
     */
-    GPIO_Error_t LED_Init (void);
+    GPIO_enuErrorStatus LED_Init (void);
 
     /**
     * @brief Sets the State of the Specified LED (ON or OFF)
@@ -54,6 +54,6 @@
     * @note LEDs must be initialized first by calling LED_Init() function
     */
 
-    GPIO_Error_t LED_SetStatus ( LEDs_t LED_NAME , U32 LED_STATUS );
+    GPIO_enuErrorStatus LED_SetStatus ( LEDs_t LED_NAME , U32 LED_STATUS );
 
 #endif
