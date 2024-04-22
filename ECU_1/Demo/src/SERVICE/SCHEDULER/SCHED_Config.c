@@ -65,14 +65,14 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="Receiver runnable",
         .InitialDelayMS=50,
-        .PeriodicityMS=10,
+        .PeriodicityMS=5,
         .CallBack=Receiver_Manager_Runnable
     },
     [Sender]=
     {
         .TaskName="Sender runnable",
         .InitialDelayMS=100,
-        .PeriodicityMS=100,
+        .PeriodicityMS=50,
         .CallBack=Sender_Manager_Runnable
     },
     [Manager]=
@@ -86,7 +86,7 @@ const RunnableTask_t RUN_LIST[_Runnable_no] =
     {
         .TaskName="LCD APP",
         .InitialDelayMS=0,
-        .PeriodicityMS=2,
+        .PeriodicityMS=1,
         .CallBack=LCD_Runnable
     },
     [Switch_Debouncing]=

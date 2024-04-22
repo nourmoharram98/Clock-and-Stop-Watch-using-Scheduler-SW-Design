@@ -421,8 +421,12 @@ void Command_Handler(u8 command)
  */
 void Mode_Switch_Pressed(void)
 {
-    Mode ^=1;
-    Operation_type=Init_Operation;
+    if(Operation_type==Idle_Operation)
+    {
+        Mode ^=1;
+        Operation_type=Init_Operation;
+
+    }
 }
 
 /**
@@ -1098,64 +1102,97 @@ void Down_Switch_Pressed(void)
                                                         }
                                         /*---------------*/    
                                     }   
-                                /*---------*/
+                                /*------------*/
                                 }
                         /*--------*/   
 
                         /*Days Units*/
                             if(EDIT_INDEX==Day_unit)
                             {
-                                if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
-                                {
-                                    if(IsLeapYear_edit(year))
-                                    {
-                                        if(EDIT_TEMP_VALUE.value<0)
+
+                                /*Reset to Zero*/
+                                        if (Clock_Date_Digits[Day_tens].value == 0)
                                         {
-                                            EDIT_TEMP_VALUE.value = 9;
+                                            if(EDIT_TEMP_VALUE.value<1)
+                                            {
+                                                EDIT_TEMP_VALUE.value=9;
+                                            }
+                                        }
+
+                                        if (Clock_Date_Digits[Day_tens].value > 0 && Clock_Date_Digits[Day_tens].value < 3 )
+                                        {
+                                            if(EDIT_TEMP_VALUE.value<0)
+                                            {
+                                                EDIT_TEMP_VALUE.value=9;
+                                            }
+                                        }
+                                /*-------------*/
+
+                                /*Reset to One*/
+                                    if (Clock_Date_Digits[Month_tens].value == 0 && Clock_Date_Digits[Month_unit].value == 2)
+                                    {
+                                        if(IsLeapYear_edit(year))
+                                        {
+                                            if (Clock_Date_Digits[Day_tens].value == 0)
+                                            {
+                                                if(EDIT_TEMP_VALUE.value<1)
+                                                {
+                                                    EDIT_TEMP_VALUE.value = 9;
+                                                }
+                                            }
+                                            else if (Clock_Date_Digits[Day_tens].value > 0)
+                                            {
+                                                if(EDIT_TEMP_VALUE.value<0)
+                                                {
+                                                    EDIT_TEMP_VALUE.value = 9;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if ( (EDIT_TEMP_VALUE.value<0 && Clock_Date_Digits[Day_tens].value == 2))
+                                            {
+                                                EDIT_TEMP_VALUE.value =8;
+                                            }
+                                            else if((EDIT_TEMP_VALUE.value <0 && Clock_Date_Digits[Day_tens].value < 2))
+                                            {
+                                                EDIT_TEMP_VALUE.value = 9;
+                                            }
                                         }
                                     }
+                                    else if ((Clock_Date_Digits[Month_unit].value == 4 || Clock_Date_Digits[Month_unit].value == 6 || Clock_Date_Digits[Month_unit].value == 9 || (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value==1))&& Clock_Date_Digits[Day_tens].value==3)
+                                    {
+                                        EDIT_TEMP_VALUE.value=0;
+                                    }   
                                     else
-                                    {
-                                        if ( (EDIT_TEMP_VALUE.value<0 && Clock_Date_Digits[Day_tens].value == 2))
+                                    {   
+                                        if (Clock_Date_Digits[Day_tens].value == 0)
                                         {
-                                            EDIT_TEMP_VALUE.value =8;
+                                            if(EDIT_TEMP_VALUE.value<1)
+                                            {
+                                                EDIT_TEMP_VALUE.value=9;
+                                            }
                                         }
-                                        else if((EDIT_TEMP_VALUE.value <0 && Clock_Date_Digits[Day_tens].value < 2))
-                                        {
-                                            EDIT_TEMP_VALUE.value = 9;
-                                        }
-                                    }
-                                }
-                                else if ((Clock_Date_Digits[Month_unit].value == 4 || Clock_Date_Digits[Month_unit].value == 6 || Clock_Date_Digits[Month_unit].value == 9 || (Clock_Date_Digits[Month_tens].value == 1 && Clock_Date_Digits[Month_unit].value==1))&& Clock_Date_Digits[Day_tens].value==3)
-                                {
-                                    EDIT_TEMP_VALUE.value=0;
-                                }   
-                                else
-                                {   
-                                    if (Clock_Date_Digits[Day_tens].value == 0)
-                                    {
-                                        if(EDIT_TEMP_VALUE.value<1)
-                                        {
-                                            EDIT_TEMP_VALUE.value=9;
-                                        }
-                                    }
 
-                                    if (Clock_Date_Digits[Day_tens].value > 0 && Clock_Date_Digits[Day_tens].value < 3 )
-                                    {
-                                        if(EDIT_TEMP_VALUE.value<0)
+                                        if (Clock_Date_Digits[Day_tens].value > 0 && Clock_Date_Digits[Day_tens].value < 3 )
                                         {
-                                            EDIT_TEMP_VALUE.value=9;
+                                            if(EDIT_TEMP_VALUE.value<0)
+                                            {
+                                                EDIT_TEMP_VALUE.value=9;
+                                            }
                                         }
-                                    }
 
-                                    if(Clock_Date_Digits[Day_tens].value == 3)
-                                    {
-                                        if ( EDIT_TEMP_VALUE.value<0 )
+                                        if(Clock_Date_Digits[Day_tens].value == 3)
                                         {
-                                            EDIT_TEMP_VALUE.value=1;
+                                            if ( EDIT_TEMP_VALUE.value<0 )
+                                            {
+                                                EDIT_TEMP_VALUE.value=1;
+                                            }
                                         }
-                                    }
-                                }       
+                                    }  
+                                /*------------*/
+
+      
                             }       
                         /*----------*/   
 

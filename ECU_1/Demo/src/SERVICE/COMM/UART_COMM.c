@@ -129,21 +129,39 @@ Sys_enuErrorStates_t Communication_Sender(void)
 Sys_enuErrorStates_t Communication_Receiver(void)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-
-
+    // u8 Copy_Data_Received=0;
+    // USART_Request_t Local_Data=
+    // {
+    //     .USART_ID=USART1,
+    //     .PtrtoBuffer=&Copy_Data_Received,
+    //     .length=1,
+    //     .CallBack=NULL_POINTER
+    // };
+    // USART_GetByte(Local_Data);
     
     if(Received_Request!=0)
     { 
         process_received_data(Received_Request);    
         //Command_Handler(Received_Request);
         Received_Request=0;
+        Error_Status=OK;
     }
     else
     {
         Error_Status=NOT_OK;
     }
+    // if(Copy_Data_Received!=0)
+    // { 
+    //     process_received_data(Copy_Data_Received);    
+    //     //Command_Handler(Received_Request);
+    //     Copy_Data_Received=0;
+    //     Error_Status=OK;
 
-    Error_Status=OK;
+    // }
+    // else
+    // {
+    //     Error_Status=NOT_OK;
+    // }
     return Error_Status;
 
 }

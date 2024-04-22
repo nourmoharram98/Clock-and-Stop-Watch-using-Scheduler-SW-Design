@@ -92,7 +92,7 @@ void Stopwatch_Runnable(void)
                 Stop_Watch_Digits[Second_tens_SW].value++;
                 Stop_Watch_Digits[Second_tens_SW].digit_state=DIGIT_STATE_PRINT;
 
-                if (Stop_Watch_Digits[Second_tens_SW].value > 6) {
+                if (Stop_Watch_Digits[Second_tens_SW].value > 5) {
                     Stop_Watch_Digits[Second_tens_SW].value = 0;
                     Stop_Watch_Digits[Second_tens_SW].digit_state=DIGIT_STATE_PRINT;
 
@@ -106,21 +106,24 @@ void Stopwatch_Runnable(void)
                         Stop_Watch_Digits[Minutes_tens_SW].value++;
                         Stop_Watch_Digits[Minutes_tens_SW].digit_state=DIGIT_STATE_PRINT;
 
-                        if (Stop_Watch_Digits[Minutes_tens_SW].value > 6) {
+                        if (Stop_Watch_Digits[Minutes_tens_SW].value > 5) 
+                        {
                             Stop_Watch_Digits[Minutes_tens_SW].value = 0;
                             Stop_Watch_Digits[Minutes_tens_SW].digit_state=DIGIT_STATE_PRINT;
 
                             Stop_Watch_Digits[Hours_unit_SW].value++;
-            Stop_Watch_Digits[Hours_unit_SW].digit_state=DIGIT_STATE_PRINT;
-
-                            if (Stop_Watch_Digits[Hours_unit_SW].value > 9) {
+                            Stop_Watch_Digits[Hours_unit_SW].digit_state=DIGIT_STATE_PRINT;
+                        }
+                            if (Stop_Watch_Digits[Hours_unit_SW].value > 9) 
+                            {
                                 Stop_Watch_Digits[Hours_unit_SW].value = 0;
                                 Stop_Watch_Digits[Hours_unit_SW].digit_state=DIGIT_STATE_PRINT;
 
                                 Stop_Watch_Digits[Hours_tens_SW].value++;
-            Stop_Watch_Digits[Hours_tens_SW].digit_state=DIGIT_STATE_PRINT;
-
-                                if (Stop_Watch_Digits[Hours_tens_SW].value > 9) {
+                                Stop_Watch_Digits[Hours_tens_SW].digit_state=DIGIT_STATE_PRINT;
+                            }
+                                if (Stop_Watch_Digits[Hours_tens_SW].value > 9) 
+                                {
                                     Stop_Watch_Digits[Hours_tens_SW].value = 0;
                                     Stop_Watch_Digits[Hours_tens_SW].digit_state=DIGIT_STATE_PRINT;
 
@@ -130,8 +133,6 @@ void Stopwatch_Runnable(void)
                     }
                 }
             }
-        }
-    }
     else
     {
         //do nothing

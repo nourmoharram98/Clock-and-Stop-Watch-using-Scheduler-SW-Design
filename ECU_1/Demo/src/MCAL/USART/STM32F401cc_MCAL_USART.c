@@ -204,25 +204,26 @@ Sys_enuErrorStates_t USART_GetByte(USART_Request_t USART_Request)
     {
         rx_requests[USART_Request.USART_ID].ReqState=USART_RQST_STATE_BUSY;
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 |= USART_RE_ENABLE;
-        while(~((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)&&TIME_OUT)
-        {
-            TIME_OUT--;
-        }
-        if(TIME_OUT==0)
-        {
-           if(((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)==0)
-           {
-                Error_Status=TIMEOUT_ERROR;
-           }
-           else
-           {
-                *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
-           }
-        }
-        else
-        {
-            *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
-        }
+        // while(~((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)&&TIME_OUT)
+        // {
+        //     TIME_OUT--;
+        // }
+        // if(TIME_OUT==0)
+        // {
+        //    if(((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)==0)
+        //    {
+        //         Error_Status=TIMEOUT_ERROR;
+        //    }
+        //    else
+        //    {
+        //         *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
+        //    }
+        // }
+        // else
+        // {
+        //     *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
+        // }
+        *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
 
       
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 &= ~(USART_RE_ENABLE);
