@@ -61,6 +61,9 @@ int main()
 =======
 int main() {
     uint8_t input_data = 3; // Example input data
+<<<<<<< HEAD
+>>>>>>> 35e0c227ca91ea0f8a5f027f6f05b31a43463ea7
+=======
 >>>>>>> 35e0c227ca91ea0f8a5f027f6f05b31a43463ea7
 
     Communication_Manager(input_data);
