@@ -44,6 +44,7 @@ void process_received_data(uint8_t received_data) {
     }
 }
 
+<<<<<<< HEAD
 // Communication Manager function
 void Communication_Manager(uint8_t RAW_DATA) {
     uint8_t processed_data = append_crc(RAW_DATA);
@@ -57,6 +58,10 @@ void Communication_Manager(uint8_t RAW_DATA) {
 int main() 
 {
     uint8_t input_data = 4; // Example input data
+=======
+int main() {
+    uint8_t input_data = 3; // Example input data
+>>>>>>> 35e0c227ca91ea0f8a5f027f6f05b31a43463ea7
 
     Communication_Manager(input_data);
 

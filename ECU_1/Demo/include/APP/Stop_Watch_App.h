@@ -17,18 +17,18 @@
 #define NUMBER_OF_DIGITS_STOPW_MODE           7
 
 
-#define DIGIT_STATE_OPERATING      1
-#define DIGIT_STATE_EDITTING       2
 
-#define DeciSecond_hundred         0
-#define Second_unit                1
-#define Second_tens                2
+#define Hours_tens_SW                 6
+#define Hours_unit_SW                 5
 
-#define Minutes_unit               3
-#define Minutes_tens               4
+#define Minutes_tens_SW               4
+#define Minutes_unit_SW               3
 
-#define Hours_unit                 5
-#define Hours_tens                 6
+#define Second_tens_SW                2
+#define Second_unit_SW                1
+
+#define DeciSecond_hundred_SW         0
+
 
 
 #define Hours_Tens_Position       3
@@ -47,3 +47,4 @@
 
 void Stopwatch_Runnable(void);
 
+void Reset_StopWatch(void);
