@@ -5,6 +5,10 @@
 #include"./Error_states.h"
 #include "./MCAL/USART/MCAL_USART_CONFIG.h"
 
+
+#define USART_PINS_NUM      2
+#define USART_TX_PIN        0
+#define USART_RX_PIN        1
 /**
  * @brief Macros for USART IDs 
  * 
@@ -76,6 +80,7 @@ typedef struct
     f32 baudrate;
 }USART_Configurations_t;
 
+
 /**
  * @brief struct for USART Requests
  * 
@@ -93,6 +98,8 @@ typedef struct
  * 
  */
 Sys_enuErrorStates_t USART_Init(void);
+
+Sys_enuErrorStates_t USART_Pins_Init(void);
 
 Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request);
 

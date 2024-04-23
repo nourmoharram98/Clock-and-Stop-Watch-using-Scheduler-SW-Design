@@ -1,8 +1,9 @@
-#include "Std_Types.h"
-#include "Bit_Mask.h"
-#include "HAL/LCD/HAL_LCD_CONFIG.h"
+#include"Std_Types.h"
+#include"Bit_Mask.h"
+#include"HAL/LCD/HAL_LCD_CONFIG.h"
 #include"HAL/LCD/HAL_LCD.h"
 #include"MCAL/GPIO/GPIO.h"
+
 
 #define LCD_PORTA  	(void *)(0x40020000)
 #define LCD_PORTB	(void *)(0x40020400)

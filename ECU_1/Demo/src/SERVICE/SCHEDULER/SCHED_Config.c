@@ -34,46 +34,66 @@
  * The example provided initializes a single task to run the TrafficLight_Runnable function,
  * which controls the traffic light state machine.
  */
-const RunnableTask_t RUN_LIST[_Runnable_no] = 
 
+
+
+const RunnableTask_t RUN_LIST[_Runnable_no] = 
 {
     [Clock_Date]=
     {
         .TaskName="Clock Data APP",
-        .InitialDelayMS=200,
+        .InitialDelayMS=100,
         .PeriodicityMS=100,
-        .CallBack=Clock_Data_Runnable
+        .CallBack=Clock_Date_Runnable 
     }
     ,
     [StopWatch]=
     {
-        .TaskName="LED TEST APP",
-        .InitialDelayMS=200,
+        .TaskName="Stop Watch APP",
+        .InitialDelayMS=100,
         .PeriodicityMS=100,
         .CallBack=Stopwatch_Runnable
-    }
-    ,
+    },
+    [Control_Switch]=
+    {
+        .TaskName="ControlSwitches_Runnable",
+        .InitialDelayMS=100,
+        .PeriodicityMS=50,
+        .CallBack=ControlSwitches_Runnable
+    },
+    [Receiver]=
+    {
+        .TaskName="Receiver runnable",
+        .InitialDelayMS=50,
+        .PeriodicityMS=5,
+        .CallBack=Receiver_Manager_Runnable
+    },
+    [Sender]=
+    {
+        .TaskName="Sender runnable",
+        .InitialDelayMS=100,
+        .PeriodicityMS=50,
+        .CallBack=Sender_Manager_Runnable
+    },
     [Manager]=
     {
         .TaskName="Manager",
-        .InitialDelayMS=200,
-        .PeriodicityMS=100,
+        .InitialDelayMS=50,
+        .PeriodicityMS=50,
         .CallBack=Manager_Runnable
-    }
-    ,
+    },
     [LCD]=
     {
-        .TaskName="LED TEST APP",
-        .InitialDelayMS=40,
-        .PeriodicityMS=2,
-        .CallBack=LCD_Runnbale
-    }
-    ,
-    [Switch]=
+        .TaskName="LCD APP",
+        .InitialDelayMS=0,
+        .PeriodicityMS=1,
+        .CallBack=LCD_Runnable
+    },
+    [Switch_Debouncing]=
     {
-        .TaskName="LED TEST APP",
-        .InitialDelayMS=200,
+        .TaskName="Switch Debouncing Runnable",
+        .InitialDelayMS=50,
         .PeriodicityMS=5,
-        .CallBack=Switch_Runnable
+        .CallBack=Switch_Debouncing_Runnable
     }
 };

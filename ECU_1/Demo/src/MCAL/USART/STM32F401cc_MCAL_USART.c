@@ -1,7 +1,7 @@
-#include"./Std_Types.h"
+#include"Std_Types.h"
 #include"Error_states.h"
 #include"MCAL/USART/STM32F401cc_MCAL_USART.h"
-
+#include"MCAL/GPIO/GPIO.h"
 /**
  * @brief Macros used in implementation
  * 
@@ -24,6 +24,10 @@
  * @brief USART Registers
  * 
  */
+
+extern void Toggle_Mode(void);
+//to be externed in UART_COMM.c
+u8 Received_Request=0;
 typedef struct 
 {
     volatile u32 SR;
@@ -62,6 +66,7 @@ typedef struct
 
 const USART_Configurations_t USARTs_Configurations[Number_Of_USARTS];
 const u32 USART_CLKFreqs[Number_Of_USARTS];
+extern const GPIO_Pin_t USART_Pins[USART_PINS_NUM];
 Tx_ReqHandling_t tx_requests[Number_Of_USARTS];
 Rx_ReqHandling_t rx_requests[Number_Of_USARTS];
 
@@ -123,10 +128,27 @@ Sys_enuErrorStates_t USART_Init(void)
 }
 
 
+Sys_enuErrorStates_t USART_Pins_Init(void)
+{
+    Sys_enuErrorStates_t Error_Status=NOT_OK;
+    GPIO_Pin_t Local_Pin_Data;
+    for(u8 index=0;index<USART_PINS_NUM;index++)
+    {
+        Local_Pin_Data.Port=USART_Pins[index].Port;
+        Local_Pin_Data.Pin_num=USART_Pins[index].Pin_num;
+        Local_Pin_Data.Pin_Mode=USART_Pins[index].Pin_Mode;
+        Local_Pin_Data.Pin_Speed=USART_Pins[index].Pin_Speed;
+        GPIO_Init(&Local_Pin_Data);
+        GPIO_CFG_AlternateFunction(USART_Pins[index].Port,USART_Pins[index].Pin_num,GPIO_FUNC_AF7);
+    }
+
+    return Error_Status;
+}
+
 Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-    u16 TIME_OUT=5000;
+    volatile u16 TIME_OUT=3000;
     if(USART_Request.USART_ID>=Number_Of_USARTS)
     {
         Error_Status=INVALID_INPUT_VALUE;
@@ -145,7 +167,8 @@ Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 |= USART_TE_ENABLE;
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR=*(USART_Request.PtrtoBuffer);
 
-        while(~(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR&USART_TC_FLAG)&&TIME_OUT)
+        //while(~(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR&USART_TC_FLAG)&&TIME_OUT)
+        while(TIME_OUT)
         {
             TIME_OUT--;
         }
@@ -164,7 +187,7 @@ Sys_enuErrorStates_t USART_SendByte(USART_Request_t USART_Request)
 Sys_enuErrorStates_t USART_GetByte(USART_Request_t USART_Request)
 {
     Sys_enuErrorStates_t Error_Status=NOT_OK;
-    u32 TIME_OUT=100000;
+    u32 TIME_OUT=3000;
     if(USART_Request.USART_ID>=Number_Of_USARTS)
     {
         Error_Status=INVALID_INPUT_VALUE;
@@ -181,25 +204,26 @@ Sys_enuErrorStates_t USART_GetByte(USART_Request_t USART_Request)
     {
         rx_requests[USART_Request.USART_ID].ReqState=USART_RQST_STATE_BUSY;
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 |= USART_RE_ENABLE;
-        while(~((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)&&TIME_OUT)
-        {
-            TIME_OUT--;
-        }
-        if(TIME_OUT==0)
-        {
-           if(((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)==0)
-           {
-                Error_Status=TIMEOUT_ERROR;
-           }
-           else
-           {
-                *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
-           }
-        }
-        else
-        {
-            *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
-        }
+        // while(~((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)&&TIME_OUT)
+        // {
+        //     TIME_OUT--;
+        // }
+        // if(TIME_OUT==0)
+        // {
+        //    if(((((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->SR)&USART_RXNE_FLAG)==0)
+        //    {
+        //         Error_Status=TIMEOUT_ERROR;
+        //    }
+        //    else
+        //    {
+        //         *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
+        //    }
+        // }
+        // else
+        // {
+        //     *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
+        // }
+        *(USART_Request.PtrtoBuffer)= ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->DR;
 
       
         ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART_Request.USART_ID])->CR1 &= ~(USART_RE_ENABLE);
@@ -307,18 +331,48 @@ void USART1_IRQHandler(void)
 
         }
     }
-    if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->SR&USART_RXNE_FLAG && rx_requests[USART1].ReqState==USART_RQST_STATE_BUSY)
+    // if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->SR&USART_RXNE_FLAG && rx_requests[USART1].ReqState==USART_RQST_STATE_BUSY)
+    // {
+    //     if(rx_requests[USART1].Buffer.Pos_Index < rx_requests[USART1].Buffer.size)
+    //     {
+    //         rx_requests[USART1].Buffer.dataByte[rx_requests[USART1].Buffer.Pos_Index]=((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR;
+    //         rx_requests[USART1].Buffer.Pos_Index++;
+    //         if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR=='N')
+    //         {
+    //             Toggle_Mode();
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RE_ENABLE);
+    //         // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RXNEIE_ENABLE);
+    //         // rx_requests[USART1].ReqState=USART_RQST_STATE_READY;
+    //         rx_requests[USART1].Buffer.Pos_Index=0;
+    //         if(rx_requests[USART1].CallBack!=NULL_POINTER)
+    //         {
+    //             rx_requests[USART1].CallBack();
+    //         }
+    //         else
+    //         {
+    //             // do nothing
+    //         }
+    //     }
+    // }
+     if(((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->SR&USART_RXNE_FLAG && rx_requests[USART1].ReqState==USART_RQST_STATE_BUSY)
     {
         if(rx_requests[USART1].Buffer.Pos_Index < rx_requests[USART1].Buffer.size)
         {
             rx_requests[USART1].Buffer.dataByte[rx_requests[USART1].Buffer.Pos_Index]=((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR;
+            Received_Request=((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->DR;
             rx_requests[USART1].Buffer.Pos_Index++;
+
         }
         else
         {
-            ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RE_ENABLE);
-            ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RXNEIE_ENABLE);
-            rx_requests[USART1].ReqState=USART_RQST_STATE_BUSY;
+            // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RE_ENABLE);
+            // ((volatile USART_PerRegs_t *)USART_BaseAddresses[USART1])->CR1 &= ~(USART_RXNEIE_ENABLE);
+            // rx_requests[USART1].ReqState=USART_RQST_STATE_READY;
+            rx_requests[USART1].Buffer.Pos_Index=0;
             if(rx_requests[USART1].CallBack!=NULL_POINTER)
             {
                 rx_requests[USART1].CallBack();

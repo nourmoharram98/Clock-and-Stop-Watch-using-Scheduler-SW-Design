@@ -126,3 +126,7 @@ SysTick_Error_t SysTick_SetCurrentVal(uint32 CurrentVal)
     Handler_variable();
  }
 
+u32 Systick_STKVAL(void)
+{
+    return SysTick->STK_VAL;
+}

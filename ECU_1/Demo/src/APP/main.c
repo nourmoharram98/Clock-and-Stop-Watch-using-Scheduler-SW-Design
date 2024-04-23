@@ -12,6 +12,8 @@
 
 #include "MCAL/SYSTICK/SYSTICK.h"
 
+#include "MCAL/USART/STM32F401cc_MCAL_USART.h"
+
 #include "SERVICE/SCHEDULER/SCHED.h"
 
 #define RCC_TEST                0
@@ -315,7 +317,6 @@ int main ()
 #endif
 
 #if DEMO_TEST_1
-
 int main ()
 {
     RCC_EnableClock				( CLK_HSI );
@@ -323,12 +324,43 @@ int main ()
     RCC_AHB_PREscaler			( AHB_PRE_1 );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIA );
     RCC_SetAHB1Peripheral		( AHB1ENR_GPOIB );
-
+    RCC_SetAHB1Peripheral		( AHB1ENR_GPOIC );
+    RCC_SetAPB2Peripheral       (APB2ENR_USART1);
+    SysTick_SetClockSource(SysTick_CLOCK_SOURCE_AHB_8);
+    SysTick_SetCurrentVal(0);
+    SysTick_EnableInterrupt();
     HAL_SWITCH_Init();
-    LCD_InitAsync();  
+    LCD_InitAsync();
+    LED_Init();
+    USART_Pins_Init();
+    NVIC_EnableIRQ(USART1_IRQn);
+    USART_Init();
+    u8 x;
+    USART_Request_t Requestone={
+        .length=1,
+        .PtrtoBuffer=&x,
+        .USART_ID=USART1
+    };
+   // USART_SendByte(Requestone);
+   //USART_SendByteAsynchZC(Requestone);
+      USART_ReceiveByteAsynchZC(Requestone);
+//     LED_SetStatus(Nour_LED,LED_SET_ON);
 
+//    while(1)
+//    {
+//         if(x=='M')
+//         {
+//             LED_SetStatus(Nour_LED,LED_SET_ON);
+//         }
+//         if(x=='N')
+//         {
+//             LED_SetStatus(Nour_LED,LED_SET_OFF);
+//         }
+//    }
+    
     SCHED_Init                  ();
     SCHED_Start                 ();
+
 }
 
 #endif

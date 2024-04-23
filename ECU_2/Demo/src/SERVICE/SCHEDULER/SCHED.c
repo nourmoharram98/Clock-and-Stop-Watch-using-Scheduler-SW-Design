@@ -49,7 +49,7 @@ static void SCHED(void)
    for(idx = 0; idx < _Runnable_no; idx++)
    {
         // Checking if the initial delay has passed for the task
-        if(TimeStamp >= (RUN_LIST[idx].InitialDelayMS + RUN_LIST[idx].PeriodicityMS))
+        if(TimeStamp >= (RUN_LIST[idx].InitialDelayMS))
         {
             // Calculate the time since the task was last executed
             uint64 elapsedTime = TimeStamp - RUN_LIST[idx].InitialDelayMS;

@@ -13,6 +13,7 @@
 #include "Std_Types.h"
 #include "Error_states.h"
 #include "HAL/SWITCH/HAL_SWITCH_CONFIG.h"
+#include"HAL/SystickReader/SYSTICK_Reader.h"
 
 
 /**
@@ -22,8 +23,10 @@
 // #define SWITCH_MODE_INTERNALPULLUP				GPIO_PIN_INPUT_PULLUP
 // #define SWITCH_MODE_EXTERNALPULLDOWN			GPIO_PIN_INPUT_PULLDOWN
 
-#define SWITCH_PIN_MODE_INTERNALPULLUP				0x00000008
-#define SWITCH_PIN_MODE_INTERNALPULLDOWN			0x00000010
+#define FOUR_BIT_OFFSET								0x00000004
+
+#define SWITCH_PIN_MODE_INTERNALPULLUP				0x10000008
+#define SWITCH_PIN_MODE_INTERNALPULLDOWN			0x10000010
 
 #define SWITCH_CONNECTION_MODE_INTPU				0x00000001
 #define SWITCH_CONNECTION_MODE_INTPD				0x00000000
@@ -38,8 +41,8 @@
  */
 typedef enum
 {
-	Switch_Released,/**< Switch_Released */
-	Switch_Pressed/**< Switch_Pressed */
+	Switch_Released, /**< Switch_Released */
+	Switch_Pressed   /**< Switch_Pressed */
 }Switch_Status_t;
 
 

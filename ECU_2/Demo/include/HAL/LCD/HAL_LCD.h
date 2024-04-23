@@ -12,8 +12,8 @@
 
 #include"Std_Types.h"
 #include"Error_states.h"
-#include "HAL/LCD/HAL_LCD_CONFIG.h"
-
+#include"HAL/LCD/HAL_LCD_CONFIG.h"
+#include"HAL/SystickReader/SYSTICK_Reader.h"
 #define LCD_DISPLAY_ROW1        0
 #define LCD_DISPLAY_ROW2        1
 #define LCD_DISPLAY_ROW3        2
@@ -23,6 +23,12 @@
 #define LCD_DISPLAY_COL_START   0
 #define LCD_DISPLAY_COL_END     15
 
+/**
+ * @brief Macros for enabling and disabling the cursor and blink
+ * 
+ */
+#define LCD_CURSOR_BLINK_ON     0x0f
+#define LCD_CURSOR_BLINK_OFF    0x0c
 
 typedef void (*LCD_CBFUNC_t)(void);
 
@@ -54,17 +60,17 @@ typedef struct
  * @brief functions APIs
  * f
  */
-
-void LCD_Runnable(void);
 Sys_enuErrorStates_t LCD_InitAsync(void);
 Sys_enuErrorStates_t LCD_ClearScreenAsync(void);
 Sys_enuErrorStates_t LCD_SetCursorPosAsync(u8 Copy_LCDPosx,u8 Copy_LCDPosy);
 Sys_enuErrorStates_t LCD_WriteStringAsync(const char *ptrToString,u8 String_size);
+Sys_enuErrorStates_t LCD_WriteCommandAsync(const char command);
 Sys_enuErrorStates_t LCD_GetStatus(u32* PtrToLCDstatus);
 
 Sys_enuErrorStates_t LCD_WriteSetCB(LCD_CBFUNC_t PtrTofunc);
 Sys_enuErrorStates_t LCD_ClearSetCB(LCD_CBFUNC_t PtrTofunc);
 Sys_enuErrorStates_t LCD_SetCursorSetCB(LCD_CBFUNC_t PtrTofunc);
+Sys_enuErrorStates_t LCD_enuWriteNumber(u32 number);
 
 
 
